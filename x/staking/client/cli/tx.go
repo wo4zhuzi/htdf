@@ -11,8 +11,8 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	"github.com/orientwalt/htdf/x/staking"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
+	"github.com/orientwalt/htdf/x/staking"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -25,9 +25,7 @@ func GetCmdCreateValidator(cdc *codec.Codec) *cobra.Command {
 		Short: "create new validator initialized with a self-delegation to it",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
 			validatorAddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
@@ -66,9 +64,7 @@ func GetCmdEditValidator(cdc *codec.Codec) *cobra.Command {
 		Short: "edit an existing validator account",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
 			validatorAddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
@@ -124,7 +120,6 @@ func GetCmdDelegate(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		Short: "delegate liquid tokens to a validator",
 		Long: strings.TrimSpace(`Delegate an amount of liquid coins to a validator from your wallet:
-
 $ hscli tx staking delegate cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
 				   			cosmosvaloper1l2rsakp388kuv9k8qzq6lrm9taddae7fpx59wm \
 				   			1000stake
@@ -163,7 +158,6 @@ func GetCmdRedelegate(storeName string, cdc *codec.Codec) *cobra.Command {
 		Short: "redelegate illiquid tokens from one validator to another",
 		Args:  cobra.ExactArgs(4),
 		Long: strings.TrimSpace(`Redelegate an amount of illiquid staking tokens from one validator to another:
-
 $ hscli tx staking redelegate cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
 							  cosmosvaloper1gghjut3ccd8ay0zduzj64hwre2fxs9ldmqhffj \
 							  cosmosvaloper1l2rsakp388kuv9k8qzq6lrm9taddae7fpx59wm \
@@ -171,28 +165,30 @@ $ hscli tx staking redelegate cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			delAddr := cliCtx.GetFromAddress()
-			valSrcAddr, err := sdk.ValAddressFromBech32(args[0])
+			delAddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 
-			valDstAddr, err := sdk.ValAddressFromBech32(args[1])
+			valSrcAddr, err := sdk.ValAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
 
-			amount, err := sdk.ParseCoin(args[2])
+			valDstAddr, err := sdk.ValAddressFromBech32(args[2])
+			if err != nil {
+				return err
+			}
+
+			amount, err := sdk.ParseCoin(args[3])
 			if err != nil {
 				return err
 			}
 
 			msg := staking.NewMsgBeginRedelegate(delAddr, valSrcAddr, valDstAddr, amount)
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
 		},
 	}
 }
@@ -204,30 +200,30 @@ func GetCmdUnbond(storeName string, cdc *codec.Codec) *cobra.Command {
 		Short: "unbond shares from a validator",
 		Args:  cobra.ExactArgs(3),
 		Long: strings.TrimSpace(`Unbond an amount of bonded shares from a validator:
-
 $ hscli tx staking unbond cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
 						  cosmosvaloper1gghjut3ccd8ay0zduzj64hwre2fxs9ldmqhffj \
 						  100stake
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			delAddr := cliCtx.GetFromAddress()
-			valAddr, err := sdk.ValAddressFromBech32(args[0])
+			delAddr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+			valAddr, err := sdk.ValAddressFromBech32(args[1])
 			if err != nil {
 				return err
 			}
 
-			amount, err := sdk.ParseCoin(args[1])
+			amount, err := sdk.ParseCoin(args[2])
 			if err != nil {
 				return err
 			}
 
 			msg := staking.NewMsgUndelegate(delAddr, valAddr, amount)
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg}, false)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
 		},
 	}
 }
