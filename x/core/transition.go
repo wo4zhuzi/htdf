@@ -1,4 +1,4 @@
-package app
+package htdfservice
 
 import (
 	"errors"
@@ -10,14 +10,13 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	evmstate "github.com/orientwalt/htdf/evm/state"
 	"github.com/orientwalt/htdf/evm/vm"
-	"github.com/orientwalt/htdf/x/core"
 
 	apptypes "github.com/orientwalt/htdf/types"
 )
 
 type StateTransition struct {
 	gpGasLimit *ethcore.GasPool
-	msg        htdfservice.MsgSendFrom
+	msg        MsgSendFrom
 	gas        uint64   //unit: gallon
 	gasPrice   *big.Int //unit: satoshi/gallon
 	initialGas uint64
@@ -27,7 +26,7 @@ type StateTransition struct {
 	evm        *vm.EVM
 }
 
-func NewStateTransition(evm *vm.EVM, msg htdfservice.MsgSendFrom, stateDB *evmstate.CommitStateDB) *StateTransition {
+func NewStateTransition(evm *vm.EVM, msg MsgSendFrom, stateDB *evmstate.CommitStateDB) *StateTransition {
 	return &StateTransition{
 		gpGasLimit: new(ethcore.GasPool).AddGas(msg.GasLimit),
 		evm:        evm,
@@ -60,7 +59,7 @@ func (st *StateTransition) buyGas() error {
 		return errors.New("insufficient balance for gas")
 	}
 
-	// try call subGas mothed, to check gas limit
+	// try call subGas method, to check gas limit
 	if err := st.gpGasLimit.SubGas(st.msg.Gas); err != nil {
 		fmt.Printf("SubGas error|err=%s\n", err)
 		return err
@@ -75,9 +74,9 @@ func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error)
 	// Set the starting gas for the raw transaction
 	var gas uint64
 	if contractCreation && homestead {
-		gas = params.TxGasContractCreation
+		gas = params.TxGasContractCreation //53000
 	} else {
-		gas = params.TxGas
+		gas = params.TxGas //21000
 	}
 	// Bump the required gas by the amount of transactional data
 	if len(data) > 0 {

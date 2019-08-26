@@ -18,6 +18,8 @@ const (
 	ServiceStore         = "service"
 	GuardianStore        = "guardian"
 	UpgradeStore         = "upgrade"
+	Storage              = "storage"
+	Code                 = "code"
 
 	// all route for query and handler
 	BankRoute     = "bank"
@@ -48,4 +50,6 @@ var (
 	KeyService  = sdk.NewKVStoreKey(ServiceStore)
 	KeyGuardian = sdk.NewKVStoreKey(GuardianStore)
 	KeyUpgrade  = sdk.NewKVStoreKey(UpgradeStore)
+	KeyStorage  = sdk.NewKVStoreKey(Storage) // junying-todo
+	KeyCode     = sdk.NewKVStoreKey(Code)    // junying-todo
 )

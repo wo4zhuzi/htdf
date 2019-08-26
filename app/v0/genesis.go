@@ -47,19 +47,6 @@ type GenesisState struct {
 	GenTxs       []json.RawMessage     `json:"gentxs"`
 }
 
-type SendTxResp struct {
-	ErrCode         sdk.CodeType `json:"code"`
-	ErrMsg          string       `json:"message"`
-	ContractAddress string       `json:"contract_address"`
-	EvmOutput       string       `json:"evm_output"`
-}
-
-func (self SendTxResp) String() string {
-	self.ErrMsg = sdk.GetErrMsg(self.ErrCode)
-	data, _ := json.Marshal(&self)
-	return string(data)
-}
-
 func NewGenesisState(accounts []GenesisAccount, authData auth.GenesisState, stakeData stake.GenesisState, mintData mint.GenesisState,
 	distrData distr.GenesisState, govData gov.GenesisState, upgradeData upgrade.GenesisState, serviceData service.GenesisState,
 	guardianData guardian.GenesisState, slashingData slashing.GenesisState, crisisData crisis.GenesisState) GenesisState {

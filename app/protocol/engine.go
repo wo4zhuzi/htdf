@@ -82,7 +82,9 @@ func (pe *ProtocolEngine) GetKVStoreKeys() []*sdk.KVStoreKey {
 		KeyParams,
 		KeyUpgrade,
 		KeyService,
-		KeyGuardian}
+		KeyGuardian,
+		KeyStorage,
+		KeyCode}
 }
 
 func (pe *ProtocolEngine) GetTransientStoreKeys() []*sdk.TransientStoreKey {

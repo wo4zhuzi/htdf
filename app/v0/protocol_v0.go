@@ -6,6 +6,7 @@ import (
 
 	"github.com/orientwalt/htdf/app/protocol"
 	"github.com/orientwalt/htdf/codec"
+	newevmtypes "github.com/orientwalt/htdf/evm/types"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"
@@ -114,6 +115,7 @@ func (p *ProtocolV0) configCodec() {
 
 func MakeLatestCodec() *codec.Codec {
 	var cdc = codec.New()
+	newevmtypes.RegisterCodec(cdc)
 	htdfservice.RegisterCodec(cdc)
 	params.RegisterCodec(cdc) // only used by querier
 	mint.RegisterCodec(cdc)   // only used by querier
@@ -280,7 +282,7 @@ func (p *ProtocolV0) configRouters() {
 	stake.RegisterInvariants(&p.crisisKeeper, p.StakeKeeper, p.feeCollectionKeeper, p.distrKeeper, p.accountMapper)
 
 	p.router.
-		AddRoute(RouterKey, htdfservice.NewHandler(p)).
+		AddRoute(RouterKey, htdfservice.NewHandler(p.accountMapper, p.feeCollectionKeeper, protocol.KeyStorage, protocol.KeyCode)).
 		AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
 		AddRoute(protocol.StakeRoute, stake.NewHandler(p.StakeKeeper)).
 		AddRoute(protocol.SlashingRoute, slashing.NewHandler(p.slashingKeeper)).
@@ -321,7 +323,9 @@ func (p *ProtocolV0) GetKVStoreKeyList() []*sdk.KVStoreKey {
 		protocol.KeyParams,
 		protocol.KeyUpgrade,
 		protocol.KeyService,
-		protocol.KeyGuardian}
+		protocol.KeyGuardian,
+		protocol.KeyStorage,
+		protocol.KeyCode}
 }
 
 // configure all Stores
@@ -372,7 +376,8 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 	for _, gacc := range genesisState.Accounts {
 		acc := gacc.ToAccount()
 		acc.AccountNumber = p.accountMapper.GetNextAccountNumber(ctx)
-		p.accountMapper.SetGenesisAccount(ctx, acc)
+		evmacc := newevmtypes.NewAccount(acc)
+		p.accountMapper.SetGenesisAccount(ctx, evmacc)
 	}
 
 	// initialize distribution (must happen before staking)
@@ -452,60 +457,6 @@ func (p *ProtocolV0) InitChainer(ctx sdk.Context, DeliverTx sdk.DeliverTx, req a
 	return abci.ResponseInitChain{
 		Validators: validators,
 	}
-}
-
-func (p *ProtocolV0) Transition(ctx sdk.Context, inputMsg sdk.Msg) (result sdk.Result) {
-	// var sendTxResp apptypes.SendTxResp
-
-	// switch msg := inputMsg.(type) {
-
-	// case htdfservice.MsgSendFrom:
-
-	// 	// classic transfer
-	// 	if len(msg.Data) == 0 {
-	// 		return htdfservice.HandleMsgSendFrom(ctx, app.bankKeeper, msg)
-	// 	}
-
-	// 	fmt.Printf("FeeTotal1=%v\n", app.feeCollectionKeeper.GetCollectedFees(ctx))
-
-	// 	if !msg.To.Empty() {
-	// 		//open smart contract
-	// 		fmt.Printf("openContract\n")
-	// 		genErr, evmOutput := app.openContract(ctx, msg)
-	// 		if genErr != nil {
-	// 			fmt.Printf("openContract error|err=%s\n", genErr)
-	// 			sendTxResp.ErrCode = apptypes.ErrCode_OpenContract
-	// 			return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
-	// 		}
-
-	// 		sendTxResp.EvmOutput = evmOutput
-	// 		return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
-
-	// 	} else {
-	// 		// new smart contract
-	// 		fmt.Printf("create contract\n")
-	// 		err, contractAddr := app.CreateContract(ctx, msg)
-	// 		if err != nil {
-	// 			fmt.Printf("CreateContract error|err=%s\n", err)
-	// 			sendTxResp.ErrCode = apptypes.ErrCode_CreateContract
-	// 			return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
-	// 		}
-
-	// 		sendTxResp.ContractAddress = contractAddr
-	// 		return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
-	// 	}
-
-	// 	fmt.Printf("FeeTotal2=%v\n", app.feeCollectionKeeper.GetCollectedFees(ctx))
-
-	// case htdfservice.MsgAdd:
-	// 	return htdfservice.HandleMsgAdd(ctx, app.bankKeeper, msg)
-	// default:
-	// 	fmt.Printf("msgType error|mstType=%v\n", msg.Type())
-	// 	sendTxResp.ErrCode = apptypes.ErrCode_Param
-	// 	return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
-	// }
-
-	return sdk.Result{}
 }
 
 func (p *ProtocolV0) GetRouter() protocol.Router {

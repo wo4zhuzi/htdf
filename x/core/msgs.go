@@ -2,10 +2,16 @@ package htdfservice
 
 import (
 	"encoding/json"
+
 	"github.com/orientwalt/htdf/types"
 
-	sdk "github.com/orientwalt/htdf/types"
 	"github.com/ethereum/go-ethereum/common"
+	sdk "github.com/orientwalt/htdf/types"
+)
+
+const (
+	defaultGasLimit = 21000
+	defaultGasPrice = 1
 )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,9 +32,12 @@ var _ sdk.Msg = MsgSendFrom{}
 // NewMsgSend is a constructor function for MsgSend
 func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
 	return MsgSendFrom{
-		From:   fromaddr,
-		To:     toaddr,
-		Amount: amount,
+		From:     fromaddr,
+		To:       toaddr,
+		Amount:   amount,
+		Gas:      defaultGasLimit,
+		GasPrice: defaultGasPrice,
+		GasLimit: defaultGasLimit,
 	}
 }
 

@@ -131,7 +131,7 @@ clean:
 	@find build -name bin | xargs rm -rf
 
 clear: clean
-	@rm -rf ~/.hsd ~/.hscli
+	@rm -rf ~/.hs*
 
 # git part
 down:
