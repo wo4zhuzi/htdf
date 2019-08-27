@@ -9,16 +9,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/orientwalt/htdf/utils/unit_convert"
-
+	"github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/codec"
+	srvconfig "github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/x/staking"
-	"github.com/orientwalt/htdf/app"
-	srvconfig "github.com/orientwalt/htdf/server/config"
 
 	tmconfig "github.com/orientwalt/tendermint/config"
 	"github.com/orientwalt/tendermint/crypto"
@@ -30,7 +28,7 @@ import (
 
 	"github.com/orientwalt/htdf/accounts/keystore"
 	hsign "github.com/orientwalt/htdf/accounts/signs"
-	"github.com/orientwalt/htdf/app/v0"
+	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/server"
 	hsutils "github.com/orientwalt/htdf/utils"
 )
@@ -52,7 +50,7 @@ const (
 	//
 	nodeDirPerm = 0755
 	//
-	DefaultDenom = unit_convert.DefaultDenom
+	DefaultDenom = sdk.DefaultDenom
 )
 
 // get cmd to initialize all files for tendermint testnet and application

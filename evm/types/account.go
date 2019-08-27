@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"github.com/orientwalt/htdf/utils/unit_convert"
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
@@ -37,7 +36,7 @@ func ProtoBaseAccount() auth.Account {
 
 // Balance returns the balance of an account.
 func (acc Account) Balance() sdk.Int {
-	return acc.GetCoins().AmountOf(unit_convert.DefaultDenom)
+	return acc.GetCoins().AmountOf(sdk.DefaultDenom)
 }
 
 // SetBalance sets an account's balance.
@@ -47,8 +46,8 @@ func (acc Account) SetBalance(amt sdk.Int) {
 
 	bUpdateDenom := false
 	for _, coin := range oldCoins {
-		if coin.Denom == unit_convert.DefaultDenom {
-			coin = sdk.NewCoin(unit_convert.DefaultDenom, amt)
+		if coin.Denom == sdk.DefaultDenom {
+			coin = sdk.NewCoin(sdk.DefaultDenom, amt)
 			bUpdateDenom = true
 		}
 		newCoins = append(newCoins, coin)
@@ -56,7 +55,7 @@ func (acc Account) SetBalance(amt sdk.Int) {
 
 	//insert new denom;  evm use "satoshi"
 	if bUpdateDenom == false {
-		newCoins = append(newCoins, sdk.NewCoin(unit_convert.DefaultDenom, amt))
+		newCoins = append(newCoins, sdk.NewCoin(sdk.DefaultDenom, amt))
 	}
 
 	acc.SetCoins(newCoins)

@@ -13,7 +13,7 @@ import (
 
 const (
 	// Default parameter namespace
-	DefaultParamSpace = "stake"
+	DefaultParamSpace = sdk.DefaultDenom // junying-todo, 2019-08-27, "stake" to satoshi
 	// DefaultUnbondingTime reflects three weeks in seconds as the default
 	// unbonding time.
 	// TODO: Justify our choice of default here.

@@ -5,7 +5,6 @@ import (
 	"math/big"
 
 	sdk "github.com/orientwalt/htdf/types"
-	htdftype "github.com/orientwalt/htdf/utils/unit_convert"
 )
 
 // junying-todo, 2019-07-17
@@ -79,7 +78,7 @@ func BeginBlocker(ctx sdk.Context, k Keeper) {
 
 	// mint coins, add to collected fees, update supply
 	//fmt.Printf("AnnualProvisions: %s, Inflation: %s, provisionAmt: %s\n", minter.AnnualProvisions.String(), minter.Inflation.String(), provisionAmt.TruncateInt().String())
-	mintedCoin := sdk.NewCoin(htdftype.DefaultDenom, provisionAmt.TruncateInt())
+	mintedCoin := sdk.NewCoin(sdk.DefaultDenom, provisionAmt.TruncateInt())
 	k.fck.AddCollectedFees(ctx, sdk.Coins{mintedCoin})
 	k.sk.InflateSupply(ctx, mintedCoin.Amount)
 

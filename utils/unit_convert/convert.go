@@ -5,10 +5,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func DefaultCoinToBigCoin(defaultCoin *sdk.Coin, bigCoin *BigCoin) {
+//
+func DefaultCoinToBigCoin(defaultCoin *sdk.Coin, bigCoin *sdk.BigCoin) {
 	//convert when default denom
-	if defaultCoin.Denom == DefaultDenom {
-		bigCoin.Denom = BigDenom
+	if defaultCoin.Denom == sdk.DefaultDenom {
+		bigCoin.Denom = sdk.BigDenom
 		bigCoin.Amount = RightShift(*defaultCoin.Amount.BigInt(), 8).String()
 	} else {
 		bigCoin.Denom = defaultCoin.Denom
@@ -16,9 +17,10 @@ func DefaultCoinToBigCoin(defaultCoin *sdk.Coin, bigCoin *BigCoin) {
 	}
 }
 
-func DefaultCoinsToBigCoins(defaultCoins []sdk.Coin) (bigCoins []BigCoin) {
+//
+func DefaultCoinsToBigCoins(defaultCoins []sdk.Coin) (bigCoins []sdk.BigCoin) {
 	for _, coin := range defaultCoins {
-		var bigCoin BigCoin
+		var bigCoin sdk.BigCoin
 		DefaultCoinToBigCoin(&coin, &bigCoin)
 		bigCoins = append(bigCoins, bigCoin)
 	}
@@ -26,15 +28,17 @@ func DefaultCoinsToBigCoins(defaultCoins []sdk.Coin) (bigCoins []BigCoin) {
 	return bigCoins
 }
 
+//
 func DefaultAmoutToBigAmount(defaultAmount string) (bigAmount string) {
 	iDefaultAmount, _ := sdk.NewIntFromString(defaultAmount)
 	return RightShift(*iDefaultAmount.BigInt(), 8).String()
 }
 
-func BigCoinToDefaultCoin(bigCoin *BigCoin, defaultCoin *sdk.Coin) {
+//
+func BigCoinToDefaultCoin(bigCoin *sdk.BigCoin, defaultCoin *sdk.Coin) {
 	//convert when bug denom
-	if bigCoin.Denom == BigDenom {
-		defaultCoin.Denom = DefaultDenom
+	if bigCoin.Denom == sdk.BigDenom {
+		defaultCoin.Denom = sdk.DefaultDenom
 
 		decAmount, _ := decimal.NewFromString(bigCoin.Amount)
 		defaultCoin.Amount, _ = sdk.NewIntFromString(LeftShift(decAmount, 8).String())
@@ -44,7 +48,8 @@ func BigCoinToDefaultCoin(bigCoin *BigCoin, defaultCoin *sdk.Coin) {
 	}
 }
 
-func BigCoinsToDefaultCoins(bigCoins []BigCoin) (defaultCoins []sdk.Coin) {
+//
+func BigCoinsToDefaultCoins(bigCoins []sdk.BigCoin) (defaultCoins []sdk.Coin) {
 
 	for _, bigCoin := range bigCoins {
 		var defaultCoin sdk.Coin
@@ -55,6 +60,7 @@ func BigCoinsToDefaultCoins(bigCoins []BigCoin) (defaultCoins []sdk.Coin) {
 	return defaultCoins
 }
 
+//
 func BigAmountToDefaultAmount(bigAmount string) (defaultAmount string) {
 	decBigAmount, _ := decimal.NewFromString(bigAmount)
 	return LeftShift(decBigAmount, 8).String()

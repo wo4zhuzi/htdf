@@ -164,7 +164,7 @@ func LatestBlockRequestHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 type DisplayTx struct {
 	From   sdk.AccAddress
 	To     sdk.AccAddress
-	Amount []unit_convert.BigCoin
+	Amount []sdk.BigCoin
 	Hash   string
 	Memo   string
 }
@@ -182,8 +182,8 @@ type BlockInfo struct {
 }
 
 type DisplayFee struct {
-	Amount []unit_convert.BigCoin `json:"amount"`
-	Gas    string                 `json:"gas"`
+	Amount []sdk.BigCoin `json:"amount"`
+	Gas    string        `json:"gas"`
 }
 
 type StdTx struct {

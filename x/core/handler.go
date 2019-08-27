@@ -11,7 +11,6 @@ import (
 	"github.com/orientwalt/htdf/evm/vm"
 	appParams "github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/htdf/utils/unit_convert"
 	"github.com/orientwalt/htdf/x/auth"
 )
 
@@ -64,7 +63,7 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 		//open smart contract
 
 		fmt.Printf("openContract\n")
-		genErr, evmOutput := HandleOpenContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
+		evmOutput, genErr := HandleOpenContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
 		if genErr != nil {
 			fmt.Printf("openContract error|err=%s\n", genErr)
 			sendTxResp.ErrCode = sdk.ErrCode_OpenContract
@@ -77,7 +76,7 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 	} else {
 		// new smart contract
 		fmt.Printf("create contract\n")
-		err, contractAddr := HandleCreateContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
+		contractAddr, err := HandleCreateContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
 		if err != nil {
 			fmt.Printf("CreateContract error|err=%s\n", err)
 			sendTxResp.ErrCode = sdk.ErrCode_CreateContract
@@ -92,14 +91,14 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 }
 
 // junying-todo, 2019-08-26
-func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (err error, evmOutput string) {
+func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (evmOutput string, err error) {
 
 	fmt.Printf("Handling MsgSendFrom with No Contract.\n")
 
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
 		fmt.Printf("newStateDB error\n")
-		return err, ""
+		return "", err
 	}
 
 	fromAddress := sdk.ToEthAddress(msg.From)
@@ -123,12 +122,12 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 	inputCode, err := hex.DecodeString(msg.Data)
 	if err != nil {
 		fmt.Printf("DecodeString error\n")
-		return err, ""
+		return "", err
 	}
 
 	fmt.Printf("inputCode=%s\n", hex.EncodeToString(inputCode))
 
-	transferAmount := msg.Amount.AmountOf(unit_convert.DefaultDenom).BigInt()
+	transferAmount := msg.Amount.AmountOf(sdk.DefaultDenom).BigInt()
 
 	fmt.Printf("transferAmount: %d\n", transferAmount)
 	st := NewStateTransition(evm, msg, stateDB)
@@ -140,7 +139,7 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 	err = st.buyGas()
 	if err != nil {
 		fmt.Printf("buyGas error|err=%s\n", err)
-		return err, ""
+		return "", err
 	}
 
 	// contract transaction ? ordinary transaction
@@ -162,7 +161,7 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 	err = st.useGas(itrsGas)
 	if err != nil {
 		fmt.Printf("useGas error|err=%s\n", err)
-		return err, ""
+		return "", err
 	}
 
 	// commented by junying, 2019-08-22
@@ -172,7 +171,7 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 	outputs, gasLeftover, vmerr := evm.Call(contractRef, toAddress, inputCode, st.gas, transferAmount)
 	if err != nil {
 		fmt.Printf("evm call error|err=%s\n", vmerr)
-		return vmerr, ""
+		return "", vmerr
 	}
 
 	st.gas = gasLeftover
@@ -188,21 +187,21 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 
 	// junying-todo, 2019-08-22
 	// this function is used to collect all kinds of budget including fee + blk rewards for the next block reward
-	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(unit_convert.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
+	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
 
 	fmt.Printf("evm call end|outputs=%x\n", outputs)
 
 	stateDB.Commit(false)
 
-	return nil, hex.EncodeToString(outputs)
+	return hex.EncodeToString(outputs), nil
 }
 
 // junying-todo, 2019-08-26
-func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (err error, evmOutput string) {
+func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (evmOutput string, err error) {
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
 		fmt.Printf("newStateDB error\n")
-		return err, ""
+		return "", err
 	}
 
 	fromAddress := sdk.ToEthAddress(msg.From)
@@ -231,7 +230,7 @@ func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, fee
 	inputCode, err := hex.DecodeString(msg.Data)
 	if err != nil {
 		fmt.Printf("DecodeString error\n")
-		return err, ""
+		return "", err
 	}
 
 	fmt.Printf("inputCode=%s\n", hex.EncodeToString(inputCode))
@@ -243,7 +242,7 @@ func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, fee
 	err = st.buyGas()
 	if err != nil {
 		fmt.Printf("buyGas error|err=%s\n", err)
-		return err, ""
+		return "", err
 	}
 
 	//Intrinsic gas calc
@@ -252,13 +251,13 @@ func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, fee
 	err = st.useGas(itrsGas)
 	if err != nil {
 		fmt.Printf("useGas error|err=%s\n", err)
-		return err, ""
+		return "", err
 	}
 
 	_, contractAddr, gasLeftover, vmerr := evm.Create(contractRef, inputCode, st.gas, big.NewInt(0))
 	if vmerr != nil {
 		fmt.Printf("evm Create error|err=%s\n", vmerr)
-		return vmerr, ""
+		return "", vmerr
 	}
 	st.gas = gasLeftover
 
@@ -269,38 +268,11 @@ func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, fee
 	// gasUsedValue
 	gasUsedValue := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
 	fmt.Printf("gasUsedValue=%s\n", gasUsedValue.String())
-	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(unit_convert.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
+	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
 
 	fmt.Printf("Create contract ok,contractAddr|appFormat=%s|ethFormat=%s\n", sdk.ToAppAddress(contractAddr).String(), contractAddr.String())
 
 	stateDB.Commit(false)
 
-	return nil, sdk.ToAppAddress(contractAddr).String()
+	return sdk.ToAppAddress(contractAddr).String(), nil
 }
-
-// func NewClassicHandler(keeper bank.Keeper) sdk.Handler {
-// 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
-// 		switch msg := msg.(type) {
-// 		case MsgSendFrom:
-// 			return HandleMsgSendFrom(ctx, keeper, msg)
-// 		default:
-// 			errMsg := fmt.Sprintf("Unrecognized htdfservice Msg type: %v", msg.Type())
-// 			return sdk.ErrUnknownRequest(errMsg).Result()
-// 		}
-// 	}
-// }
-
-// // Handle a message to sendfrom
-// func HandleMsgSendFrom(ctx sdk.Context, keeper bank.Keeper, msg MsgSendFrom) sdk.Result {
-// 	if !keeper.GetSendEnabled(ctx) {
-// 		return bank.ErrSendDisabled(keeper.Codespace()).Result()
-// 	}
-// 	tags, err := keeper.SendCoins(ctx, msg.From, msg.To, msg.Amount)
-// 	if err != nil {
-// 		return err.Result()
-// 	}
-
-// 	return sdk.Result{
-// 		Tags: tags,
-// 	}
-// }

@@ -1,4 +1,4 @@
-package unit_convert
+package types
 
 const (
 	BigDenom     = "htdf"
