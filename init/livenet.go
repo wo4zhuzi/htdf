@@ -9,14 +9,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/codec"
+	srvconfig "github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/x/staking"
-	"github.com/orientwalt/htdf/app"
-	srvconfig "github.com/orientwalt/htdf/server/config"
 
 	tmconfig "github.com/orientwalt/tendermint/config"
 	"github.com/orientwalt/tendermint/crypto"
@@ -27,7 +27,7 @@ import (
 
 	"github.com/orientwalt/htdf/accounts/keystore"
 	hsign "github.com/orientwalt/htdf/accounts/signs"
-	"github.com/orientwalt/htdf/app/v0"
+	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/server"
 	hsutils "github.com/orientwalt/htdf/utils"
 )
@@ -81,7 +81,7 @@ Example:
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 0.01photino,0.001stake)",
 	)
 	cmd.Flags().String(flagIssuerBechAddress, "", "issuer bech address")
-	cmd.Flags().String(flagStakerBechAddress, "", "staker bech address")
+	// cmd.Flags().String(flagStakerBechAddress, "", "staker bech address") // blocked by junying, 2019-08-27, reason: stake doesn't exist anymore
 	cmd.Flags().String(flagPasswordFromFile, "", "input password from file")
 	return cmd
 }
@@ -89,8 +89,12 @@ Example:
 var (
 	// issuer allocation amount
 	issuerAccTokens = sdk.TokensFromTendermintPower(50000000000) //5*10 ** 10(* 10 ** 6)
+
 	// staker allocation amount
-	stakerStakingTokens = sdk.TokensFromTendermintPower(10000000) // 10 ** 7(* 10 ** 6)
+	// blocked by junying, 2019-08-27
+	// reason: stake doesn't exist anymore
+	// stakerStakingTokens = sdk.TokensFromTendermintPower(10000000) // 10 ** 7(* 10 ** 6)
+
 	// validator stake alloc amount
 	validatorStakingTokens = sdk.TokensFromTendermintPower(1000000) // 10 ** 6(* 10 ** 6)
 )
@@ -143,16 +147,21 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 		stakerBechAddr, err = client.GetString("Staker Address: ", buffer)
 	}
 
-	stakerAccAddr, err := sdk.AccAddressFromBech32(stakerBechAddr)
-	if err != nil {
-		return err
-	}
-	accs = append(accs, v0.GenesisAccount{
-		Address: stakerAccAddr,
-		Coins: sdk.Coins{
-			sdk.NewCoin(sdk.DefaultBondDenom, stakerStakingTokens),
-		},
-	})
+	// blocked by junying, 2019-08-27
+	// reason: stake doesn't exist anymore
+	// stakerAccAddr, err := sdk.AccAddressFromBech32(stakerBechAddr)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// blocked by junying, 2019-08-27
+	// reason: stake doesn't exist anymore
+	// accs = append(accs, v0.GenesisAccount{
+	// 	Address: stakerAccAddr,
+	// 	Coins: sdk.Coins{
+	// 		sdk.NewCoin(sdk.DefaultBondDenom, stakerStakingTokens),
+	// 	},
+	// })
 
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {

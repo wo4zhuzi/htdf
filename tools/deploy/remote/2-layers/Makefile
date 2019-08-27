@@ -38,7 +38,7 @@ REFINED_PASS_COL_INDEX = 3
 CHAINID = testchain#mainchain
 MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
 ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3#htdf1h6dmymwjgqc5xxxvvsf3rwl54plr2pe3kjyw8n
-STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8#htdf18a6g5u5msn04l87kdk06cn97qjumgemu2phxwd
+# STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8#htdf18a6g5u5msn04l87kdk06cn97qjumgemu2phxwd
 DEFAULT_VAL_COUNT = 4#7
 DEFAULT_SENTRY_PUB_COUNT = ${DEFAULT_VAL_COUNT}
 DEFAULT_SENTRY_PRIV_COUNT = ${DEFAULT_VAL_COUNT}
@@ -147,7 +147,6 @@ vals:
 				 --validator-ip-addresses ${VALIDATOR_PRIV_IP} \
 				 --minimum-gas-prices ${MINIMUM_GAS_PRICES} \
 				 --issuer-bech-address ${ISSUER_ADDRESS} \
-				 --staker-bech-address ${STAKER_ADDRESS} \
 				 --password-from-file ${VALIDATOR_PASSWORD}
 
 sentries: sentries-priv sentries-pub
@@ -160,7 +159,6 @@ sentries-priv:
 				 --validator-ip-addresses ${SENTRY_PRIV_IP} \
 				 --minimum-gas-prices ${MINIMUM_GAS_PRICES} \
 				 --issuer-bech-address ${ISSUER_ADDRESS} \
-				 --staker-bech-address ${STAKER_ADDRESS} \
 				 --password-from-file ${SENTRY_PRIV_PASSWORD}
 
 sentries-pub:
@@ -171,7 +169,6 @@ sentries-pub:
 				 --validator-ip-addresses ${SENTRY_PUB_IP} \
 				 --minimum-gas-prices ${MINIMUM_GAS_PRICES} \
 				 --issuer-bech-address ${ISSUER_ADDRESS} \
-				 --staker-bech-address ${STAKER_ADDRESS} \
 				 --password-from-file ${SENTRY_PUB_PASSWORD}
 
 genesis:

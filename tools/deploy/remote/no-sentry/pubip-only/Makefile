@@ -37,7 +37,7 @@ FIRST_ROW_INDEX = 2
 CHAIN_ID = testchain
 MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
 ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3
-STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8
+# STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8
 DEFAULT_PORT = 26656
 ## account
 DEFAULT_WALLET_PASSWORD = xy11223355xx111
@@ -119,7 +119,6 @@ vals:
 				 --validator-ip-addresses ${VALIDATOR_IP} \
 				 --minimum-gas-prices ${MINIMUM_GAS_PRICES} \
 				 --issuer-bech-address ${ISSUER_ADDRESS} \
-				 --staker-bech-address ${STAKER_ADDRESS} \
 				 --password-from-file ${VALIDATOR_PASSWORD}
 
 genesis.json:
