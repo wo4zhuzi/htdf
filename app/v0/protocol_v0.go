@@ -376,7 +376,7 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 	for _, gacc := range genesisState.Accounts {
 		acc := gacc.ToAccount()
 		acc.AccountNumber = p.accountMapper.GetNextAccountNumber(ctx)
-		evmacc := newevmtypes.NewAccount(acc)
+		evmacc := newevmtypes.NewAccount(acc) // junying-todo, 2019-08-26
 		p.accountMapper.SetGenesisAccount(ctx, evmacc)
 	}
 

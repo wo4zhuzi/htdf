@@ -49,12 +49,15 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// Ensure that the provided fees meet a minimum threshold for the validator,
 		// if this is a CheckTx. This is only for local mempool purposes, and thus
 		// is only ran on check tx.
-		if ctx.IsCheckTx() && !simulate {
-			res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
-			if !res.IsOK() {
-				return newCtx, res, true
-			}
-		}
+		// junying-todo, 2019-08-27
+		// conventional fee prechecking doesn't needed anymore
+		// evm will replace it.
+		// if ctx.IsCheckTx() && !simulate {
+		// 	res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
+		// 	if !res.IsOK() {
+		// 		return newCtx, res, true
+		// 	}
+		// }
 
 		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.Gas)
 
@@ -62,30 +65,35 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// to know how much gas was used! This is because the GasMeter is created in
 		// the AnteHandler, but if it panics the context won't be set properly in
 		// runTx's recover call.
-		defer func() {
-			if r := recover(); r != nil {
-				switch rType := r.(type) {
-				case sdk.ErrorOutOfGas:
-					log := fmt.Sprintf(
-						"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
-						rType.Descriptor, stdTx.Fee.Gas, newCtx.GasMeter().GasConsumed(),
-					)
-					res = sdk.ErrOutOfGas(log).Result()
-
-					res.GasWanted = stdTx.Fee.Gas
-					res.GasUsed = newCtx.GasMeter().GasConsumed()
-					abort = true
-				default:
-					panic(r)
-				}
-			}
-		}()
+		// junying-todo, 2019-08-27
+		// conventional gas metering doesn't needed anymore
+		// evm will replace it.
+		// defer func() {
+		// 	if r := recover(); r != nil {
+		// 		switch rType := r.(type) {
+		// 		case sdk.ErrorOutOfGas:
+		// 			log := fmt.Sprintf(
+		// 				"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
+		// 				rType.Descriptor, stdTx.Fee.Gas, newCtx.GasMeter().GasConsumed(),
+		// 			)
+		// 			res = sdk.ErrOutOfGas(log).Result()
+		// 			res.GasWanted = stdTx.Fee.Gas
+		// 			res.GasUsed = newCtx.GasMeter().GasConsumed()
+		// 			abort = true
+		// 		default:
+		// 			panic(r)
+		// 		}
+		// 	}
+		// }()
 
 		if err := tx.ValidateBasic(); err != nil {
 			return newCtx, err.Result(), true
 		}
 
-		newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+		// junying-todo, 2019-08-27
+		// conventional gas consuming doesn't needed anymore
+		// evm will replace it.
+		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
 
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
@@ -103,14 +111,16 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			return newCtx, res, true
 		}
 
-		if !stdTx.Fee.Amount.IsZero() {
-			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
-			if !res.IsOK() {
-				return newCtx, res, true
-			}
-
-			fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
-		}
+		// junying-todo, 2019-08-27
+		// conventional deducting fee module doesn't needed anymore.
+		// evm will replace it.
+		// if !stdTx.Fee.Amount.IsZero() {
+		// 	signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
+		// 	if !res.IsOK() {
+		// 		return newCtx, res, true
+		// 	}
+		// 	fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
+		// }
 
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
