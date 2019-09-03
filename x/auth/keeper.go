@@ -114,9 +114,9 @@ func (ak AccountKeeper) GetAllAccounts(ctx sdk.Context) []Account {
 }
 
 // Implements sdk.AccountKeeper.
-func (am AccountKeeper) SetGenesisAccount(ctx sdk.Context, acc Account) {
-	am.IncreaseTotalLoosenToken(ctx, acc.GetCoins())
-	am.SetAccount(ctx, acc)
+func (ak AccountKeeper) SetGenesisAccount(ctx sdk.Context, acc Account) {
+	ak.IncreaseTotalLoosenToken(ctx, acc.GetCoins())
+	ak.SetAccount(ctx, acc)
 }
 
 // SetAccount implements sdk.AccountKeeper.
