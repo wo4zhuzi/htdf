@@ -662,9 +662,9 @@ func (csdb *CommitStateDB) createObject(addr ethcmn.Address) (newObj, prevObj *s
 	prevObj = csdb.getStateObject(addr)
 
 	acc := csdb.ak.NewAccountWithAddress(csdb.ctx, sdk.AccAddress(addr.Bytes()))
-	realAccount := newevmtypes.NewAccount(acc)
-	newObj = newObject(csdb, realAccount)
-	newObj.setNonce(0) // sets the object to dirty
+	realAccount := newevmtypes.NewAccount(acc) // commented by junying, 2019-08-xx
+	newObj = newObject(csdb, realAccount)      // added by shengxian
+	newObj.setNonce(0)                         // sets the object to dirty
 
 	if prevObj == nil {
 		csdb.journal.append(createObjectChange{account: &addr})

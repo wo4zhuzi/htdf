@@ -1,0 +1,34 @@
+{
+    "type": "auth/StdTx", 
+    "value": {
+        "fee": {
+            "amount": [
+                {
+                    "amount": "1", 
+                    "denom": "satoshi"
+                }
+            ], 
+            "gas": "200000"
+        }, 
+        "memo": "contract test", 
+        "msg": [
+            {
+                "type": "htdfservice/send", 
+                "value": {
+                    "Amount": [
+                        {
+                            "amount": "0", 
+                            "denom": "satoshi"
+                        }
+                    ], 
+                    "Data": "d57bde79", 
+                    "From": "htdf1hu64tcnuq7h4ypzmdtd0xhg6ccfzhqgfql9srj", 
+                    "Gas": "200000", 
+                    "GasLimit": "200000", 
+                    "GasPrice": "1", 
+                    "To": "htdf1fpwud66l8m32rchdqndz0zl0lp8vkcpsr5rxv5"
+                }
+            }
+        ]
+    }
+}

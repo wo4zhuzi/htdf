@@ -78,12 +78,10 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 			return sdk.ErrInsufficientCoins("Amount must be positive")
 		}
 	} else {
-		// access smart contract
-
-		// amount must be 0
-		if !msg.Amount.IsZero() {
-			return sdk.NewError(types.Codespace, types.ErrCode_BeZeroAmount, "access smart contract, amount must be 0")
-		}
+		// access smart contract, amount must be 0 ?
+		// if !msg.Amount.IsZero() {
+		// 	return sdk.NewError(types.Codespace, types.ErrCode_BeZeroAmount, "access smart contract, amount must be 0")
+		// }
 	}
 
 	return nil

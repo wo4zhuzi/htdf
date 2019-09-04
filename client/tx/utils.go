@@ -146,32 +146,32 @@ func queryTx(cdc *codec.Codec, cliCtx context.CLIContext, hashHexStr string) (sd
 	if err != nil {
 		return sdk.TxResponse{}, err
 	}
-	fmt.Println("1	>>>>>>queryTx>>>>>>>>>")
+	// fmt.Println("1	>>>>>>queryTx>>>>>>>>>")
 	node, err := cliCtx.GetNode()
 	if err != nil {
 		return sdk.TxResponse{}, err
 	}
-	fmt.Println("2	>>>>>>queryTx>>>>>>>>>")
+	// fmt.Println("2	>>>>>>queryTx>>>>>>>>>")
 	resTx, err := node.Tx(hash, !cliCtx.TrustNode)
 	if err != nil {
 		return sdk.TxResponse{}, err
 	}
-	fmt.Println("3	>>>>>>queryTx>>>>>>>>>", resTx.Height)
+	// fmt.Println("3	>>>>>>queryTx>>>>>>>>>", resTx.Height)
 	if !cliCtx.TrustNode {
 		if err = ValidateTxResult(cliCtx, resTx); err != nil {
 			return sdk.TxResponse{}, err
 		}
 	}
-	fmt.Println("4	>>>>>>queryTx>>>>>>>>>")
+	// fmt.Println("4	>>>>>>queryTx>>>>>>>>>")
 	resBlocks, err := getBlocksForTxResults(cliCtx, []*ctypes.ResultTx{resTx})
 	if err != nil {
 		return sdk.TxResponse{}, err
 	}
-	fmt.Println("5	>>>>>>queryTx>>>>>>>>>")
+	// fmt.Println("5	>>>>>>queryTx>>>>>>>>>")
 	out, err := formatTxResult(cdc, resTx, resBlocks[resTx.Height])
 	if err != nil {
 		return out, err
 	}
-	fmt.Println("6	>>>>>>queryTx>>>>>>>>>")
+	// fmt.Println("6	>>>>>>queryTx>>>>>>>>>")
 	return out, nil
 }

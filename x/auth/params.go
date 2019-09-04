@@ -22,7 +22,7 @@ const (
 	//DefaultTxSizeLimit            uint64 = 1000
 	DefaultTxSizeCostPerByte      uint64 = 10
 	DefaultSigVerifyCostED25519   uint64 = 590
-	DefaultSigVerifyCostSecp256k1 uint64 = 1000
+	DefaultSigVerifyCostSecp256k1 uint64 = 4000 // modified by junying, 2019-09-04, 1000 to 4000
 )
 
 var (

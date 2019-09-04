@@ -1,4 +1,4 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity ^0.4.16;
 
 /// @title Voting with delegation.
 contract Ballot {
@@ -28,7 +28,7 @@ contract Ballot {
     Proposal[] public proposals;
 
     /// Create a new ballot to choose one of `proposalNames`.
-    constructor(bytes32[] memory proposalNames) public {
+    function Ballot(bytes32[] proposalNames) public {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
 
@@ -49,25 +49,18 @@ contract Ballot {
     // Give `voter` the right to vote on this ballot.
     // May only be called by `chairperson`.
     function giveRightToVote(address voter) public {
-        // If the first argument of `require` evaluates
-        // to `false`, execution terminates and all
-        // changes to the state and to Ether balances
-        // are reverted.
-        // This used to consume all gas in old EVM versions, but
-        // not anymore.
-        // It is often a good idea to use `require` to check if
-        // functions are called correctly.
-        // As a second argument, you can also provide an
-        // explanation about what went wrong.
+        // If the argument of `require` evaluates to `false`,
+        // it terminates and reverts all changes to
+        // the state and to Ether balances. It is often
+        // a good idea to use this if functions are
+        // called incorrectly. But watch out, this
+        // will currently also consume all provided gas
+        // (this is planned to change in the future).
         require(
-            msg.sender == chairperson,
-            "Only chairperson can give right to vote."
+            (msg.sender == chairperson) &&
+            !voters[voter].voted &&
+            (voters[voter].weight == 0)
         );
-        require(
-            !voters[voter].voted,
-            "The voter already voted."
-        );
-        require(voters[voter].weight == 0);
         voters[voter].weight = 1;
     }
 
@@ -75,9 +68,10 @@ contract Ballot {
     function delegate(address to) public {
         // assigns reference
         Voter storage sender = voters[msg.sender];
-        require(!sender.voted, "You already voted.");
+        require(!sender.voted);
 
-        require(to != msg.sender, "Self-delegation is disallowed.");
+        // Self-delegation is not allowed.
+        require(to != msg.sender);
 
         // Forward the delegation as long as
         // `to` also delegated.
@@ -91,7 +85,7 @@ contract Ballot {
             to = voters[to].delegate;
 
             // We found a loop in the delegation, not allowed.
-            require(to != msg.sender, "Found loop in delegation.");
+            require(to != msg.sender);
         }
 
         // Since `sender` is a reference, this
@@ -114,8 +108,7 @@ contract Ballot {
     /// to proposal `proposals[proposal].name`.
     function vote(uint proposal) public {
         Voter storage sender = voters[msg.sender];
-        require(sender.weight != 0, "Has no right to vote");
-        require(!sender.voted, "Already voted.");
+        require(!sender.voted);
         sender.voted = true;
         sender.vote = proposal;
 

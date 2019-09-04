@@ -146,7 +146,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 			serviceMsgNum++
 		}
 	}
-	fmt.Println("1111111111@@@@@@@@@@@@@!!!!!!!!!")
+	// fmt.Println("1111111111@@@@@@@@@@@@@!!!!!!!!!")
 	if serviceMsgNum != 0 && serviceMsgNum != len(msgs) {
 		return sdk.ErrServiceTxLimit("Can't mix service msgs with other types of msg in one transaction!")
 	}
@@ -155,12 +155,12 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 		subspace, found := p.paramsKeeper.GetSubspace(auth.DefaultParamspace)
 		var txSizeLimit uint64
 		if found {
-			fmt.Println("22222222222@@@@@@@@@@@@@!!!!!!!!!", subspace)
+			// fmt.Println("22222222222@@@@@@@@@@@@@!!!!!!!!!", subspace)
 			subspace.Get(ctx, auth.KeySigVerifyCostSecp256k1, &txSizeLimit)
 		} else {
 			panic("The subspace " + auth.DefaultParamspace + " cannot be found!")
 		}
-		fmt.Println("33333333333@@@@@@@@@@@@@!!!!!!!!!")
+		// fmt.Println("33333333333@@@@@@@@@@@@@!!!!!!!!!")
 		if uint64(len(txBytes)) > txSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), txSizeLimit))
 		}

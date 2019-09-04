@@ -1,24 +1,23 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity ^0.4.11;
 
 contract SimpleAuction {
     // Parameters of the auction. Times are either
     // absolute unix timestamps (seconds since 1970-01-01)
     // or time periods in seconds.
-    address payable public beneficiary;
-    uint public auctionEndTime;
+    address public beneficiary;
+    uint public auctionEnd;
 
     // Current state of the auction.
     address public highestBidder;
     uint public highestBid;
 
     // Allowed withdrawals of previous bids
-    mapping(address => uint) pendingReturns;
+    mapping(address => uint) public pending;
 
-    // Set to true at the end, disallows any change.
-    // By default initialized to `false`.
+    // Set to true at the end, disallows any change
     bool ended;
 
-    // Events that will be emitted on changes.
+    // Events that will be fired on changes.
     event HighestBidIncreased(address bidder, uint amount);
     event AuctionEnded(address winner, uint amount);
 
@@ -30,12 +29,12 @@ contract SimpleAuction {
     /// Create a simple auction with `_biddingTime`
     /// seconds bidding time on behalf of the
     /// beneficiary address `_beneficiary`.
-    constructor(
+    function SimpleAuction(
         uint _biddingTime,
-        address payable _beneficiary
+        address _beneficiary
     ) public {
         beneficiary = _beneficiary;
-        auctionEndTime = now + _biddingTime;
+        auctionEnd = now + _biddingTime;
     }
 
     /// Bid on the auction with the value sent
@@ -51,17 +50,11 @@ contract SimpleAuction {
 
         // Revert the call if the bidding
         // period is over.
-        require(
-            now <= auctionEndTime,
-            "Auction already ended."
-        );
+        require(now <= auctionEnd);
 
         // If the bid is not higher, send the
         // money back.
-        require(
-            msg.value > highestBid,
-            "There already is a higher bid."
-        );
+        require(msg.value > highestBid);
 
         if (highestBid != 0) {
             // Sending back the money by simply using
@@ -69,29 +62,35 @@ contract SimpleAuction {
             // because it could execute an untrusted contract.
             // It is always safer to let the recipients
             // withdraw their money themselves.
-            pendingReturns[highestBidder] += highestBid;
+            pending[highestBidder] += highestBid;
         }
         highestBidder = msg.sender;
         highestBid = msg.value;
-        emit HighestBidIncreased(msg.sender, msg.value);
+        HighestBidIncreased(msg.sender, msg.value);
     }
 
     /// Withdraw a bid that was overbid.
     function withdraw() public returns (bool) {
-        uint amount = pendingReturns[msg.sender];
+        uint amount = pending[msg.sender];
         if (amount > 0) {
             // It is important to set this to zero because the recipient
             // can call this function again as part of the receiving call
             // before `send` returns.
-            pendingReturns[msg.sender] = 0;
+            pending[msg.sender] = 0;
 
             if (!msg.sender.send(amount)) {
                 // No need to call throw here, just reset the amount owing
-                pendingReturns[msg.sender] = amount;
+                pending[msg.sender] = amount;
                 return false;
             }
         }
         return true;
+    }
+
+    // junying-todo, 2019-08-19
+    // customized
+    function remaining() public returns (uint){
+        return auctionEnd-now;
     }
 
     /// End the auction and send the highest bid
@@ -111,12 +110,14 @@ contract SimpleAuction {
         // external contracts.
 
         // 1. Conditions
-        require(now >= auctionEndTime, "Auction not yet ended.");
-        require(!ended, "auctionEnd has already been called.");
+        require(now >= auctionEnd); // auction did not yet end
+        require(!ended); // this function has already been called
+        // require(now >= auctionEndTime, "Auction not yet ended.");
+        // require(!ended, "auctionEnd has already been called.");
 
         // 2. Effects
         ended = true;
-        emit AuctionEnded(highestBidder, highestBid);
+        AuctionEnded(highestBidder, highestBid);
 
         // 3. Interaction
         beneficiary.transfer(highestBid);
