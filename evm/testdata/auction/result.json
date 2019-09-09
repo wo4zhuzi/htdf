@@ -1,16 +1,16 @@
 {
-  "height": "1038",
-  "txhash": "E63018F04A75BBD29B6A1CFC0A19B9AB44B2BE7B1E6AE3DEED15A9FB74B9683C",
-  "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"\\\",\\\"evm_output\\\":\\\"00000000000000000000000093ef873a279d2f51aefd6b72dc6e3b71a0a02580\\\"}\"}]",
+  "height": "6928",
+  "txhash": "F5DAB3BC32BBDE92694EB4D39B6E9D7450B5958F4E930FACAB9183D8DEAF467B",
+  "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"\\\",\\\"evm_output\\\":\\\"\\\"}\"}]",
   "logs": [
     {
       "msg_index": "0",
       "success": true,
-      "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"\",\"evm_output\":\"00000000000000000000000093ef873a279d2f51aefd6b72dc6e3b71a0a02580\"}"
+      "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"\",\"evm_output\":\"\"}"
     }
   ],
   "gas_wanted": "200000",
-  "gas_used": "31961",
+  "gas_used": "31631",
   "tags": [
     {
       "key": "action",
@@ -25,14 +25,14 @@
           "type": "htdfservice/send",
           "value": {
             "From": "htdf1hu64tcnuq7h4ypzmdtd0xhg6ccfzhqgfql9srj",
-            "To": "htdf1fpwud66l8m32rchdqndz0zl0lp8vkcpsr5rxv5",
+            "To": "htdf1szm7u5ewf4726kdwm29373najm7j8u2a3s0knr",
             "Amount": [
               {
                 "denom": "satoshi",
                 "amount": "0"
               }
             ],
-            "Data": "91f90157",
+            "Data": "2a24f46c",
             "Gas": "200000",
             "GasPrice": "1",
             "GasLimit": "200000"
@@ -54,11 +54,11 @@
             "type": "tendermint/PubKeySecp256k1",
             "value": "A57vPqspNdbxgiwtF40Sq2Yxdb+dobbmceqG40EX0v4U"
           },
-          "signature": "NRerMpJ+7/HCn94CV2FOnMLUmWLTQqB6vGWsKBbnlCsTBhlGu4kBYJ0i4M/BdZv6aeenhW73zous+rh8AwzibA=="
+          "signature": "ruuW3RrxToqfuBWSaIuwwjlcrtsPA9/eFhqe4de90blkYkshoLGHVLkr7IQtZLmz71zI1gm6NJY5Lj/4VOwbbA=="
         }
       ],
       "memo": "contract test"
     }
   },
-  "timestamp": "2019-09-05T02:59:32Z"
+  "timestamp": "2019-09-09T02:18:11Z"
 }
