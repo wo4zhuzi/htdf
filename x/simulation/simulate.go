@@ -13,7 +13,7 @@ import (
 
 	abci "github.com/orientwalt/tendermint/abci/types"
 
-	"github.com/orientwalt/htdf/baseapp"
+	"github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -21,7 +21,7 @@ import (
 type AppStateFn func(r *rand.Rand, accs []Account, genesisTimestamp time.Time) (appState json.RawMessage, accounts []Account, chainId string)
 
 // Simulate tests application by sending random messages.
-func Simulate(t *testing.T, app *baseapp.BaseApp,
+func Simulate(t *testing.T, app *app.BaseApp,
 	appStateFn AppStateFn, ops WeightedOperations,
 	invariants sdk.Invariants, numBlocks, blockSize int, commit, lean bool) (bool, error) {
 
@@ -33,7 +33,7 @@ func Simulate(t *testing.T, app *baseapp.BaseApp,
 // initialize the chain for the simulation
 func initChain(
 	r *rand.Rand, params Params, accounts []Account,
-	app *baseapp.BaseApp, appStateFn AppStateFn, genesisTimestamp time.Time,
+	app *app.BaseApp, appStateFn AppStateFn, genesisTimestamp time.Time,
 ) (mockValidators, []Account) {
 
 	appState, accounts, chainID := appStateFn(r, accounts, genesisTimestamp)
@@ -51,7 +51,7 @@ func initChain(
 // SimulateFromSeed tests an application by running the provided
 // operations, testing the provided invariants, but using the provided seed.
 // TODO split this monster function up
-func SimulateFromSeed(tb testing.TB, app *baseapp.BaseApp,
+func SimulateFromSeed(tb testing.TB, app *app.BaseApp,
 	appStateFn AppStateFn, seed int64, ops WeightedOperations,
 	invariants sdk.Invariants,
 	numBlocks, blockSize int, commit, lean bool) (stopEarly bool, simError error) {
@@ -220,7 +220,7 @@ func SimulateFromSeed(tb testing.TB, app *baseapp.BaseApp,
 
 //______________________________________________________________________________
 
-type blockSimFn func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
+type blockSimFn func(r *rand.Rand, app *app.BaseApp, ctx sdk.Context,
 	accounts []Account, header abci.Header) (opCount int)
 
 // Returns a function to simulate blocks. Written like this to avoid constant
@@ -234,7 +234,7 @@ func createBlockSimulator(testingMode bool, tb testing.TB, t *testing.T, params 
 	blocksize := 0
 	selectOp := ops.getSelectOpFn()
 
-	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
+	return func(r *rand.Rand, app *app.BaseApp, ctx sdk.Context,
 		accounts []Account, header abci.Header) (opCount int) {
 
 		fmt.Printf("\rSimulating... block %d/%d, operation %d/%d. ",
@@ -289,7 +289,7 @@ func createBlockSimulator(testingMode bool, tb testing.TB, t *testing.T, params 
 
 // nolint: errcheck
 func runQueuedOperations(queueOps map[int][]Operation,
-	height int, tb testing.TB, r *rand.Rand, app *baseapp.BaseApp,
+	height int, tb testing.TB, r *rand.Rand, app *app.BaseApp,
 	ctx sdk.Context, accounts []Account, logWriter LogWriter, tallyEvent func(string), lean bool) (numOpsRan int) {
 
 	queuedOp, ok := queueOps[height]
@@ -319,7 +319,7 @@ func runQueuedOperations(queueOps map[int][]Operation,
 
 func runQueuedTimeOperations(queueOps []FutureOperation,
 	height int, currentTime time.Time, tb testing.TB, r *rand.Rand,
-	app *baseapp.BaseApp, ctx sdk.Context, accounts []Account,
+	app *app.BaseApp, ctx sdk.Context, accounts []Account,
 	logWriter LogWriter, tallyEvent func(string), lean bool) (numOpsRan int) {
 
 	numOpsRan = 0
