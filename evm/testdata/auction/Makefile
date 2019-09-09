@@ -120,7 +120,7 @@ highestBid:
 
 # In: []
 # Out: []
-# 
+# YOU NEED TO CALL THIS TO FINALIZE AUCTION. THEN, THE BENEFICIARY WILL RECEIVE THE HIGHTEST BID.
 auctionEnd:
 	@replkey From $$(hscli accounts list|row 1) unsigned.tx y;\
 	 replkey Data 2a24f46c unsigned.tx y;\
