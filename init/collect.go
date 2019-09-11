@@ -14,12 +14,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/orientwalt/htdf/app"
+	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/codec"
-	"github.com/orientwalt/htdf/x/auth"
-	"github.com/orientwalt/htdf/app"
-	"github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/server"
+	"github.com/orientwalt/htdf/x/auth"
 )
 
 const (
@@ -138,7 +138,7 @@ func genAppStateFromConfigEx(
 	)
 
 	// process genesis transactions, else create default genesis.json
-	appGenTxs, persistentPeers, err = v0.CollectStdTxs(
+	appGenTxs, persistentPeers, err = v0.CollectStdTxsEx(
 		cdc, config.Moniker, initCfg.GenTxsDir, genDoc,
 	)
 	if err != nil {

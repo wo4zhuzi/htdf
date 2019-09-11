@@ -20,6 +20,7 @@ import (
 	"github.com/orientwalt/htdf/x/mint"
 	"github.com/orientwalt/htdf/x/service"
 	"github.com/orientwalt/htdf/x/slashing"
+	"github.com/orientwalt/htdf/x/staking"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
 	tmtypes "github.com/orientwalt/tendermint/types"
@@ -328,6 +329,94 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 		if msg.Description.Moniker != moniker {
 			addressesIPs = append(addressesIPs, nodeAddrIP)
 		}
+	}
+
+	sort.Strings(addressesIPs)
+	persistentPeers = strings.Join(addressesIPs, ",")
+
+	return appGenTxs, persistentPeers, nil
+}
+
+// added by junying, 2019-09-11
+// copied from usdp, junying-todo-20190517
+// remove persistentPeers
+func CollectStdTxsEx(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tmtypes.GenesisDoc) (
+	appGenTxs []auth.StdTx, persistentPeers string, err error) {
+
+	var fos []os.FileInfo
+	fos, err = ioutil.ReadDir(genTxsDir)
+	if err != nil {
+		return appGenTxs, persistentPeers, err
+	}
+
+	// prepare a map of all accounts in genesis state to then validate
+	// against the validators addresses
+	var appState GenesisState
+	if err := cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
+		return appGenTxs, persistentPeers, err
+	}
+
+	addrMap := make(map[string]GenesisAccount, len(appState.Accounts))
+	for i := 0; i < len(appState.Accounts); i++ {
+		acc := appState.Accounts[i]
+		addrMap[acc.Address.String()] = acc
+	}
+
+	// addresses and IPs (and port) validator server info
+	var addressesIPs []string
+
+	for _, fo := range fos {
+		filename := filepath.Join(genTxsDir, fo.Name())
+		if !fo.IsDir() && (filepath.Ext(filename) != ".json") {
+			continue
+		}
+
+		// get the genStdTx
+		var jsonRawTx []byte
+		if jsonRawTx, err = ioutil.ReadFile(filename); err != nil {
+			return appGenTxs, persistentPeers, err
+		}
+		var genStdTx auth.StdTx
+		if err = cdc.UnmarshalJSON(jsonRawTx, &genStdTx); err != nil {
+			return appGenTxs, persistentPeers, err
+		}
+		appGenTxs = append(appGenTxs, genStdTx)
+
+		// genesis transactions must be single-message
+		msgs := genStdTx.GetMsgs()
+		if len(msgs) != 1 {
+
+			return appGenTxs, persistentPeers, errors.New(
+				"each genesis transaction must provide a single genesis message")
+		}
+
+		msg := msgs[0].(staking.MsgCreateValidator)
+		// validate delegator and validator addresses and funds against the accounts in the state
+		delAddr := msg.DelegatorAddress.String()
+		valAddr := sdk.AccAddress(msg.ValidatorAddress).String()
+
+		delAcc, delOk := addrMap[delAddr]
+		_, valOk := addrMap[valAddr]
+
+		accsNotInGenesis := []string{}
+		if !delOk {
+			accsNotInGenesis = append(accsNotInGenesis, delAddr)
+		}
+		if !valOk {
+			accsNotInGenesis = append(accsNotInGenesis, valAddr)
+		}
+		if len(accsNotInGenesis) != 0 {
+			return appGenTxs, persistentPeers, fmt.Errorf(
+				"account(s) %v not in genesis.json: %+v", strings.Join(accsNotInGenesis, " "), addrMap)
+		}
+
+		if delAcc.Coins.AmountOf(msg.Value.Denom).LT(msg.Value.Amount) {
+			return appGenTxs, persistentPeers, fmt.Errorf(
+				"insufficient fund for delegation %v: %v < %v",
+				delAcc.Address, delAcc.Coins.AmountOf(msg.Value.Denom), msg.Value.Amount,
+			)
+		}
+
 	}
 
 	sort.Strings(addressesIPs)

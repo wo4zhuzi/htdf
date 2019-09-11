@@ -75,13 +75,14 @@ install: clean pre vals genesis.json config.toml refine distr.config start
 
 ############################################################################################
 ############################################################################################
-chk.var: pre mk.acc.file
+chk.var: pre# mk.acc.file
 	@echo "number_of_validators = ${VALS_COUNT}"
 	@echo "validator indeces = [${VALS_INDEX}]"
-	@echo "number of genesis accounts = $$(linecount ${ACCOUNTS_GENESIS_INIT})"
+	# @echo "number of genesis accounts = $$(linecount ${ACCOUNTS_GENESIS_INIT})"
 	@echo 
 	@echo [servers]
 	@colex 2 ${SERVER_LIST}
+	@wc ${VALIDATOR_IP} | awk '{print$$1F}'
 
 clean: clear
 	#@rm -rf $(HOME)/.hsd
@@ -106,7 +107,7 @@ mk.acc.file:
 # prepare
 pre:
 	@if ! [ -d ${CONFIGTMPDIR} ]; then mkdir -p ${CONFIGTMPDIR}; fi
-	@if ! [ -d ${ACCOUNTDIR} ]; then mkdir -p ${ACCOUNTDIR}; fi
+	# @if ! [ -d ${ACCOUNTDIR} ]; then mkdir -p ${ACCOUNTDIR}; fi
 	@if ! [ -f ${SERVER_LIST} ]; then rowex 1 ${SERVER_INFO} >> ${SERVER_LIST};fi
 	@column ${PRIV_COL_INDEX} ${SERVER_LIST} >> ${VALIDATOR_IP}
 	@column ${PASS_COL_INDEX} ${SERVER_LIST} >> ${VALIDATOR_PASSWORD}
