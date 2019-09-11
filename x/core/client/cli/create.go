@@ -52,7 +52,7 @@ func GetCmdCreate(cdc *codec.Codec) *cobra.Command {
 
 			encodeflag := viper.GetBool(htdfservice.FlagEncode)
 
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins)
+			msg := htdfservice.NewMsgSendFromDefault(fromaddr, toaddr, coins)
 
 			return PrintUnsignedStdTx(txBldr, cliCtx, []sdk.Msg{msg}, encodeflag)
 		},

@@ -141,7 +141,7 @@ func (bldr TxBuilder) WithFees(fees string) TxBuilder {
 
 // WithGasPrices returns a copy of the context with updated gas prices.
 func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
-	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices)
+	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices) // junying-todo, 2019-09-10, ParseDecCoins to ParseCoins, due to be replaced
 	if err != nil {
 		panic(err)
 	}

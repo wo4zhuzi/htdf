@@ -1,12 +1,12 @@
 {
-  "height": "6928",
-  "txhash": "F5DAB3BC32BBDE92694EB4D39B6E9D7450B5958F4E930FACAB9183D8DEAF467B",
-  "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"\\\",\\\"evm_output\\\":\\\"\\\"}\"}]",
+  "height": "7838",
+  "txhash": "D20BC7B0F50CBD76D1F7997C58179449EB8BB587D805F6E973EAC2C1C44141EF",
+  "raw_log": "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"{\\\"code\\\":0,\\\"message\\\":\\\"ok\\\",\\\"contract_address\\\":\\\"\\\",\\\"evm_output\\\":\\\"0000000000000000000000009544b04424391f8b2f1bdce01e1c990b743ba2b3\\\"}\"}]",
   "logs": [
     {
       "msg_index": "0",
       "success": true,
-      "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"\",\"evm_output\":\"\"}"
+      "log": "{\"code\":0,\"message\":\"ok\",\"contract_address\":\"\",\"evm_output\":\"0000000000000000000000009544b04424391f8b2f1bdce01e1c990b743ba2b3\"}"
     }
   ],
   "gas_wanted": "200000",
@@ -32,7 +32,7 @@
                 "amount": "0"
               }
             ],
-            "Data": "2a24f46c",
+            "Data": "38af3eed",
             "Gas": "200000",
             "GasPrice": "1",
             "GasLimit": "200000"
@@ -54,11 +54,11 @@
             "type": "tendermint/PubKeySecp256k1",
             "value": "A57vPqspNdbxgiwtF40Sq2Yxdb+dobbmceqG40EX0v4U"
           },
-          "signature": "ruuW3RrxToqfuBWSaIuwwjlcrtsPA9/eFhqe4de90blkYkshoLGHVLkr7IQtZLmz71zI1gm6NJY5Lj/4VOwbbA=="
+          "signature": "RXP3hgIKVuin7ZfhbzKQBl1GlSCKirCkpKVC9H82uE0lVX2rpyspHcEmGi6vqNFKwMKNTm+SUyr9NR3BGUkhKA=="
         }
       ],
       "memo": "contract test"
     }
   },
-  "timestamp": "2019-09-09T02:18:11Z"
+  "timestamp": "2019-09-09T03:49:22Z"
 }

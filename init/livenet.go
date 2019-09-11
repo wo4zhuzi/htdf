@@ -141,11 +141,13 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 	})
 
 	// add staker address
-	stakerBechAddr := viper.GetString(flagStakerBechAddress)
-	if stakerBechAddr == "" {
-		buffer := client.BufferStdin()
-		stakerBechAddr, err = client.GetString("Staker Address: ", buffer)
-	}
+	// blocked by junying, 2019-09-11
+	// reasone: no stake at present
+	// stakerBechAddr := viper.GetString(flagStakerBechAddress)
+	// if stakerBechAddr == "" {
+	// 	buffer := client.BufferStdin()
+	// 	stakerBechAddr, err = client.GetString("Staker Address: ", buffer)
+	// }
 
 	// blocked by junying, 2019-08-27
 	// reason: stake doesn't exist anymore

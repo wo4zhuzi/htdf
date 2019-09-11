@@ -50,7 +50,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// if this is a CheckTx. This is only for local mempool purposes, and thus
 		// is only ran on check tx.
 		// junying-todo, 2019-08-27
-		// conventional fee prechecking doesn't needed anymore
+		// conventional fee prechecking isn't necessary anymore
 		// evm will replace it.
 		// if ctx.IsCheckTx() && !simulate {
 		// 	res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
@@ -66,7 +66,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// the AnteHandler, but if it panics the context won't be set properly in
 		// runTx's recover call.
 		// junying-todo, 2019-08-27
-		// conventional gas metering doesn't needed anymore
+		// conventional gas metering isn't necessary anymore
 		// evm will replace it.
 		// defer func() {
 		// 	if r := recover(); r != nil {
@@ -91,7 +91,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// junying-todo, 2019-08-27
-		// conventional gas consuming doesn't needed anymore
+		// conventional gas consuming isn't necessary anymore
 		// evm will replace it.
 		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
 

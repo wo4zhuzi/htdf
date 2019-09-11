@@ -30,7 +30,9 @@ type MsgSendFrom struct {
 var _ sdk.Msg = MsgSendFrom{}
 
 // NewMsgSend is a constructor function for MsgSend
-func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
+// Normal Transaction
+// Default GasLimit, Default GasPrice
+func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
 	return MsgSendFrom{
 		From:     fromaddr,
 		To:       toaddr,
@@ -41,6 +43,20 @@ func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.C
 	}
 }
 
+// Normal Transaction
+// Default GasLimit, Customized GasPrice
+func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64) MsgSendFrom {
+	return MsgSendFrom{
+		From:     fromaddr,
+		To:       toaddr,
+		Amount:   amount,
+		Gas:      defaultGasLimit,
+		GasPrice: gasPrice,
+		GasLimit: defaultGasLimit,
+	}
+}
+
+// Contract Transaction
 func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gas uint64, gasPrice uint64, gasLimit uint64) MsgSendFrom {
 	return MsgSendFrom{
 		From:     fromaddr,

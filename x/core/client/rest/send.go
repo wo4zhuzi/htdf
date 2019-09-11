@@ -5,6 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/orientwalt/htdf/accounts"
+	"github.com/orientwalt/htdf/accounts/keystore"
+	htdfRest "github.com/orientwalt/htdf/accounts/rest"
+	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
@@ -12,14 +16,10 @@ import (
 	"github.com/orientwalt/htdf/crypto/keys/keyerror"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/types/rest"
+	"github.com/orientwalt/htdf/utils/unit_convert"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/x/bank"
-	"github.com/orientwalt/htdf/accounts"
-	"github.com/orientwalt/htdf/accounts/keystore"
-	htdfRest "github.com/orientwalt/htdf/accounts/rest"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
-	"github.com/orientwalt/htdf/utils/unit_convert"
-	"github.com/orientwalt/htdf/x/core"
+	htdfservice "github.com/orientwalt/htdf/x/core"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 )
 
@@ -107,7 +107,7 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			}
 		}
 
-		fmt.Printf("gas=%d|gasPrice=%d|gasLmint=%d\n", gas, gasPrice, gasLimit)
+		fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", gas, gasPrice, gasLimit)
 
 		msg := htdfservice.NewMsgSendFromForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gas, gasPrice, gasLimit)
 		CompleteAndBroadcastTxREST(w, cliCtx, req.BaseReq, mreq.BaseReq.Password, []sdk.Msg{msg}, cdc)

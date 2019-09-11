@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	htdfRest "github.com/orientwalt/htdf/accounts/rest"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/types/rest"
+	"github.com/orientwalt/htdf/utils/unit_convert"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	htdfRest "github.com/orientwalt/htdf/accounts/rest"
-	"github.com/orientwalt/htdf/utils/unit_convert"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 )
 
@@ -71,7 +71,7 @@ func CreateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		msg := htdfservice.NewMsgSendFrom(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount))
+		msg := htdfservice.NewMsgSendFromDefault(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount))
 		WriteGenerateStdTxResponse(w, cdc, cliCtx, BaseReq, []sdk.Msg{msg}, req.Encode)
 
 		return

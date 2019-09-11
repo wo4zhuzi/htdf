@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
-	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	hsutils "github.com/orientwalt/htdf/utils"
+	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	"github.com/spf13/cobra"
 )
@@ -50,7 +50,18 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins)
+			// gaspriceStr := viper.GetString(client.FlagGasPrices)
+			// var gaspriceInt uint64
+			// if gaspriceStr == "" {
+			// 	gaspriceInt = 1
+			// } else {
+			// 	gaspriceStr = strings.TrimRight(gaspriceStr, sdk.DefaultDenom)
+			// 	gaspriceInt, err = strconv.ParseUint(gaspriceStr, 10, 64)
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// }
+			msg := htdfservice.NewMsgSendFromDefault(fromaddr, toaddr, coins) //, gaspriceInt)
 			cliCtx.PrintResponse = true
 			fmt.Println("aaaaaaaaaaaaa", msg.Type())
 			return CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, fromaddr) //not completed yet, need account name
