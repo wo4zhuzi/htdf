@@ -15,8 +15,8 @@ import (
 	"github.com/orientwalt/tendermint/types"
 	amino "github.com/tendermint/go-amino"
 
-	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/app/v0"
+	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/server"
 )
 

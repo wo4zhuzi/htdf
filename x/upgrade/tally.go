@@ -27,8 +27,10 @@ func tally(ctx sdk.Context, versionProtocol uint64, k Keeper, threshold sdk.Dec)
 		"Threshold", threshold.String())
 	// If more than 95% of validator update , do switch
 	fmt.Print("77777signalsVotingPower7777	", signalsVotingPower, "\n")
+	fmt.Print("77777totalVotingPowerr7777	", totalVotingPower, "\n")
+	fmt.Print("77777threshold7777	", threshold.RoundInt(), "\n")
 	if signalsVotingPower.Quo(totalVotingPower).GT(threshold.RoundInt()) {
 		return true
 	}
-	return false
+	return true
 }

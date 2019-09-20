@@ -92,8 +92,8 @@ func NewHtdfServiceApp(logger log.Logger, config *cfg.InstrumentationConfig, db 
 	//Change namespace to appName
 	appPrometheusConfig.Namespace = appPrometheusNamespace
 	engine.Add(v0.NewProtocolV0(0, logger, protocolKeeper, app.invCheckPeriod, &appPrometheusConfig))
-	//engine.Add(v1.NewProtocolV0(1, logger, protocolKeeper, app.checkInvariant, app.trackCoinFlow, &appPrometheusConfig))
-	// engine.Add(v2.NewProtocolV1(2, ...))
+	engine.Add(v0.NewProtocolV0(1, logger, protocolKeeper, app.invCheckPeriod, &appPrometheusConfig))
+	//engine.Add(v2.NewProtocolV1(2, ...))
 	fmt.Print("KeyMain----->	", app.GetKVStore(protocol.KeyMain), "\n")
 	loaded, current := engine.LoadCurrentProtocol(app.GetKVStore(protocol.KeyMain))
 	if !loaded {
