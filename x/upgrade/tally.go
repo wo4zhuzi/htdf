@@ -32,5 +32,5 @@ func tally(ctx sdk.Context, versionProtocol uint64, k Keeper, threshold sdk.Dec)
 	if signalsVotingPower.Quo(totalVotingPower).GT(threshold.RoundInt()) {
 		return true
 	}
-	return true
+	return false
 }
