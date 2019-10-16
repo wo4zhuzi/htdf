@@ -58,6 +58,7 @@ build-batchsend:
 
 install: build
 	@if [ -d build/bin ]; then cp build/bin/* $(GOPATH)/bin; fi
+	@$(MAKE) -C . clean
 
 # build-:
 # ifeq ($(CURRENT_OS),Windows)
