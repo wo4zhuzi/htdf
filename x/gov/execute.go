@@ -33,7 +33,7 @@ func SoftwareUpgradeProposalExecute(ctx sdk.Context, gk Keeper, sp *SoftwareUpgr
 	}
 
 	gk.protocolKeeper.SetUpgradeConfig(ctx, sdk.NewUpgradeConfig(sp.ProposalID, sp.ProtocolDefinition))
-
+	fmt.Println("Execute SoftwareProposal Success")
 	ctx.Logger().Info("Execute SoftwareProposal Success")
 
 	return nil

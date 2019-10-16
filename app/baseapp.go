@@ -233,11 +233,11 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 		return errors.New("baseapp expects MultiStore with 'main' KVStore")
 	}
 
-	// memoize baseKey
-	if app.baseKey != nil {
-		panic("app.baseKey expected to be nil; duplicate init?")
-	}
-	app.baseKey = baseKey
+	// // memoize baseKey
+	// if app.baseKey != nil {
+	// 	panic("app.baseKey expected to be nil; duplicate init?")
+	// }
+	// app.baseKey = baseKey
 
 	// Load the consensus params from the main store. If the consensus params are
 	// nil, it will be saved later during InitChain.
@@ -253,6 +253,11 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 		}
 
 		app.setConsensusParams(consensusParams)
+	}else {
+		// It will get saved later during InitChain.
+		if app.LastBlockHeight() != 0 {
+			panic(errors.New("consensus params is empty"))
+		}
 	}
 
 	// needed for `gaiad export`, which inits from store but never calls initchain
@@ -352,6 +357,7 @@ func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
 	lastCommitID := app.cms.LastCommitID()
 
 	return abci.ResponseInfo{
+		AppVersion:       version.ProtocolVersion,
 		Data:             app.name,
 		LastBlockHeight:  lastCommitID.Version,
 		LastBlockAppHash: lastCommitID.Hash,
@@ -471,7 +477,7 @@ func handleQueryApp(app *BaseApp, path []string, req abci.RequestQuery) (res abc
 			return abci.ResponseQuery{
 				Code:      uint32(sdk.CodeOK),
 				Codespace: string(sdk.CodespaceRoot),
-				Value:     []byte(version.Version),
+				Value:     []byte(version.GetVersion()),
 			}
 
 		default:

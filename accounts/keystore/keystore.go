@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orientwalt/htdf/x/auth"
-	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/accounts"
 	"github.com/orientwalt/htdf/accounts/event"
 	"github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/crypto/keys/mintkey"
+	"github.com/orientwalt/htdf/x/auth"
+	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 )
 
 var (

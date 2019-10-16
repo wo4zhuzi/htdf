@@ -1,7 +1,6 @@
 package subspace
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/orientwalt/htdf/codec"
@@ -92,10 +91,10 @@ func concatKeys(key, subkey []byte) (res []byte) {
 
 // Get parameter from store
 func (s Subspace) Get(ctx sdk.Context, key []byte, ptr interface{}) {
-	fmt.Println("...............", key, ptr)
+	//fmt.Println("...............", key, ptr)
 	store := s.kvStore(ctx)
 	bz := store.Get(key)
-	fmt.Println(",,,,,,,,,,,,", store, bz, key)
+	//fmt.Println(",,,,,,,,,,,,", store, bz, key)
 	err := s.cdc.UnmarshalJSON(bz, ptr)
 	if err != nil {
 		panic(err)

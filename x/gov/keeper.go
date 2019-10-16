@@ -303,6 +303,7 @@ func (keeper Keeper) activateVotingPeriod(ctx sdk.Context, proposal ProposalCont
 
 	keeper.RemoveFromInactiveProposalQueue(ctx, proposal.GetDepositEndTime(), proposal.GetProposalID())
 	keeper.InsertActiveProposalQueue(ctx, proposal.GetVotingEndTime(), proposal.GetProposalID())
+	keeper.SetValidatorSet(ctx, proposal.GetProposalID())
 }
 
 // Params

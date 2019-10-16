@@ -40,6 +40,7 @@ import (
 	hsgovClient "github.com/orientwalt/htdf/x/gov/client"
 	hslashingClient "github.com/orientwalt/htdf/x/slashing/client"
 	hstakingClient "github.com/orientwalt/htdf/x/staking/client"
+	upgradecmd "github.com/orientwalt/htdf/x/upgrade/client/cli"
 )
 
 const (
@@ -147,6 +148,8 @@ func queryCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 		tx.QueryTxCmd(cdc),
 		client.LineBreak,
 		authcmd.GetAccountCmd(storeAcc, cdc),
+		upgradecmd.GetInfoCmd("upgrade", cdc),
+		upgradecmd.GetCmdQuerySignals("upgrade", cdc),
 	)
 
 	for _, m := range mc {
