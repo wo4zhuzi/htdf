@@ -229,9 +229,11 @@ ssh.vals:
 	 ipaddr=$$(row $$index ${SERVER_LIST}|column ${PRIV_COL_INDEX});\
 	 passwd=$$(row $$index ${SERVER_LIST}|column ${PEM_COL_INDEX});\
 	 sshpass -p $$passwd ssh root@$$ipaddr
+
 # temp zone
-apt.install.make:
+cmd = apt install make
+run.cmd:
 	@for index in $(VALS_INDEX); do \
 	 ipaddr=$$(row $$index ${SERVER_LIST} 1|column ${PRIV_COL_INDEX});\
 	 passwd=$$(row $$index ${SERVER_LIST} 1|column ${PEM_COL_INDEX});\
-	 sshpass -p $$passwd ssh root@$$ipaddr apt install make; done
+	 sshpass -p $$passwd ssh root@$$ipaddr ${cmd}; done
