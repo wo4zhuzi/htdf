@@ -97,7 +97,8 @@ mk.make.file:
 	@cp ${MKFILE_PATH} $(CONFIGDIR);\
 	 chainid=$$(findstr CHAIN_ID ${MKFILE_PATH}|fromstr =|excludestr " ");\
 	 replconfval $(CONFIGDIR)/Makefile CHAIN_ID $$chainid ${CHAIN_ID}
-# create genesis accouts file
+	 
+# create genesis accounts file
 mk.acc.file:
 	@if [ -f ${ACCOUNTS_GENESIS_INIT} ]; then rm ${ACCOUNTS_GENESIS_INIT}; fi
 	@hscli accounts list >> ${ACCOUNTS_GENESIS_INIT}
