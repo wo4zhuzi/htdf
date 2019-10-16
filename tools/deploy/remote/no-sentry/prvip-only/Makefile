@@ -97,7 +97,7 @@ mk.make.file:
 	@cp ${MKFILE_PATH} $(CONFIGDIR);\
 	 chainid=$$(findstr CHAIN_ID ${MKFILE_PATH}|fromstr =|excludestr " ");\
 	 replconfval $(CONFIGDIR)/Makefile CHAIN_ID $$chainid ${CHAIN_ID}
-	 
+
 # create genesis accounts file
 mk.acc.file:
 	@if [ -f ${ACCOUNTS_GENESIS_INIT} ]; then rm ${ACCOUNTS_GENESIS_INIT}; fi
@@ -107,14 +107,14 @@ mk.acc.file:
 # prepare
 pre:
 	@if ! [ -d ${CONFIGTMPDIR} ]; then mkdir -p ${CONFIGTMPDIR}; fi
-	@if ! [ -d ${ACCOUNTDIR} ]; then mkdir -p ${ACCOUNTDIR}; fi
+	#@if ! [ -d ${ACCOUNTDIR} ]; then mkdir -p ${ACCOUNTDIR}; fi
 	@if ! [ -f ${SERVER_LIST} ]; then rowex 1 ${SERVER_INFO} >> ${SERVER_LIST};fi
 	@column ${PRIV_COL_INDEX} ${SERVER_LIST} >> ${VALIDATOR_IP}
 	@column ${PASS_COL_INDEX} ${SERVER_LIST} >> ${VALIDATOR_PASSWORD}
 
 vals: 
 	@if ! [ -d ${VALDIR} ]; then mkdir -p ${VALDIR}; fi
-	@hsd livenet --chain-id ${CHAIN_ID} \
+	hsd livenet --chain-id ${CHAIN_ID} \
 				 --v $$(wc ${VALIDATOR_IP} | awk '{print$$1F}') \
 				 -o ${VALDIR} \
 				 --validator-ip-addresses ${VALIDATOR_IP} \
