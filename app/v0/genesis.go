@@ -141,7 +141,7 @@ func IrisAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []js
 	if err = cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
 		return genesisState, err
 	}
-	fmt.Println("!!!!!!!!!!!!!!!")
+
 	// if there are no gen txs to be processed, return the default empty state
 	if len(appGenTxs) == 0 {
 		return genesisState, errors.New("there must be at least one genesis tx")

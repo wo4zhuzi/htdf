@@ -255,6 +255,13 @@ func (p *ProtocolV0) configKeepers() {
 		gov.DefaultCodespace,
 	)
 
+	p.crisisKeeper = crisis.NewKeeper(
+		p.paramsKeeper.Subspace(crisis.DefaultParamspace),
+		p.distrKeeper,
+		p.bankKeeper,
+		p.feeCollectionKeeper,
+	)
+
 	p.serviceKeeper = service.NewKeeper(
 		p.cdc,
 		protocol.KeyService,
@@ -394,6 +401,7 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 	auth.InitGenesis(ctx, p.accountMapper, p.feeCollectionKeeper, genesisState.AuthData)
 	slashing.InitGenesis(ctx, p.slashingKeeper, genesisState.SlashingData, genesisState.StakeData.Validators.ToSDKValidators())
 	mint.InitGenesis(ctx, p.mintKeeper, genesisState.MintData)
+	crisis.InitGenesis(ctx, p.crisisKeeper, genesisState.CrisisData)
 	service.InitGenesis(ctx, p.serviceKeeper, genesisState.ServiceData)
 	guardian.InitGenesis(ctx, p.guardianKeeper, genesisState.GuardianData)
 	upgrade.InitGenesis(ctx, p.upgradeKeeper, genesisState.UpgradeData)
