@@ -63,7 +63,7 @@ func NewTxBuilderFromCLI() TxBuilder {
 		keybase:            kb,
 		accountNumber:      uint64(viper.GetInt64(client.FlagAccountNumber)),
 		sequence:           uint64(viper.GetInt64(client.FlagSequence)),
-		gas:                client.GasFlagVar.Gas,
+		gas:                client.GasFlagVar.Gas, // commented by junying, 2019-10-21, gas_wanted set to 200000 as default here.
 		gasAdjustment:      viper.GetFloat64(client.FlagGasAdjustment),
 		simulateAndExecute: client.GasFlagVar.Simulate,
 		chainID:            viper.GetString(client.FlagChainID),
@@ -199,7 +199,6 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 			fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
 		}
 	}
-
 	return StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,

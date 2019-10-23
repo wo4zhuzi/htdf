@@ -34,9 +34,13 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 	return func(
 		ctx sdk.Context, tx sdk.Tx, simulate bool,
 	) (newCtx sdk.Context, res sdk.Result, abort bool) {
-
 		// all transactions must be of type auth.StdTx
 		stdTx, ok := tx.(StdTx)
+		fmt.Println("NewAnteHandler:tx", tx)
+		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
+		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
+		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee.Amount, stdTx.Fee.Gas, stdTx.Fee.GasPrices(), stdTx.Fee)
+		fmt.Println("NewAnteHandler:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		if !ok {
 			// Set a gas meter with limit 0 as to prevent an infinite gas meter attack
 			// during runTx.
@@ -60,7 +64,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// }
 
 		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.Gas)
-
+		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		// AnteHandlers must have their own defer/recover in order for the BaseApp
 		// to know how much gas was used! This is because the GasMeter is created in
 		// the AnteHandler, but if it panics the context won't be set properly in
@@ -94,7 +98,8 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// conventional gas consuming isn't necessary anymore
 		// evm will replace it.
 		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
-
+		fmt.Println("NewAnteHandler:GasCalc", params.TxSizeCostPerByte, len(newCtx.TxBytes()), params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())))
+		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
 		}
@@ -125,7 +130,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
 		stdSigs := stdTx.GetSignatures()
-
+		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		for i := 0; i < len(stdSigs); i++ {
 			// skip the fee payer, account is cached and fees were deducted already
 			if i != 0 {
@@ -146,6 +151,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// TODO: tx tags (?)
+		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		return newCtx, sdk.Result{GasWanted: stdTx.Fee.Gas}, false // continue...
 	}
 }
@@ -196,6 +202,7 @@ func processSig(
 		// StdSignature (Amino encoding) and simulate gas consumption
 		// (assuming a SECP256k1 simulation key).
 		consumeSimSigGas(ctx.GasMeter(), pubKey, sig, params)
+		// fmt.Println("NewAnteHandler.processSig:simulated in")
 	}
 
 	if res := consumeSigVerificationGas(ctx.GasMeter(), sig.Signature, pubKey, params); !res.IsOK() {
@@ -355,6 +362,7 @@ func DeductFees(blockTime time.Time, acc Account, fee StdFee) (Account, sdk.Resu
 // consensus.
 func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 	minGasPrices := ctx.MinGasPrices()
+	fmt.Println("EnsureSufficientMempoolFees:minGasPrices", minGasPrices)
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
 
@@ -365,7 +373,8 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 			fee := gp.Amount.Mul(glDec)
 			requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
 		}
-
+		fmt.Println("EnsureSufficientMempoolFees:requiredFees", requiredFees)
+		fmt.Println("EnsureSufficientMempoolFees:stdFee", stdFee)
 		if !stdFee.Amount.IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(

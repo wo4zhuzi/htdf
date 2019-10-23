@@ -156,7 +156,7 @@ func queryTx(cdc *codec.Codec, cliCtx context.CLIContext, hashHexStr string) (sd
 	if err != nil {
 		return sdk.TxResponse{}, err
 	}
-	// fmt.Println("3	>>>>>>queryTx>>>>>>>>>", resTx.Height)
+	fmt.Println("3	>>>>>>queryTx>>>>>>>>>", resTx.Height, resTx.Index, resTx.Tx, resTx.TxResult)
 	if !cliCtx.TrustNode {
 		if err = ValidateTxResult(cliCtx, resTx); err != nil {
 			return sdk.TxResponse{}, err

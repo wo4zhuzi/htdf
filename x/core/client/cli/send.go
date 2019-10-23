@@ -35,6 +35,8 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
+			fmt.Println("GetCmdSend:txBldr.Gas()", txBldr.Gas())
+
 			fromaddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err

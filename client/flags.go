@@ -15,7 +15,7 @@ const (
 	// failures due to state changes that might occur between the tx simulation
 	// and the actual run.
 	DefaultGasAdjustment = 1.0
-	DefaultGasLimit      = 200000
+	DefaultGasLimit      = 210000 // junying-todo, 2019-10-21, 200000 to 21000
 	GasFlagAuto          = "auto"
 
 	// BroadcastBlock defines a tx broadcasting mode where the client waits for

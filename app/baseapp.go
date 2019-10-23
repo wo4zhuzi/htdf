@@ -639,8 +639,8 @@ func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeg
 // NOTE:CheckTx does not run the actual Msg handler function(s).
 func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 	var result sdk.Result
-	fmt.Println("CheckTx88888888888888888888")
 	tx, err := app.txDecoder(txBytes)
+	fmt.Println("CheckTx88888888888888888888:tx", tx)
 	if err != nil {
 		result = err.Result()
 	} else {
@@ -669,6 +669,8 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 		result = app.runTx(runTxModeDeliver, txBytes, tx)
 	}
 	fmt.Println("DeliverTx1111111111111", result.Data, result.Log, result.Tags)
+	// junying-todo, 2019-10-18
+	// this return value is written to database(blockchain)
 	return abci.ResponseDeliverTx{
 		Code:      uint32(result.Code),
 		Codespace: string(result.Codespace),
@@ -720,6 +722,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 	var code sdk.CodeType
 	var codespace sdk.CodespaceType
 	fmt.Println("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
+	fmt.Println("runMsgs0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	for msgIdx, msg := range msgs {
 		// match message route
 		msgRoute := msg.Route()
@@ -731,14 +734,13 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		}
 
 		var msgResult sdk.Result
-
 		// skip actual execution for CheckTx mode
 		if mode != runTxModeCheck {
 			fmt.Println("runMsgs/msgResult.IsOK()~~~~~~~~~~~~~~~~~~~~~~~~", msgRoute)
 			msgResult = handler(ctx, msg)
 
 		}
-
+		fmt.Println("runMsgs4:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
 
 		// Result.Data must be length prefixed in order to separate each result
@@ -761,7 +763,6 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		idxLog.Success = true
 		idxLogs = append(idxLogs, idxLog)
 	}
-
 	logJSON := codec.Cdc.MustMarshalJSON(idxLogs)
 	result = sdk.Result{
 		Code:      code,
@@ -814,6 +815,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// NOTE: GasWanted should be returned by the AnteHandler. GasUsed is
 	// determined by the GasMeter. We need access to the context to get the gas
 	// meter so we initialize upfront.
+
 	var gasWanted uint64
 	ctx := app.getContextForTx(mode, txBytes)
 	ms := ctx.MultiStore()
@@ -839,7 +841,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	if mode == runTxModeDeliver {
 		startingGas = ctx.BlockGasMeter().GasConsumed()
 	}
-
+	fmt.Println("runTx:startingGas", startingGas)
 	if mode == runTxModeDeliver {
 		app.deliverState.ctx = app.deliverState.ctx.WithCheckValidNum(app.deliverState.ctx.CheckValidNum() + 1)
 	}
@@ -863,7 +865,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		result.GasWanted = gasWanted
 		result.GasUsed = ctx.GasMeter().GasConsumed()
 	}()
-
+	fmt.Println("runTx:result.GasUsed", result.GasUsed)
 	// Add cache in fee refund. If an error is returned or panic happes during refund,
 	// no value will be written into blockchain state.
 	defer func() {
@@ -930,7 +932,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		anteCtx, msCache = app.cacheTxContext(ctx, txBytes)
 
 		newCtx, result, abort := anteHandler(anteCtx, tx, mode == runTxModeSimulate)
-
+		fmt.Println("anteHandler", result.GasUsed, result.GasWanted, result.Log)
 		if !newCtx.IsZero() {
 			// At this point, newCtx.MultiStore() is cache-wrapped, or something else
 			// replaced by the ante handler. We want the original multistore, not one
@@ -960,16 +962,17 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
+	fmt.Println("runTx:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", msgs, mode)
 	result = app.runMsgs(runMsgCtx, msgs, mode)
+	fmt.Println("runTx:runMsgCtx.GasMeter().GasConsumed()", runMsgCtx.GasMeter().GasConsumed())
 	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", msgs)
 	result.GasWanted = gasWanted
 
 	if mode == runTxModeSimulate {
-
 		return
 	}
-	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK())
+	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK(), result.GasUsed, result.GasWanted)
 	// only update state if all messages pass
 	if result.IsOK() {
 

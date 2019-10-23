@@ -216,7 +216,7 @@ func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 		if err != nil {
 			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
 		}
-
+		// fmt.Println("DefaultTxDecoder:tx", tx)
 		return tx, nil
 	}
 }

@@ -163,6 +163,7 @@ func (gi *gasIterator) Close() {
 // consumeSeekGas consumes a flat gas cost for seeking and a variable gas cost
 // based on the current value's length.
 func (gi *gasIterator) consumeSeekGas() {
+	// junying-focus
 	value := gi.Value()
 
 	gi.gasMeter.ConsumeGas(gi.gasConfig.ReadCostPerByte*types.Gas(len(value)), types.GasValuePerByteDesc)

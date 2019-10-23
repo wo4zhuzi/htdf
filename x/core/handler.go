@@ -63,7 +63,9 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 		//open smart contract
 
 		fmt.Printf("openContract\n")
+		fmt.Println("HandleMsgSendFrom0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		evmOutput, genErr := HandleOpenContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
+		fmt.Println("HandleMsgSendFrom1:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		if genErr != nil {
 			fmt.Printf("openContract error|err=%s\n", genErr)
 			sendTxResp.ErrCode = sdk.ErrCode_OpenContract
@@ -94,7 +96,7 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (evmOutput string, err error) {
 
 	fmt.Printf("Handling MsgSendFrom with No Contract.\n")
-
+	fmt.Println(" HandleOpenContract0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
 		fmt.Printf("newStateDB error\n")
@@ -168,7 +170,9 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 	// 1. cantransfer check
 	// 2. create receiver account if no exists
 	// 3. execute contract & calculate gas
+	fmt.Println(" HandleOpenContract1:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	outputs, gasLeftover, vmerr := evm.Call(contractRef, toAddress, inputCode, st.gas, transferAmount)
+	fmt.Println(" HandleOpenContract2:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	if err != nil {
 		fmt.Printf("evm call error|err=%s\n", vmerr)
 		return "", vmerr
@@ -188,11 +192,11 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 	// junying-todo, 2019-08-22
 	// this function is used to collect all kinds of budget including fee + blk rewards for the next block reward
 	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
-
+	fmt.Println(" HandleOpenContract3:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	fmt.Printf("evm call end|outputs=%x\n", outputs)
 
 	stateDB.Commit(false)
-
+	fmt.Println(" HandleOpenContract4:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	return hex.EncodeToString(outputs), nil
 }
 

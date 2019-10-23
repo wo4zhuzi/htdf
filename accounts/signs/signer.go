@@ -52,6 +52,7 @@ func SignTx(txbuilder authtxb.TxBuilder, stdTx auth.StdTx, privKey tmcrypto.Priv
 		sigs = append(sigs, stdSignature)
 	}
 	//fmt.Print(stdTx.GetMsgs()[0].GetSignBytes())
+	// fmt.Println("SignTx:stdTx", stdTx)
 	signedStdTx = auth.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
 	return
 }
@@ -68,12 +69,14 @@ func BuildAndSign(txbuilder authtxb.TxBuilder, privKey tmcrypto.PrivKey, msgs []
 
 //
 func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignMsg, error) {
+	fmt.Println("BuildSignMsg:txbuilder.Gas()", txbuilder.Gas())
 	chainID := txbuilder.ChainID()
 	if chainID == "" {
 		return authtxb.StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
 	}
 	fmt.Println("##################", txbuilder.Sequence())
 	fees := txbuilder.Fees()
+	fmt.Println("BuildSignMsg:fees", fees)
 	if !txbuilder.GasPrices().IsZero() {
 		if !fees.IsZero() {
 			return authtxb.StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
@@ -89,7 +92,7 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 			fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
 		}
 	}
-
+	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.Gas(), fees), txbuilder.Gas(), fees)
 	return authtxb.StdSignMsg{
 		ChainID:       txbuilder.ChainID(),
 		AccountNumber: txbuilder.AccountNumber(),
@@ -108,7 +111,7 @@ func Sign(txbuilder authtxb.TxBuilder, privKey tmcrypto.PrivKey, msg authtxb.Std
 	}
 
 	en := txbuilder.TxEncoder()
-	fmt.Println("4--------------------", msg.Msgs)
+	fmt.Println("4--------------------", msg.Msgs, msg.Fee)
 	return en(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
 }
 
