@@ -60,10 +60,15 @@ Delegators are Atom holders who cannot, or do not want to run a validator themse
        Q: Difference between InfiniteGasMeter vs. BasicGasMeter
        A: InfiniteGasMeter has no limit while BasicGasMeter has limit
        Q: What is BlockGasLimit?
-       Q: How BlockGasMeter works?
+       Q: How it works?
+          --BlockGasMeter--
           * MaximumBlockGas From ConsensusParams's BlockParams(actually from genesis.json. default value is -1,that's,infiniteGasMeter)
           * ref: baseapp.go
           BeginBlock-->MaxGas Set
+          runTx------->ConsumeGas
+
+          --GasMeter
+          runTx,runMsgs---->ConsumeGas for every kvstore handling
 #### 3. cosmos vs. ethereum
        Q: structure analysis
        A:                 cosmos      ethereum
