@@ -39,7 +39,10 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		fmt.Println("NewAnteHandler:tx", tx)
 		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
 		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
-		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee.Amount, stdTx.Fee.Gas, stdTx.Fee.GasPrices(), stdTx.Fee)
+		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount)
+		fmt.Println("NewAnteHandler:stdTx.Fee.Gas", stdTx.Fee.Gas)
+		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrices())
+		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
 		fmt.Println("NewAnteHandler:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		if !ok {
 			// Set a gas meter with limit 0 as to prevent an infinite gas meter attack
@@ -47,6 +50,11 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			newCtx = SetGasMeter(simulate, ctx, 0)
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
 		}
+
+		// junying-todo, 2019-10-24
+		// this is for non-htdfservice txs
+		var msgs = tx.GetMsgs()
+		var route = msgs[0].Route()
 
 		params := ak.GetParams(ctx)
 
@@ -56,12 +64,14 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-08-27
 		// conventional fee prechecking isn't necessary anymore
 		// evm will replace it.
-		// if ctx.IsCheckTx() && !simulate {
-		// 	res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
-		// 	if !res.IsOK() {
-		// 		return newCtx, res, true
-		// 	}
-		// }
+		// junying-todo, 2019-10-24
+		// this is enabled again in order to handle non-htdfservice txs.
+		if ctx.IsCheckTx() && !simulate && route != "htdfservice" {
+			res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
+			if !res.IsOK() {
+				return newCtx, res, true
+			}
+		}
 
 		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.Gas)
 		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
@@ -72,23 +82,25 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-08-27
 		// conventional gas metering isn't necessary anymore
 		// evm will replace it.
-		// defer func() {
-		// 	if r := recover(); r != nil {
-		// 		switch rType := r.(type) {
-		// 		case sdk.ErrorOutOfGas:
-		// 			log := fmt.Sprintf(
-		// 				"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
-		// 				rType.Descriptor, stdTx.Fee.Gas, newCtx.GasMeter().GasConsumed(),
-		// 			)
-		// 			res = sdk.ErrOutOfGas(log).Result()
-		// 			res.GasWanted = stdTx.Fee.Gas
-		// 			res.GasUsed = newCtx.GasMeter().GasConsumed()
-		// 			abort = true
-		// 		default:
-		// 			panic(r)
-		// 		}
-		// 	}
-		// }()
+		// junying-todo, 2019-10-24
+		// this is enabled again in order to handle non-htdfservice txs.
+		defer func() {
+			if r := recover(); r != nil {
+				switch rType := r.(type) {
+				case sdk.ErrorOutOfGas:
+					log := fmt.Sprintf(
+						"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
+						rType.Descriptor, stdTx.Fee.Gas, newCtx.GasMeter().GasConsumed(),
+					)
+					res = sdk.ErrOutOfGas(log).Result()
+					res.GasWanted = stdTx.Fee.Gas
+					res.GasUsed = newCtx.GasMeter().GasConsumed()
+					abort = true
+				default:
+					panic(r)
+				}
+			}
+		}()
 
 		if err := tx.ValidateBasic(); err != nil {
 			return newCtx, err.Result(), true
@@ -97,7 +109,10 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-08-27
 		// conventional gas consuming isn't necessary anymore
 		// evm will replace it.
-		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+		// junying-todo, 2019-10-24
+		// this is enabled again in order to handle non-htdfservice txs.
+		newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+
 		fmt.Println("NewAnteHandler:GasCalc", params.TxSizeCostPerByte, len(newCtx.TxBytes()), params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())))
 		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
@@ -119,13 +134,15 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-08-27
 		// conventional deducting fee module doesn't needed anymore.
 		// evm will replace it.
-		// if !stdTx.Fee.Amount.IsZero() {
-		// 	signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
-		// 	if !res.IsOK() {
-		// 		return newCtx, res, true
-		// 	}
-		// 	fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
-		// }
+		// junying-todo, 2019-10-24
+		// this is enabled again in order to handle non-htdfservice txs.
+		if !stdTx.Fee.Amount.IsZero() && route != "htdfservice" {
+			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
+			if !res.IsOK() {
+				return newCtx, res, true
+			}
+			fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
+		}
 
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
