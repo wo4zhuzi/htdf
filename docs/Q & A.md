@@ -19,6 +19,11 @@ Delegators are Atom holders who cannot, or do not want to run a validator themse
 #### 2. addresses
        Q: What sorts of addresses? What are they?
        A: 
+### Transaction
+#### 1. TxHash
+       Q: Where & How Generated?
+       A:
+#### 2. 
 ### Voting
 #### 1. top 100~300 validators on cosmos hub
 #### 2. abnomality detection/penality system
