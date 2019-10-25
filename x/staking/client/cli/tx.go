@@ -120,9 +120,9 @@ func GetCmdDelegate(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		Short: "delegate liquid tokens to a validator",
 		Long: strings.TrimSpace(`Delegate an amount of liquid coins to a validator from your wallet:
-$ hscli tx staking delegate cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
-				   			cosmosvaloper1l2rsakp388kuv9k8qzq6lrm9taddae7fpx59wm \
-				   			1000stake
+$ hscli tx staking delegate htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
+							htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc \
+				   			1000satoshi
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
@@ -158,10 +158,10 @@ func GetCmdRedelegate(storeName string, cdc *codec.Codec) *cobra.Command {
 		Short: "redelegate illiquid tokens from one validator to another",
 		Args:  cobra.ExactArgs(4),
 		Long: strings.TrimSpace(`Redelegate an amount of illiquid staking tokens from one validator to another:
-$ hscli tx staking redelegate cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
-							  cosmosvaloper1gghjut3ccd8ay0zduzj64hwre2fxs9ldmqhffj \
-							  cosmosvaloper1l2rsakp388kuv9k8qzq6lrm9taddae7fpx59wm \
-							  100stake
+$ hscli tx staking redelegate htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
+							  htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc \
+							  htdfvaloper1lsh3qpmjmp7el92x4wp8a675eg9rlm5e9pukkf \
+							  100satoshi
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
@@ -200,9 +200,9 @@ func GetCmdUnbond(storeName string, cdc *codec.Codec) *cobra.Command {
 		Short: "unbond shares from a validator",
 		Args:  cobra.ExactArgs(3),
 		Long: strings.TrimSpace(`Unbond an amount of bonded shares from a validator:
-$ hscli tx staking unbond cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
-						  cosmosvaloper1gghjut3ccd8ay0zduzj64hwre2fxs9ldmqhffj \
-						  100stake
+$ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
+						  htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc \
+						  100satoshi
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
