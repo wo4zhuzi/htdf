@@ -88,6 +88,11 @@ create.contract.default:
 # contract addr: htdf1hx484kx6nntkv5ascuw20c5pn7a879agvmurh7
 # issuer:		 htdf1ha7ryup8nc2avgesfunx2pm22waqv2cx6dj0ac
 
+TMP_PATH = /tmp/result.json
+
+rm.result.json:
+	@if [ -f ${TMP_PATH}]; then rm ${TMP_PATH}; fi
+
 BLK_TIME = 5
 
 execute:
@@ -98,11 +103,12 @@ execute:
 	 echo $$unsigned;\
 	 signed=$$(hscli tx sign $$unsigned);\
 	 echo $$signed;\
-	 hscli tx broadcast $$signed > result.json;\
-	 txid=$$(findkey txhash result.json);\
+	 make -sC . rm.result.json;\
+	 hscli tx broadcast $$signed > ${TMP_PATH};\
+	 txid=$$(findkey txhash ${TMP_PATH});\
 	 echo $$txid;\
 	 sleep ${BLK_TIME};\
-	 hscli query tx $$txid > result.json;\
-	 findkey logs result.json;
+	 hscli query tx $$txid > ${TMP_PATH};\
+	 findkey logs ${TMP_PATH};
 	 
 .PHONY: create.contract.default 

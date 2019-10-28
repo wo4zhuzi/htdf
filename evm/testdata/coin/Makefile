@@ -37,6 +37,8 @@ run.contract:
 
 BLK_TIME = 5
 
+TMP_PATH = /tmp/result.json
+
 execute:
 	@contract=$$(oneline unsigned.tx | excludestr "    ");\
 	 echo "############################################################";\
@@ -45,12 +47,13 @@ execute:
 	 echo $$unsigned;\
 	 signed=$$(hscli tx sign $$unsigned);\
 	 echo $$signed;\
-	 hscli tx broadcast $$signed > result.json;\
-	 txid=$$(findkey txhash result.json);\
+	 make -sC ../ rm.result.json;\
+	 hscli tx broadcast $$signed > ${TMP_PATH};\
+	 txid=$$(findkey txhash ${TMP_PATH});\
 	 echo $$txid;\
 	 sleep ${BLK_TIME};\
-	 hscli query tx $$txid > result.json;\
-	 findkey logs result.json;
+	 hscli query tx $$txid > ${TMP_PATH};\
+	 findkey logs ${TMP_PATH};
 
 # function name: minter
 # 0x07546172
