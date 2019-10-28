@@ -90,9 +90,6 @@ create.contract.default:
 
 TMP_PATH = /tmp/result.json
 
-rm.result.json:
-	@if [ -f ${TMP_PATH}]; then rm ${TMP_PATH}; fi
-
 BLK_TIME = 5
 
 execute:
@@ -103,7 +100,6 @@ execute:
 	 echo $$unsigned;\
 	 signed=$$(hscli tx sign $$unsigned);\
 	 echo $$signed;\
-	 make -sC . rm.result.json;\
 	 hscli tx broadcast $$signed > ${TMP_PATH};\
 	 txid=$$(findkey txhash ${TMP_PATH});\
 	 echo $$txid;\

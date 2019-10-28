@@ -57,7 +57,6 @@ execute:
 	 echo $$unsigned;\
 	 signed=$$(hscli tx sign $$unsigned);\
 	 echo $$signed;\
-	 make -sC ../ rm.result.json;\
 	 hscli tx broadcast $$signed > ${TMP_PATH};\
 	 txid=$$(findkey txhash ${TMP_PATH});\
 	 echo $$txid;\
