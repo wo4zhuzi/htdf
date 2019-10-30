@@ -37,7 +37,7 @@ test.normal:
 	 hscli query account $$acc2 > ${TMP_PATH};\
 	 curr2=$$(findkey amount ${TMP_PATH});\
 	 python -c "result='passed!' if ($$orgn1-$$curr1)== ($$Gas*$$GasPrice+${TX_AMOUNT}) else 'failed!'; print result";\
-	 echo "$$orgn1 - $$curr1 == $$Gas * $$GasPrice + ${TX_AMOUNT}";
+	 echo "$$orgn1 - $$curr1 == $$gas_used * $$GasPrice + ${TX_AMOUNT}";
 
 
 ## contract tx
@@ -64,7 +64,7 @@ test.contract:
 	 curr1=$$(findkey amount ${TMP_PATH});\
 	 hscli query account $$acc2 > ${TMP_PATH};\
 	 curr2=$$(findkey amount ${TMP_PATH});\
-	 echo "$$orgn1 - $$curr1 == $$Gas * $$GasPrice + ${TX_AMOUNT}?";\
+	 echo "$$orgn1 - $$curr1 == $$gas_used * $$GasPrice?";\
 	 python -c "print $$orgn1-$$curr1";
 
 # non-htdfservice tx
