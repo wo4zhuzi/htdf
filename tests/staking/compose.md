@@ -62,17 +62,17 @@
 
     [delegators]
     hscli tx staking delegate $(hscli accounts list| sed -n '2p') \
-                               $(grep -nr validator_address  node0/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2)\
+                               $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2)\
                                10000000stake --gas-adjustment=1.5 --gas-prices=0.00001stake
     hscli tx staking redelegate $(hscli accounts list| sed -n '2p') \
-                                 $(grep -nr validator_address  node0/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \
-                                 $(grep -nr validator_address  node0/.hsd/config/genesis.json |sed -n '3p'|awk '{print $3F}' | cut -d'"' -f 2) \
+                                 $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \
+                                 $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '3p'|awk '{print $3F}' | cut -d'"' -f 2) \
                                  10000000stake --gas-adjustment=1.5 --gas-prices=0.00001stake
     hscli query distr rewards $(hscli accounts list| sed -n '2p')
     hscli query account $(hscli accounts list| sed -n '2p')
-    hscli tx staking unbond $(hscli accounts list| sed -n '2p') \
-                             $(grep -nr validator_address  node0/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \
-                             1000000stake
-                             --gas-adjustment 1.5 --gas-prices=0.00001stake
+    hscli tx staking unbond $(hscli accounts list| sed -n '1p') \
+                             $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '1p'|awk '{print $3F}' | cut -d'"' -f 2) \
+                             1000000satoshi \
+                             --gas-adjustment 1.5 --gas-prices=0.00001satoshi
     hscli tx distr withdraw-rewards $(hscli accounts list| sed -n '2p') \
-                                     $(grep -nr validator_address  node0/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \ --gas-adjustment 1.5 --gas-prices=0.00001stake
+                                     $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \ --gas-adjustment 1.5 --gas-prices=0.00001stake
