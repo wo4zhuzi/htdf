@@ -955,7 +955,6 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 	fmt.Println("6runTx!!!!!!!!!!!!!!!!!")
 	if mode == runTxModeCheck {
-
 		return
 	}
 	fmt.Println("7runTx!!!!!!!!!!!!!!!!!")

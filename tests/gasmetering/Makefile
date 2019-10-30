@@ -10,6 +10,9 @@ TMP_PATH = /tmp/result.json
 BLK_TIME = 5
 # htdfservice tx
 ## non-contract tx
+### test cases
+#### gas < DefaultTxGas(21000)
+#### gasprice < 1satoshi
 TX_AMOUNT = 1000000
 UNIT = satoshi
 
@@ -38,6 +41,10 @@ test.normal:
 
 
 ## contract tx
+### test cases
+#### 1. gas > gasUsed
+#### 2. Intrinsic Gas < gas < gasUsed
+#### 3. gas < Intrinsic Gas
 test.contract:
 	@acc1=$$(hscli accounts list|row 1);\
 	 acc2=$$(hscli accounts list|row 2);\
