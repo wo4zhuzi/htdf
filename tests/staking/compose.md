@@ -21,7 +21,7 @@
     hscli accounts new 12345678
     hscli accounts list
     hscli query account $(hscli accounts list| sed -n '1p')
-    hscli tx send $(hscli accounts list| sed -n '1p') $(hscli accounts list| sed -n '2p') 20000000stake --gas-prices=0.00001stake
+    hscli tx send $(hscli accounts list| sed -n '1p') $(hscli accounts list| sed -n '2p') 20000000satoshi --gas-prices=0.00001satoshi
     hscli tx send $(hscli accounts list| sed -n '1p') $(hscli accounts list| sed -n '2p') 20000000satoshi --gas-prices=0.00001satoshi
 
     [validators]
@@ -37,14 +37,14 @@
     - start yours(tip: 1,000,000 for voting power 1, 10,000,000 for 10, 100,000,000 for 100)
     hscli tx staking create-validator $(hscli accounts list| sed -n '2p') \
                                        --pubkey=$(hsd tendermint show-validator)\
-                                       --amount=10000000stake \
+                                       --amount=10000000satoshi \
                                        --moniker=client \
                                        --commission-rate=0.10 \
                                        --commission-max-rate=0.20 \
                                        --commission-max-change-rate=0.01 \
                                        --min-self-delegation=1 \
-                                       --gas-prices=0.00001stake
-    hscli tx staking edit-validator $(hscli accounts list| sed -n '2p') --gas-prices=0.00001stake
+                                       --gas-prices=0.00001satoshi
+    hscli tx staking edit-validator $(hscli accounts list| sed -n '2p') --gas-prices=0.00001satoshi
     or
     hscli tx staking edit-validator $(hscli accounts list| sed -n '2p')\
                 --moniker=client \
@@ -52,10 +52,10 @@
                 --website="https://cosmos.network" \
                 --identity=23870f5bb12ba2c4967c46db \
                 --details="To infinity and beyond!" \
-                --gas-prices=0.00001stake \
+                --gas-prices=0.00001satoshi \
                 --commission-rate=0.10
     - unjail
-    hscli tx slashing unjail $(hscli accounts list| sed -n '2p') --gas-prices=0.00001stake
+    hscli tx slashing unjail $(hscli accounts list| sed -n '2p') --gas-prices=0.00001satoshi
     - log
     hscli query slashing signing-info [cosmosvalconspub]
     - check
@@ -63,11 +63,11 @@
     [delegators]
     hscli tx staking delegate $(hscli accounts list| sed -n '2p') \
                                $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2)\
-                               10000000stake --gas-adjustment=1.5 --gas-prices=0.00001stake
+                               10000000satoshi --gas-adjustment=1.5 --gas-prices=0.00001satoshi
     hscli tx staking redelegate $(hscli accounts list| sed -n '2p') \
                                  $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \
                                  $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '3p'|awk '{print $3F}' | cut -d'"' -f 2) \
-                                 10000000stake --gas-adjustment=1.5 --gas-prices=0.00001stake
+                                 10000000satoshi --gas-adjustment=1.5 --gas-prices=0.00001satoshi
     hscli query distr rewards $(hscli accounts list| sed -n '2p')
     hscli query account $(hscli accounts list| sed -n '2p')
     hscli tx staking unbond $(hscli accounts list| sed -n '1p') \
@@ -75,4 +75,4 @@
                              1000000satoshi \
                              --gas-adjustment 1.5 --gas-prices=0.00001satoshi
     hscli tx distr withdraw-rewards $(hscli accounts list| sed -n '2p') \
-                                     $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \ --gas-adjustment 1.5 --gas-prices=0.00001stake
+                                     $(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '2p'|awk '{print $3F}' | cut -d'"' -f 2) \ --gas-adjustment 1.5 --gas-prices=0.00001satoshi
