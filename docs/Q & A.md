@@ -77,7 +77,7 @@ Delegators are Atom holders who cannot, or do not want to run a validator themse
 #### 3. cosmos vs. ethereum
        Q: structure analysis
        A:                 cosmos      ethereum
-          block size     infinite    1,500,000 wei
+          block size     infinite    1,500,000
           avg tx limit  200,000      21,000, 53000+
           calc metrics  db handling  contract data size+content(evm)
 ### app vs. context
