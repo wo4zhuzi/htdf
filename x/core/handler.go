@@ -82,11 +82,11 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 		if err != nil {
 			fmt.Printf("CreateContract error|err=%s\n", err)
 			sendTxResp.ErrCode = sdk.ErrCode_CreateContract
-			return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String(), GasUsed: gasUsed}
+			return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
 		}
 
 		sendTxResp.ContractAddress = contractAddr
-		return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
+		return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String(), GasUsed: gasUsed}
 	}
 
 	// fmt.Printf("FeeTotal2=%v\n", feeCollectionKeeper.GetCollectedFees(ctx))
