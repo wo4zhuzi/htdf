@@ -36,8 +36,9 @@ test.normal:
 	 curr1=$$(findkey amount ${TMP_PATH});\
 	 hscli query account $$acc2 > ${TMP_PATH};\
 	 curr2=$$(findkey amount ${TMP_PATH});\
-	 python -c "result='passed!' if ($$orgn1-$$curr1)== ($$Gas*$$GasPrice+${TX_AMOUNT}) else 'failed!'; print result";\
-	 echo "$$orgn1 - $$curr1 == $$gas_used * $$GasPrice + ${TX_AMOUNT}";
+	 margin=$$(python -c "print $$orgn1-$$curr1");\
+	 python -c "result='passed!' if $$margin == ($$GasPrice*$$gas_used+${TX_AMOUNT}) else 'failed!'; print result";\
+	 echo "$$orgn1 - $$curr1 == $$margin == $$gas_used * $$GasPrice + ${TX_AMOUNT}";
 
 
 ## contract tx
@@ -64,8 +65,9 @@ test.contract.creation:
 	 curr1=$$(findkey amount ${TMP_PATH});\
 	 hscli query account $$acc2 > ${TMP_PATH};\
 	 curr2=$$(findkey amount ${TMP_PATH});\
-	 echo "$$orgn1 - $$curr1 == $$gas_used * $$GasPrice?";\
-	 python -c "print $$orgn1-$$curr1";
+	 margin=$$(python -c "print $$orgn1-$$curr1");\
+	 python -c "result='passed!' if $$margin == $$GasPrice*$$gas_used else 'failed!'; print result";\
+	 echo "$$orgn1 - $$curr1 == $$margin == $$gas_used * $$GasPrice?";
 
 # non-htdfservice tx
 test.staking:
