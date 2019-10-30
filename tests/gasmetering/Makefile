@@ -45,7 +45,7 @@ test.normal:
 #### 1. gas > gasUsed
 #### 2. Intrinsic Gas < gas < gasUsed
 #### 3. gas < Intrinsic Gas
-test.contract:
+test.contract.creation:
 	@acc1=$$(hscli accounts list|row 1);\
 	 acc2=$$(hscli accounts list|row 2);\
 	 hscli query account $$acc1 > ${TMP_PATH};\
