@@ -721,6 +721,8 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 	var tags sdk.Tags // also just append them all
 	var code sdk.CodeType
 	var codespace sdk.CodespaceType
+	var gasUsed uint64
+
 	fmt.Println("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
 	fmt.Println("runMsgs0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	for msgIdx, msg := range msgs {
@@ -740,6 +742,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 			msgResult = handler(ctx, msg)
 
 		}
+
 		fmt.Println("runMsgs4:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
 
@@ -762,14 +765,24 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 		idxLog.Success = true
 		idxLogs = append(idxLogs, idxLog)
+
+		// junying-todo, 2019-10-24
+		// this is for non-htdfservice txs
+		var route = msg.Route()
+		if route == "htdfservice" {
+			gasUsed = gasUsed + msgResult.GasUsed
+		} else {
+			gasUsed = ctx.GasMeter().GasConsumed()
+		}
 	}
 	logJSON := codec.Cdc.MustMarshalJSON(idxLogs)
+	//
 	result = sdk.Result{
 		Code:      code,
 		Codespace: codespace,
 		Data:      data,
 		Log:       strings.TrimSpace(string(logJSON)),
-		GasUsed:   ctx.GasMeter().GasConsumed(),
+		GasUsed:   gasUsed,
 		Tags:      tags,
 	}
 	fmt.Println("runMsgs	end~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -847,12 +860,13 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 
 	defer func() {
+
 		if r := recover(); r != nil {
 			switch rType := r.(type) {
 			case sdk.ErrorOutOfGas:
 				log := fmt.Sprintf(
 					"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
-					rType.Descriptor, gasWanted, ctx.GasMeter().GasConsumed(),
+					rType.Descriptor, gasWanted, result.GasUsed, //ctx.GasMeter().GasConsumed(),
 				)
 				result = sdk.ErrOutOfGas(log).Result()
 			default:
@@ -863,14 +877,20 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		}
 
 		result.GasWanted = gasWanted
-		result.GasUsed = ctx.GasMeter().GasConsumed()
+		// commented by junying, 2019-10-30
+		// this value is the one that is finally written into blockchain(database)
+		// By this comment, at last, the value changed
+		// result.GasUsed = ctx.GasMeter().GasConsumed()
+
 	}()
 	fmt.Println("runTx:result.GasUsed", result.GasUsed)
 	// Add cache in fee refund. If an error is returned or panic happes during refund,
 	// no value will be written into blockchain state.
 	defer func() {
 
-		result.GasUsed = ctx.GasMeter().GasConsumed()
+		// commented by junying,2019-10-30
+		// result.GasUsed = ctx.GasMeter().GasConsumed()
+
 		var refundCtx sdk.Context
 		var refundCache sdk.CacheMultiStore
 		refundCtx, refundCache = app.cacheTxContext(ctx, txBytes)
@@ -896,7 +916,8 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	defer func() {
 		if mode == runTxModeDeliver {
 			ctx.BlockGasMeter().ConsumeGas(
-				ctx.GasMeter().GasConsumedToLimit(),
+				// ctx.GasMeter().GasConsumedToLimit(),// replaced by junying,2019-10-30
+				result.GasUsed, ///////////////////////// with this
 				"block gas meter",
 			)
 
@@ -974,7 +995,6 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK(), result.GasUsed, result.GasWanted)
 	// only update state if all messages pass
 	if result.IsOK() {
-
 		msCache.Write()
 	}
 
