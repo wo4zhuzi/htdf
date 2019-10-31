@@ -106,8 +106,4 @@ test.staking.unbond:
 	 python -c "result='passed!' if $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee else 'failed!'; print result";\
 	 echo "$$curr - $$orgn == $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee?";
 
-test.if:
-	@a=aaa;\
-	 if [ $$a = "aaa" ]; then echo aaaa; fi;\
-	 echo finished;
 	
