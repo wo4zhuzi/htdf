@@ -72,24 +72,42 @@ test.contract.creation:
 # non-htdfservice tx
 # staking unbond testing failed
 # after-unbounding balance = before-balance
-GAS_PRICE = 0.00001
-
-test.staking:
+UNBOND_AMOUNT = 100000
+GAS_PRICE = 1.0
+GENESIS_JSON_PATH = ~/.hsd/config/genesis.json
+test.staking.unbond:
 	@acc=$$(hscli accounts list|row 1);\
-	 hscli query account $$acc1 > ${TMP_PATH};\
+	 hscli query account $$acc > ${TMP_PATH};\
 	 orgn=$$(findkey amount ${TMP_PATH});\
 	 hscli query staking validators > ${TMP_PATH};\
 	 tokens=$$(findkey tokens ${TMP_PATH});\
-	 val_addr=$$(grep -nr validator_address  ~/.hsd/config/genesis.json |sed -n '1p'|awk '{print $3F}' | cut -d'"' -f 2);\
-	 rewards=$$(hscli query distr rewards $$acc);\
-	 hscli tx staking unbond $$acc $$val_addr ${TX_AMOUNT}${UNIT} --gas-adjustment 1.5 --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
+	 echo balance:$$orgn;\
+	 echo tokens:$$tokens;\
+	 val_addr=$$(findkey validator_address ${GENESIS_JSON_PATH});\
+	 hscli query distr rewards $$acc > ${TMP_PATH};\
+	 rewards=$$(findstr amount ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
+	 echo rewards:$$rewards;\
+	 hscli tx staking unbond $$acc $$val_addr ${UNBOND_AMOUNT}${UNIT} --gas-adjustment 1.5 --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
 	 txhash=$$(findstr txhash ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
+	 echo txhash:$$txhash;\
 	 sleep ${BLK_TIME};\
 	 hscli query tx $$txhash > ${TMP_PATH};\
 	 success=$$(findkey success ${TMP_PATH});\
+	 echo success:$$success;\
+	 if [ $$success = "False" ]; then echo success:$$success please press ctrl+c to exit; sleep 1000;fi;\
 	 gas_wanted=$$(findkey gas_wanted ${TMP_PATH});\
+	 echo "gas_wanted:$$gas_wanted";\
 	 gas_used=$$(findkey gas_used ${TMP_PATH});\
+	 echo gas_used:$$gas_used;\
 	 hscli query account $$acc > ${TMP_PATH};\
 	 curr=$$(findkey amount ${TMP_PATH});\
-	 margin=$$(python -c "print $$orgn-$$curr");\
-	 python -c "result='passed!' if $$margin == $$GasPrice*$$gas_used else 'failed!'; print result";\
+	 margin=$$(python -c "print $$curr-$$orgn");\
+	 fee=$$(python -c "print int($$gas_used*${GAS_PRICE})+1");\
+	 python -c "result='passed!' if $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee else 'failed!'; print result";\
+	 echo "$$curr - $$orgn == $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee?";
+
+test.if:
+	@a=aaa;\
+	 if [ $$a = "aaa" ]; then echo aaaa; fi;\
+	 echo finished;
+	
