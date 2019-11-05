@@ -70,10 +70,10 @@ func (st *StateTransition) buyGas() error {
 }
 
 // IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
-func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error) {
+func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
 	// Set the starting gas for the raw transaction
 	var gas uint64
-	if contractCreation && homestead {
+	if len(data) > 0 && homestead {
 		gas = params.TxGasContractCreation //53000
 	} else {
 		gas = params.TxGas //21000

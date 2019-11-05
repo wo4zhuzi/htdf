@@ -33,7 +33,10 @@ func (rsp SendTxResp) String() string {
 // connected to handler.go
 // HandleMsgSendFrom, HandleMsgAdd upgraded to EVM version
 // commented by junying, 2019-08-21
-func NewHandler(accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey) sdk.Handler {
+func NewHandler(accountKeeper auth.AccountKeeper,
+	feeCollectionKeeper auth.FeeCollectionKeeper,
+	keyStorage *sdk.KVStoreKey,
+	keyCode *sdk.KVStoreKey) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 
 		switch msg := msg.(type) {
@@ -55,7 +58,12 @@ func HandleUnknownMsg(msg sdk.Msg) sdk.Result {
 }
 
 // junying-todo, 2019-08-26
-func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) sdk.Result {
+func HandleMsgSendFrom(ctx sdk.Context,
+	accountKeeper auth.AccountKeeper,
+	feeCollectionKeeper auth.FeeCollectionKeeper,
+	keyStorage *sdk.KVStoreKey,
+	keyCode *sdk.KVStoreKey,
+	msg MsgSendFrom) sdk.Result {
 	var sendTxResp SendTxResp
 	fmt.Printf("FeeTotal1=%v\n", feeCollectionKeeper.GetCollectedFees(ctx))
 
@@ -94,7 +102,12 @@ func HandleMsgSendFrom(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCol
 
 // junying-todo, 2019-08-26
 //
-func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (evmOutput string, gasUsed uint64, err error) {
+func HandleOpenContract(ctx sdk.Context,
+	accountKeeper auth.AccountKeeper,
+	feeCollectionKeeper auth.FeeCollectionKeeper,
+	keyStorage *sdk.KVStoreKey,
+	keyCode *sdk.KVStoreKey,
+	msg MsgSendFrom) (evmOutput string, gasUsed uint64, err error) {
 
 	fmt.Printf("Handling MsgSendFrom with No Contract.\n")
 	fmt.Println(" HandleOpenContract0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
@@ -145,19 +158,11 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 		return
 	}
 
-	// contract transaction ? ordinary transaction
-	// junying-todo, 2019-08-22
-	isContract := true
-	if len(msg.Data) == 0 {
-		isContract = false
-	}
-
-	ishomestead := true
 	// Intrinsic gas calc
 	// commented by junying, 2019-08-22
 	// default non-contract tx gas: 21000
 	// default contract tx gas: 53000 + f(tx.data)
-	itrsGas, err := IntrinsicGas(inputCode, isContract, ishomestead)
+	itrsGas, err := IntrinsicGas(inputCode, true)
 	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
 	// commented by junying, 2019-08-22
 	// check if tx.gas >= calculated gas
@@ -202,7 +207,12 @@ func HandleOpenContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCo
 }
 
 // junying-todo, 2019-08-26
-func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, feeCollectionKeeper auth.FeeCollectionKeeper, keyStorage *sdk.KVStoreKey, keyCode *sdk.KVStoreKey, msg MsgSendFrom) (evmOutput string, gasUsed uint64, err error) {
+func HandleCreateContract(ctx sdk.Context,
+	accountKeeper auth.AccountKeeper,
+	feeCollectionKeeper auth.FeeCollectionKeeper,
+	keyStorage *sdk.KVStoreKey,
+	keyCode *sdk.KVStoreKey,
+	msg MsgSendFrom) (evmOutput string, gasUsed uint64, err error) {
 
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
@@ -252,7 +262,7 @@ func HandleCreateContract(ctx sdk.Context, accountKeeper auth.AccountKeeper, fee
 	}
 
 	//Intrinsic gas calc
-	itrsGas, err := IntrinsicGas(inputCode, true, true)
+	itrsGas, err := IntrinsicGas(inputCode, true)
 	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
 	err = st.useGas(itrsGas)
 	if err != nil {

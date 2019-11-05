@@ -48,11 +48,8 @@ test.normal:
 #### 3. gas < Intrinsic Gas
 test.contract.creation:
 	@acc1=$$(hscli accounts list|row 1);\
-	 acc2=$$(hscli accounts list|row 2);\
 	 hscli query account $$acc1 > ${TMP_PATH};\
 	 orgn1=$$(findkey amount ${TMP_PATH});\
-	 hscli query account $$acc2 > ${TMP_PATH};\
-	 orgn2=$$(findkey amount ${TMP_PATH});\
 	 echo $$(cat ../evm/coin/coin_sol_Coin.bin);\
 	 $(MAKE) -sC ../evm create.contract.default;\
 	 txhash=$$(findkey txhash ${TMP_PATH});\
@@ -63,8 +60,6 @@ test.contract.creation:
 	 Gas=$$(findkey Gas ${TMP_PATH});\
 	 hscli query account $$acc1 > ${TMP_PATH};\
 	 curr1=$$(findkey amount ${TMP_PATH});\
-	 hscli query account $$acc2 > ${TMP_PATH};\
-	 curr2=$$(findkey amount ${TMP_PATH});\
 	 margin=$$(python -c "print $$orgn1-$$curr1");\
 	 python -c "result='passed!' if $$margin == $$GasPrice*$$gas_used else 'failed!'; print result";\
 	 echo "$$orgn1 - $$curr1 == $$margin == $$gas_used * $$GasPrice?";
@@ -96,7 +91,7 @@ test.staking.unbond:
 	 echo success:$$success;\
 	 if [ $$success = "False" ]; then echo success:$$success please press ctrl+c to exit; sleep 1000;fi;\
 	 gas_wanted=$$(findkey gas_wanted ${TMP_PATH});\
-	 echo "gas_wanted:$$gas_wanted";\
+	 echo gas_wanted:$$gas_wanted;\
 	 gas_used=$$(findkey gas_used ${TMP_PATH});\
 	 echo gas_used:$$gas_used;\
 	 hscli query account $$acc > ${TMP_PATH};\
@@ -104,6 +99,6 @@ test.staking.unbond:
 	 margin=$$(python -c "print $$curr-$$orgn");\
 	 fee=$$(python -c "print int($$gas_used*${GAS_PRICE})+1");\
 	 python -c "result='passed!' if $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee else 'failed!'; print result";\
-	 echo "$$curr - $$orgn == $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee?";
+	 echo $$curr - $$orgn == $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee?;
 
 	
