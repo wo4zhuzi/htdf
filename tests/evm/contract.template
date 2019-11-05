@@ -8,7 +8,7 @@
                     "denom": "satoshi"
                 }
             ], 
-            "gas": "1200000"
+            "gas": "300000"
         }, 
         "memo": "contract test", 
         "msg": [

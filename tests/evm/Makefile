@@ -82,6 +82,7 @@ create.contract.default:
 	 replkey Data $$data contract.template y;\
 	 replkey Gas  $$gas contract.template y;\
 	 replkey GasLimit $$gas contract.template y;\
+	 replkey gas $$gas contract.template y;\
 	 make -sC . execute
 
 # contract tx hash: 141D3CD4EB7B0BDB41C2313CF2170F6FBF0410898BEB05FBB7D88BA182E5028B

@@ -177,10 +177,10 @@ func HandleOpenContract(ctx sdk.Context,
 	// 2. create receiver account if no exists
 	// 3. execute contract & calculate gas
 	fmt.Println(" HandleOpenContract1:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
-	outputs, gasLeftover, vmerr := evm.Call(contractRef, toAddress, inputCode, st.gas, transferAmount)
+	outputs, gasLeftover, err := evm.Call(contractRef, toAddress, inputCode, st.gas, transferAmount)
 	fmt.Println(" HandleOpenContract2:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	if err != nil {
-		fmt.Printf("evm call error|err=%s\n", vmerr)
+		fmt.Printf("evm call error|err=%s\n", err)
 		return
 	}
 
@@ -270,9 +270,9 @@ func HandleCreateContract(ctx sdk.Context,
 		return
 	}
 
-	_, contractAddr, gasLeftover, vmerr := evm.Create(contractRef, inputCode, st.gas, big.NewInt(0))
-	if vmerr != nil {
-		fmt.Printf("evm Create error|err=%s\n", vmerr)
+	_, contractAddr, gasLeftover, err := evm.Create(contractRef, inputCode, st.gas, big.NewInt(0))
+	if err != nil {
+		fmt.Printf("evm Create error|err=%s\n", err)
 		return
 	}
 	st.gas = gasLeftover

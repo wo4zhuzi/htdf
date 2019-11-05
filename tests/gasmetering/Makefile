@@ -44,8 +44,9 @@ test.normal:
 ## contract tx
 ### test cases
 #### 1. gas > gasUsed
-#### 2. Intrinsic Gas < gas < gasUsed
-#### 3. gas < Intrinsic Gas
+#### 2. Intrinsic Gas < gas < gasUsed: DeliverTx Success, No Error, No gas_used report
+#### 3. gas < Intrinsic : DeliverTx Failed, create contract error
+#### 4. gas < GasMeter.ConsumedGas(): CheckTx Failed
 test.contract.creation:
 	@acc1=$$(hscli accounts list|row 1);\
 	 hscli query account $$acc1 > ${TMP_PATH};\
@@ -56,6 +57,7 @@ test.contract.creation:
 	 success=$$(findkey success ${TMP_PATH});\
 	 gas_wanted=$$(findkey gas_wanted ${TMP_PATH});\
 	 gas_used=$$(findkey gas_used ${TMP_PATH});\
+	 gas_used=$$(python -c "gas_used='0' if '$$gas_used'== 'no found!' else '$$gas_used'; print gas_used");\
 	 GasPrice=$$(findkey GasPrice ${TMP_PATH});\
 	 Gas=$$(findkey Gas ${TMP_PATH});\
 	 hscli query account $$acc1 > ${TMP_PATH};\
