@@ -744,6 +744,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		}
 
 		fmt.Println("runMsgs4:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
+		fmt.Println("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
 		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
 
 		// Result.Data must be length prefixed in order to separate each result
@@ -760,6 +761,11 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 			code = msgResult.Code
 			codespace = msgResult.Codespace
+
+			// junying-todo, 2019-11-05
+			if msgRoute == "htdfservice" {
+				gasUsed = gasUsed + msgResult.GasUsed
+			}
 			break
 		}
 
@@ -768,8 +774,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 		// junying-todo, 2019-10-24
 		// this is for non-htdfservice txs
-		var route = msg.Route()
-		if route == "htdfservice" {
+		if msgRoute == "htdfservice" {
 			gasUsed = gasUsed + msgResult.GasUsed
 		} else {
 			gasUsed = ctx.GasMeter().GasConsumed()
@@ -878,7 +883,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 		result.GasWanted = gasWanted
 		// commented by junying, 2019-10-30
-		// this value is the one that is finally written into blockchain(database)
+		// this value is the lethal one that is finally written into blockchain(database)
 		// By this comment, at last, the value changed
 		// result.GasUsed = ctx.GasMeter().GasConsumed()
 
@@ -994,7 +999,13 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK(), result.GasUsed, result.GasWanted)
 	// only update state if all messages pass
-	if result.IsOK() {
+	// junying-todo, 2019-11-05
+	// wondering if should add some condition for evm failure
+	// if result.IsOK()
+	// result.Code = 0: Success
+	// result.Code = 1,2: EVM ERROR
+	if result.Code < 3 {
+		fmt.Println("11runTx!!!!!!!!!!!!!!!!!")
 		msCache.Write()
 	}
 

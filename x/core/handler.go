@@ -64,44 +64,43 @@ func HandleMsgSendFrom(ctx sdk.Context,
 	keyStorage *sdk.KVStoreKey,
 	keyCode *sdk.KVStoreKey,
 	msg MsgSendFrom) sdk.Result {
+	// initialize
 	var sendTxResp SendTxResp
-	fmt.Printf("FeeTotal1=%v\n", feeCollectionKeeper.GetCollectedFees(ctx))
+	var gasUsed uint64
+	var evmOutput string
+	var err error
 
 	if !msg.To.Empty() {
-		//open smart contract
-
-		fmt.Printf("openContract\n")
-		fmt.Println("HandleMsgSendFrom0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
-		evmOutput, gasUsed, genErr := HandleOpenContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
-		fmt.Println("HandleMsgSendFrom1:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
-		if genErr != nil {
-			fmt.Printf("openContract error|err=%s\n", genErr)
-			sendTxResp.ErrCode = sdk.ErrCode_OpenContract
-			return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
-		}
-
-		sendTxResp.EvmOutput = evmOutput
-		return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String(), GasUsed: gasUsed}
-
-	} else {
-		// new smart contract
-		fmt.Printf("create contract\n")
-		contractAddr, gasUsed, err := HandleCreateContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
+		// open smart contract
+		evmOutput, gasUsed, err = HandleOpenContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
 		if err != nil {
-			fmt.Printf("CreateContract error|err=%s\n", err)
-			sendTxResp.ErrCode = sdk.ErrCode_CreateContract
-			return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
+			sendTxResp.ErrCode = sdk.ErrCode_OpenContract
 		}
-
-		sendTxResp.ContractAddress = contractAddr
-		return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String(), GasUsed: gasUsed}
+		sendTxResp.EvmOutput = evmOutput
+	} else {
+		// create smart contract
+		evmOutput, gasUsed, err = HandleCreateContract(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
+		if err != nil {
+			sendTxResp.ErrCode = sdk.ErrCode_CreateContract
+		}
+		sendTxResp.ContractAddress = evmOutput
 	}
+	return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String(), GasUsed: gasUsed}
+}
 
-	// fmt.Printf("FeeTotal2=%v\n", feeCollectionKeeper.GetCollectedFees(ctx))
+//
+func FeeCollecting(ctx sdk.Context,
+	feeCollectionKeeper auth.FeeCollectionKeeper,
+	stateDB *state.CommitStateDB,
+	gasused uint64,
+	gasprice *big.Int) {
+	gasUsed := new(big.Int).Mul(new(big.Int).SetUint64(gasused), gasprice)
+	fmt.Printf("gasUsed=%s\n", gasUsed.String())
+	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsed))})
+	stateDB.Commit(false)
 }
 
 // junying-todo, 2019-08-26
-//
 func HandleOpenContract(ctx sdk.Context,
 	accountKeeper auth.AccountKeeper,
 	feeCollectionKeeper auth.FeeCollectionKeeper,
@@ -148,7 +147,7 @@ func HandleOpenContract(ctx sdk.Context,
 	fmt.Printf("transferAmount: %d\n", transferAmount)
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", msg.Gas, msg.GasPrice, msg.GasLimit)
+	fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
 
 	// commented by junying, 2019-08-22
 	// subtract gaslimit*gasprice from sender
@@ -181,29 +180,19 @@ func HandleOpenContract(ctx sdk.Context,
 	fmt.Println(" HandleOpenContract2:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	if err != nil {
 		fmt.Printf("evm call error|err=%s\n", err)
-		return
+		// junying-todo, 2019-11-05
+		gasUsed = msg.GasLimit
+	} else {
+		st.gas = gasLeftover
+		// junying-todo, 2019-08-22
+		// refund(add) remaining to sender
+		st.refundGas()
+		fmt.Printf("gasUsed=%d\n", st.gasUsed())
+		gasUsed = st.gasUsed()
 	}
-
-	st.gas = gasLeftover
-	// junying-todo, 2019-08-22
-	// refund(add) remaining to sender
-	st.refundGas()
-
-	fmt.Printf("gasUsed=%d\n", st.gasUsed())
-
-	// gasUsedValue
-	gasUsedValue := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-	fmt.Printf("gasUsedValue=%s\n", gasUsedValue.String())
-
-	// junying-todo, 2019-08-22
-	// this function is used to collect all kinds of budget including fee + blk rewards for the next block reward
-	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
-	fmt.Println(" HandleOpenContract3:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
-	fmt.Printf("evm call end|outputs=%x\n", outputs)
-
-	stateDB.Commit(false)
-	fmt.Println(" HandleOpenContract4:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
-	return hex.EncodeToString(outputs), st.gasUsed(), nil
+	evmOutput = hex.EncodeToString(outputs)
+	FeeCollecting(ctx, feeCollectionKeeper, stateDB, gasUsed, st.gasPrice)
+	return
 }
 
 // junying-todo, 2019-08-26
@@ -253,7 +242,7 @@ func HandleCreateContract(ctx sdk.Context,
 
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", msg.Gas, msg.GasPrice, msg.GasLimit)
+	fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
 
 	err = st.buyGas()
 	if err != nil {
@@ -273,22 +262,16 @@ func HandleCreateContract(ctx sdk.Context,
 	_, contractAddr, gasLeftover, err := evm.Create(contractRef, inputCode, st.gas, big.NewInt(0))
 	if err != nil {
 		fmt.Printf("evm Create error|err=%s\n", err)
-		return
+		// junying-todo, 2019-11-05
+		gasUsed = msg.GasLimit
+	} else {
+		st.gas = gasLeftover
+		st.refundGas()
+		gasUsed = st.gasUsed()
+
 	}
-	st.gas = gasLeftover
-
-	st.refundGas()
-
-	fmt.Printf("gasUsed=%d\n", st.gasUsed())
-
-	// gasUsedValue
-	gasUsedValue := new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice)
-	fmt.Printf("gasUsedValue=%s\n", gasUsedValue.String())
-	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsedValue))})
-
+	evmOutput = sdk.ToAppAddress(contractAddr).String()
 	fmt.Printf("Create contract ok,contractAddr|appFormat=%s|ethFormat=%s\n", sdk.ToAppAddress(contractAddr).String(), contractAddr.String())
-
-	stateDB.Commit(false)
-
-	return sdk.ToAppAddress(contractAddr).String(), st.gasUsed(), nil
+	FeeCollecting(ctx, feeCollectionKeeper, stateDB, gasUsed, st.gasPrice)
+	return
 }

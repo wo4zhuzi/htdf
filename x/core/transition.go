@@ -46,13 +46,13 @@ func (st *StateTransition) useGas(amount uint64) error {
 }
 
 func (st *StateTransition) buyGas() error {
-	st.gas = st.msg.Gas
+	st.gas = st.msg.GasLimit
 	st.initialGas = st.gas
 	fmt.Printf("msgGas=%d\n", st.initialGas)
 
 	eaSender := apptypes.ToEthAddress(st.msg.From)
 
-	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.Gas), st.gasPrice)
+	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.GasLimit), st.gasPrice)
 	fmt.Printf("msgGasVal=%s\n", msgGasVal.String())
 
 	if st.stateDB.GetBalance(eaSender).Cmp(msgGasVal) < 0 {
@@ -60,7 +60,7 @@ func (st *StateTransition) buyGas() error {
 	}
 
 	// try call subGas method, to check gas limit
-	if err := st.gpGasLimit.SubGas(st.msg.Gas); err != nil {
+	if err := st.gpGasLimit.SubGas(st.msg.GasLimit); err != nil {
 		fmt.Printf("SubGas error|err=%s\n", err)
 		return err
 	}
