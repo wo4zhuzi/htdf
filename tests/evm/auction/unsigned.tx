@@ -4,7 +4,7 @@
         "fee": {
             "amount": [
                 {
-                    "amount": "1", 
+                    "amount": "200000", 
                     "denom": "satoshi"
                 }
             ], 
@@ -23,7 +23,6 @@
                     ], 
                     "Data": "38af3eed", 
                     "From": "htdf1hu64tcnuq7h4ypzmdtd0xhg6ccfzhqgfql9srj", 
-                    "Gas": "200000", 
                     "GasLimit": "200000", 
                     "GasPrice": "1", 
                     "To": "htdf1szm7u5ewf4726kdwm29373najm7j8u2a3s0knr"

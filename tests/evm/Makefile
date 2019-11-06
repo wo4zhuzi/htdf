@@ -67,7 +67,6 @@ create.contract:
 	 read -p "fee[default:1]:" txfee;\
 	 replkey From $$sender contract.template y;\
 	 replkey Data $$data contract.template y;\
-	 replkey Gas  $$gas contract.template y;\
 	 replkey gas  $$gas contract.template y;\
 	 replkey GasLimit $$gas contract.template y;\
 	 replkey GasPrice $$gasprice contract.template y;\
@@ -80,7 +79,6 @@ create.contract.default:
 	 read -p "Gas:" gas;\
 	 replkey From $$contract_addr contract.template y;\
 	 replkey Data $$data contract.template y;\
-	 replkey Gas  $$gas contract.template y;\
 	 replkey GasLimit $$gas contract.template y;\
 	 replkey gas $$gas contract.template y;\
 	 make -sC . execute

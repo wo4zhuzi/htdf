@@ -22,7 +22,6 @@ type MsgSendFrom struct {
 	To       sdk.AccAddress
 	Amount   sdk.Coins
 	Data     string
-	Gas      uint64 //unit,  gallon
 	GasPrice uint64 //unit,  satoshi/gallon
 	GasLimit uint64 //unit,  gallon
 }
@@ -37,7 +36,6 @@ func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amoun
 		From:     fromaddr,
 		To:       toaddr,
 		Amount:   amount,
-		Gas:      defaultGasLimit,
 		GasPrice: defaultGasPrice,
 		GasLimit: defaultGasLimit,
 	}
@@ -50,7 +48,6 @@ func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.C
 		From:     fromaddr,
 		To:       toaddr,
 		Amount:   amount,
-		Gas:      defaultGasLimit,
 		GasPrice: gasPrice,
 		GasLimit: defaultGasLimit,
 	}
@@ -63,7 +60,6 @@ func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amoun
 		To:       toaddr,
 		Amount:   amount,
 		Data:     data,
-		Gas:      gas,
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 	}

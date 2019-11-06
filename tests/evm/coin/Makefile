@@ -27,7 +27,6 @@ run.contract:
 	 replkey From $$fromaddr ../unsigned.tx y;\
 	 replkey To $$contract_addr ../unsigned.tx y;\
 	 replkey Data $$data ../unsigned.tx y;\
-	 replkey Gas  $$gas ../unsigned.tx y;\
 	 replkey GasLimit $$gas ../unsigned.tx y;\
 	 replkey GasPrice $$gasprice ../unsigned.tx y;\
 	 contract=$$(oneline ../unsigned.tx | excludestr "    ");\
