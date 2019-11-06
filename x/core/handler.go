@@ -147,7 +147,7 @@ func HandleOpenContract(ctx sdk.Context,
 	fmt.Printf("transferAmount: %d\n", transferAmount)
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
+	fmt.Printf("gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
 
 	// commented by junying, 2019-08-22
 	// subtract gaslimit*gasprice from sender
@@ -242,7 +242,7 @@ func HandleCreateContract(ctx sdk.Context,
 
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
+	fmt.Printf("gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
 
 	err = st.buyGas()
 	if err != nil {
