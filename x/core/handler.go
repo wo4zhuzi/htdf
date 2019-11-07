@@ -112,7 +112,7 @@ func HandleOpenContract(ctx sdk.Context,
 	fmt.Println(" HandleOpenContract0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
-		fmt.Printf("newStateDB error\n")
+		evmOutput = fmt.Sprintf("newStateDB error\n")
 		return
 	}
 
@@ -136,7 +136,7 @@ func HandleOpenContract(ctx sdk.Context,
 
 	inputCode, err := hex.DecodeString(msg.Data)
 	if err != nil {
-		fmt.Printf("DecodeString error\n")
+		evmOutput = fmt.Sprintf("DecodeString error\n")
 		return
 	}
 
@@ -153,7 +153,7 @@ func HandleOpenContract(ctx sdk.Context,
 	// subtract gaslimit*gasprice from sender
 	err = st.buyGas()
 	if err != nil {
-		fmt.Printf("buyGas error|err=%s\n", err)
+		evmOutput = fmt.Sprintf("buyGas error|err=%s\n", err)
 		return
 	}
 
@@ -161,13 +161,13 @@ func HandleOpenContract(ctx sdk.Context,
 	// commented by junying, 2019-08-22
 	// default non-contract tx gas: 21000
 	// default contract tx gas: 53000 + f(tx.data)
-	itrsGas, err := IntrinsicGas(inputCode, true)
+	itrsGas, err := auth.IntrinsicGas(inputCode, true)
 	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
 	// commented by junying, 2019-08-22
 	// check if tx.gas >= calculated gas
 	err = st.useGas(itrsGas)
 	if err != nil {
-		fmt.Printf("useGas error|err=%s\n", err)
+		evmOutput = fmt.Sprintf("useGas error|err=%s\n", err)
 		return
 	}
 
@@ -182,6 +182,7 @@ func HandleOpenContract(ctx sdk.Context,
 		fmt.Printf("evm call error|err=%s\n", err)
 		// junying-todo, 2019-11-05
 		gasUsed = msg.GasLimit
+		evmOutput = fmt.Sprintf("evm call error|err=%s\n", err)
 	} else {
 		st.gas = gasLeftover
 		// junying-todo, 2019-08-22
@@ -189,8 +190,8 @@ func HandleOpenContract(ctx sdk.Context,
 		st.refundGas()
 		fmt.Printf("gasUsed=%d\n", st.gasUsed())
 		gasUsed = st.gasUsed()
+		evmOutput = hex.EncodeToString(outputs)
 	}
-	evmOutput = hex.EncodeToString(outputs)
 	FeeCollecting(ctx, feeCollectionKeeper, stateDB, gasUsed, st.gasPrice)
 	return
 }
@@ -205,10 +206,9 @@ func HandleCreateContract(ctx sdk.Context,
 
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
-		fmt.Printf("newStateDB error\n")
+		evmOutput = fmt.Sprintf("newStateDB error\n")
 		return
 	}
-
 	fromAddress := sdk.ToEthAddress(msg.From)
 	toAddress := sdk.ToEthAddress(msg.To)
 
@@ -234,7 +234,7 @@ func HandleCreateContract(ctx sdk.Context,
 
 	inputCode, err := hex.DecodeString(msg.Data)
 	if err != nil {
-		fmt.Printf("DecodeString error\n")
+		evmOutput = fmt.Sprintf("DecodeString error\n")
 		return
 	}
 
@@ -246,16 +246,16 @@ func HandleCreateContract(ctx sdk.Context,
 
 	err = st.buyGas()
 	if err != nil {
-		fmt.Printf("buyGas error|err=%s\n", err)
+		evmOutput = fmt.Sprintf("buyGas error|err=%s\n", err)
 		return
 	}
 
 	//Intrinsic gas calc
-	itrsGas, err := IntrinsicGas(inputCode, true)
+	itrsGas, err := auth.IntrinsicGas(inputCode, true)
 	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
 	err = st.useGas(itrsGas)
 	if err != nil {
-		fmt.Printf("useGas error|err=%s\n", err)
+		evmOutput = fmt.Sprintf("useGas error|err=%s\n", err)
 		return
 	}
 
@@ -264,13 +264,14 @@ func HandleCreateContract(ctx sdk.Context,
 		fmt.Printf("evm Create error|err=%s\n", err)
 		// junying-todo, 2019-11-05
 		gasUsed = msg.GasLimit
+		evmOutput = fmt.Sprintf("evm Create error|err=%s\n", err)
 	} else {
 		st.gas = gasLeftover
 		st.refundGas()
 		gasUsed = st.gasUsed()
-
+		evmOutput = sdk.ToAppAddress(contractAddr).String()
 	}
-	evmOutput = sdk.ToAppAddress(contractAddr).String()
+
 	fmt.Printf("Create contract ok,contractAddr|appFormat=%s|ethFormat=%s\n", sdk.ToAppAddress(contractAddr).String(), contractAddr.String())
 	FeeCollecting(ctx, feeCollectionKeeper, stateDB, gasUsed, st.gasPrice)
 	return

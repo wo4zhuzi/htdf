@@ -124,6 +124,7 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 type StdFee struct {
 	Amount sdk.Coins `json:"amount"`
 	Gas    uint64    `json:"gas"`
+	// GasPrice uint64    `json:"gasprice"`
 }
 
 // NewStdFee returns a new instance of StdFee

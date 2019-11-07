@@ -4,15 +4,20 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/orientwalt/tendermint/crypto"
 	"github.com/orientwalt/tendermint/crypto/multisig"
 	"github.com/orientwalt/tendermint/crypto/secp256k1"
 
 	"github.com/orientwalt/htdf/codec"
+	"github.com/orientwalt/htdf/evm/vm"
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
+	// htdfservice "github.com/orientwalt/htdf/x/core"
 )
 
 var (
@@ -61,11 +66,9 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// Ensure that the provided fees meet a minimum threshold for the validator,
 		// if this is a CheckTx. This is only for local mempool purposes, and thus
 		// is only ran on check tx.
-		// junying-todo, 2019-08-27
-		// conventional fee prechecking isn't necessary anymore
-		// evm will replace it.
-		// junying-todo, 2019-10-24
-		// this is enabled again in order to handle non-htdfservice txs.
+		// junying-todo, 2019-11-07
+		// Check if Fee.Amount > Fee.Gas * minGasPrice or not
+		// It can be rephrased in Fee.GasPrices() > minGasPrice or not?
 		if ctx.IsCheckTx() && !simulate && route != "htdfservice" {
 			res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
 			if !res.IsOK() {
@@ -134,8 +137,6 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-08-27
 		// conventional deducting fee module doesn't needed anymore.
 		// evm will replace it.
-		// junying-todo, 2019-10-24
-		// this is enabled again in order to handle non-htdfservice txs.
 		if !stdTx.Fee.Amount.IsZero() && route != "htdfservice" {
 			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
 			if !res.IsOK() {
@@ -427,3 +428,74 @@ func GetSignBytes(chainID string, stdTx StdTx, acc Account, genesis bool) []byte
 		chainID, accNum, acc.GetSequence(), stdTx.Fee, stdTx.Msgs, stdTx.Memo,
 	)
 }
+
+// junying-todo, 2019-11-06
+// from x/core/transition.go
+// IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
+func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
+	// Set the starting gas for the raw transaction
+	var gas uint64
+	if len(data) > 0 && homestead {
+		gas = params.TxGasContractCreation // 53000 -> 60000
+	} else {
+		gas = params.TxGas // 21000 -> 30000
+	}
+	// Bump the required gas by the amount of transactional data
+	if len(data) > 0 {
+		// Zero and non-zero bytes are priced differently
+		var nz uint64
+		for _, byt := range data {
+			if byt != 0 {
+				nz++
+			}
+		}
+		// Make sure we don't exceed uint64 for all data combinations
+		if (math.MaxUint64-gas)/ethparams.TxDataNonZeroGas < nz {
+			return 0, vm.ErrOutOfGas
+		}
+		gas += nz * ethparams.TxDataNonZeroGas
+
+		z := uint64(len(data)) - nz
+		if (math.MaxUint64-gas)/ethparams.TxDataZeroGas < z {
+			return 0, vm.ErrOutOfGas
+		}
+		gas += z * ethparams.TxDataZeroGas
+	}
+	return gas, nil
+}
+
+// junying-todo, 2019-11-06
+// EVM Account Balance Prechecking
+// func PreCheck(acc Account, stdtx StdTx) (err error) {
+// 	//
+// 	// BuyGasCheck
+// 	msgs := stdtx.GetMsgs()
+// 	fee := stdtx.Fee
+// 	// amount := fee.Amount
+// 	// gas := fee.Gas
+// 	// gasprice := fee.GasPrices()
+// 	// coins := acc.GetCoins()
+// 	for i := 0; i < len(msgs); i++ {
+// 		msg := msgs[i]
+// 		msgRoute := msg.Route()
+// 		if msgRoute != "htdfservice" {
+// 			continue
+// 		}
+// 		// Intrinsic
+// 		inputCode, err := hex.DecodeString(msg.GetData())
+// 		if err != nil {
+// 			fmt.Printf("DecodeString error\n")
+// 			continue
+// 		}
+// 		itrsGas, err := IntrinsicGas(inputCode, true)
+// 		if err != nil {
+// 			fmt.Printf("useGas error|err=%s\n", err)
+// 			return err
+// 		}
+// 		if itrsGas > fee.Gas {
+// 			return errors.New("out of gas")
+// 		}
+// 	}
+// 	return
+
+// }

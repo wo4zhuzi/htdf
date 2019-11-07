@@ -6,12 +6,8 @@ import (
 	"github.com/orientwalt/htdf/types"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
-)
-
-const (
-	defaultGasLimit = 21000
-	defaultGasPrice = 1
 )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,8 +32,8 @@ func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amoun
 		From:     fromaddr,
 		To:       toaddr,
 		Amount:   amount,
-		GasPrice: defaultGasPrice,
-		GasLimit: defaultGasLimit,
+		GasPrice: 1,
+		GasLimit: params.TxGas,
 	}
 }
 
@@ -49,7 +45,7 @@ func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.C
 		To:       toaddr,
 		Amount:   amount,
 		GasPrice: gasPrice,
-		GasLimit: defaultGasLimit,
+		GasLimit: params.TxGas,
 	}
 }
 
@@ -127,6 +123,11 @@ func (msg MsgSendFrom) GetFromAddr() sdk.AccAddress {
 func (msg MsgSendFrom) FromAddress() common.Address {
 	return types.ToEthAddress(msg.From)
 }
+
+// // junying-todo, 2019-11-06
+// func (msg MsgSendFrom) GetData() string {
+// 	return msg.Data
+// }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MsgAdd defines a Add message ///////////////////////////////////////////////////////////////////////////////
