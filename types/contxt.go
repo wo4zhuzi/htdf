@@ -49,7 +49,8 @@ func NewContext(ms MultiStore, header abci.Header, isCheckTx bool, logger log.Lo
 	c = c.WithTxBytes(nil)
 	c = c.WithLogger(logger)
 	c = c.WithVoteInfos(nil)
-	c = c.WithGasMeter(stypes.NewInfiniteGasMeter())
+	// c = c.WithGasMeter(stypes.NewInfiniteGasMeter())// commented & added by junying, 2019-11-11
+	c = c.WithGasMeter(stypes.NewFalseGasMeter()) // in order to disable gasmeter for tx
 	c = c.WithMinGasPrices(DecCoins{})
 	c = c.WithConsensusParams(nil)
 	c = c.WithCheckValidNum(0)

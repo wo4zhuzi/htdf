@@ -61,6 +61,11 @@ Delegators are Atom holders who cannot, or do not want to run a validator themse
           So consumed gas will be calculated for every database operations(Read, Write, Delete, Has,...)
           Every operation includes consumeGas/consumeSeekGas. It will deduct the corresponding gas to every operation
           folling the setting in GasConfig
+
+          keywords: ctx.KVStore
+       Q: Where to initialze (Tx)GasMeter & BlockGasMeter?
+       A: BlockGasMeter: baseapp.go/BeginBlock
+          (Tx)GasMeter:  ante.go/AnteHanlder/SetGasMeter
 #### 2. GasMeter vs. BlockGasMeter
        Q: Difference between InfiniteGasMeter vs. BasicGasMeter
        A: InfiniteGasMeter has no limit while BasicGasMeter has limit

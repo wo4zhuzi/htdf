@@ -411,8 +411,8 @@ func SetGasMeter(simulate bool, ctx sdk.Context, gasLimit uint64) sdk.Context {
 	if simulate || ctx.BlockHeight() == 0 {
 		return ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 	}
-
-	return ctx.WithGasMeter(sdk.NewGasMeter(gasLimit))
+	// junying-todo, 2019-11-11
+	return ctx.WithGasMeter(sdk.NewFalseGasMeter(gasLimit)) // NewGasMeter to NewFalseGasMeter
 }
 
 // GetSignBytes returns a slice of bytes to sign over for a given transaction

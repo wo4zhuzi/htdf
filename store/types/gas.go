@@ -143,6 +143,51 @@ func (g *infiniteGasMeter) IsOutOfGas() bool {
 	return false
 }
 
+// junying-todo, 2019-11-////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+type FalseGasMeter struct {
+	consumed Gas
+}
+
+// NewInfiniteGasMeter returns a reference to a new infiniteGasMeter.
+func NewFalseGasMeter() GasMeter {
+	return &FalseGasMeter{
+		consumed: 0,
+	}
+}
+
+//
+func (g *FalseGasMeter) GasConsumed() Gas {
+	return g.consumed
+}
+
+//
+func (g *FalseGasMeter) GasConsumedToLimit() Gas {
+	return g.consumed
+}
+
+//
+func (g *FalseGasMeter) Limit() Gas {
+	return 0
+}
+
+//
+func (g *FalseGasMeter) ConsumeGas(amount Gas, descriptor string) {
+	return
+}
+
+//
+func (g *FalseGasMeter) IsPastLimit() bool {
+	return false
+}
+
+//
+func (g *FalseGasMeter) IsOutOfGas() bool {
+	return false
+}
+
+/////////////////////////////////////////////////////////////////
+
 // GasConfig defines gas cost for each operation on KVStores
 type GasConfig struct {
 	HasCost          Gas

@@ -118,6 +118,12 @@ func NewGasMeter(limit Gas) GasMeter {
 	return types.NewGasMeter(limit)
 }
 
+// junying-todo, 2019-11-11
+// in order to remove gas calc for tx
+func NewFalseGasMeter(limit Gas) GasMeter {
+	return types.NewFalseGasMeter()
+}
+
 // nolint - reexport
 type (
 	ErrorOutOfGas    = types.ErrorOutOfGas
