@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	defaultMinGasPrices     = "1.0satoshi"
+	DefaultMinGasPrices     = "1.0satoshi"
 	ValueSecurityLevel_High = "high"
 	ValueSecurityLevel_Low  = "low"
 
@@ -60,7 +60,7 @@ func (c *Config) GetMinGasPrices() sdk.DecCoins {
 func DefaultConfig() *Config {
 	return &Config{
 		BaseConfig{
-			MinGasPrices: defaultMinGasPrices,
+			MinGasPrices: DefaultMinGasPrices,
 		},
 	}
 }

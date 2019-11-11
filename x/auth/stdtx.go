@@ -49,6 +49,16 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	if tx.Fee.Amount.IsAnyNegative() {
 		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
 	}
+	// added & commented by junying, 2019-11-07
+	// var gasprice = tx.Fee.GasPrice
+	// minGasPrices, err := types.ParseDecCoins(config.DefaultMinGasPrices)
+	// if err != nil {
+	// 	return sdk.ErrTxDecode("defaultMinGasPrices decode error")
+	// }
+	// if gasprice.IsAllGTE(minGasPrices) {
+	// 	return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice %s amount is lower than DefaultMinGasPrices", tx.Fee.GasPrice))
+	// }
+
 	if len(stdSigs) == 0 {
 		return sdk.ErrNoSignatures("no signers")
 	}
@@ -107,7 +117,6 @@ func (tx StdTx) GetSigners() []sdk.AccAddress {
 func (tx StdTx) GetMemo() string { return tx.Memo }
 
 // GetSignatures returns the signature of signers who signed the Msg.
-// GetSignatures returns the signature of signers who signed the Msg.
 // CONTRACT: Length returned is same as length of
 // pubkeys returned from MsgKeySigners, and the order
 // matches.
@@ -122,16 +131,35 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // gas to be used by the transaction. The ratio yields an effective "gasprice",
 // which must be above some miminum to be accepted into the mempool.
 type StdFee struct {
-	Amount sdk.Coins `json:"amount"`
-	Gas    uint64    `json:"gas"`
-	// GasPrice uint64    `json:"gasprice"`
+	Amount   sdk.Coins    `json:"amount"`
+	Gas      uint64       `json:"gas"`
+	GasPrice sdk.DecCoins `json:"gasprice"`
+}
+
+// junying-todo, 2019-11-07
+// fee = gas * gasprice
+func CalcFees(gas uint64, gasprices sdk.DecCoins) sdk.Coins {
+	Fees := make(sdk.Coins, len(gasprices))
+	glDec := sdk.NewDec(int64(gas))
+	for i, gp := range gasprices {
+		fee := gp.Amount.Mul(glDec)
+		Fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+	}
+	return Fees
 }
 
 // NewStdFee returns a new instance of StdFee
-func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
+// func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
+// 	return StdFee{
+// 		Amount: amount,
+// 		Gas:    gas,
+// 	}
+// }
+func NewStdFee(gas uint64, gasprice sdk.DecCoins) StdFee {
 	return StdFee{
-		Amount: amount,
-		Gas:    gas,
+		Amount:   CalcFees(gas, gasprice),
+		Gas:      gas,
+		GasPrice: gasprice,
 	}
 }
 
@@ -158,6 +186,11 @@ func (fee StdFee) Bytes() []byte {
 // as fee = ceil(gasWanted * gasPrices).
 func (fee StdFee) GasPrices() sdk.DecCoins {
 	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
+}
+
+// junying-todo, 2019-11-07
+func (fee StdFee) GetAmount() sdk.DecCoins {
+	return fee.GasPrice.MulDec(sdk.NewDec(int64(fee.Gas)))
 }
 
 //__________________________________________________________

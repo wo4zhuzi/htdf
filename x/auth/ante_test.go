@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/orientwalt/tendermint/crypto"
 	"github.com/orientwalt/tendermint/crypto/ed25519"
 	"github.com/orientwalt/tendermint/crypto/multisig"
 	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	"github.com/stretchr/testify/require"
 
 	sdk "github.com/orientwalt/htdf/types"
 )
@@ -333,24 +333,24 @@ func TestAnteHandlerMemoGas(t *testing.T) {
 	var tx sdk.Tx
 	msg := newTestMsg(addr1)
 	privs, accnums, seqs := []crypto.PrivKey{priv1}, []uint64{0}, []uint64{0}
-	fee := NewStdFee(0, sdk.NewCoins(sdk.NewInt64Coin("atom", 0)))
+	fee := NewStdFee(0, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
 
 	// tx does not have enough gas
 	tx = newTestTx(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee)
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeOutOfGas)
 
 	// tx with memo doesn't have enough gas
-	fee = NewStdFee(801, sdk.NewCoins(sdk.NewInt64Coin("atom", 0)))
+	fee = NewStdFee(801, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, "abcininasidniandsinasindiansdiansdinaisndiasndiadninsd")
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeOutOfGas)
 
 	// memo too large
-	fee = NewStdFee(9000, sdk.NewCoins(sdk.NewInt64Coin("atom", 0)))
+	fee = NewStdFee(9000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, strings.Repeat("01234567890", 500))
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeMemoTooLarge)
 
 	// tx with memo has enough gas
-	fee = NewStdFee(9000, sdk.NewCoins(sdk.NewInt64Coin("atom", 0)))
+	fee = NewStdFee(9000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, strings.Repeat("0123456789", 10))
 	checkValidTx(t, anteHandler, ctx, tx, false)
 }
@@ -721,28 +721,28 @@ func TestEnsureSufficientMempoolFees(t *testing.T) {
 		input      StdFee
 		expectedOK bool
 	}{
-		{NewStdFee(200000, sdk.NewCoins(sdk.NewInt64Coin("photino", 5))), false},
-		{NewStdFee(200000, sdk.NewCoins(sdk.NewInt64Coin("stake", 1))), false},
-		{NewStdFee(200000, sdk.NewCoins(sdk.NewInt64Coin("stake", 2))), true},
-		{NewStdFee(200000, sdk.NewCoins(sdk.NewInt64Coin("photino", 10))), true},
+		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("photino", 5)))), false},
+		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("stake", 1)))), false},
+		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("stake", 2)))), true},
+		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("photino", 10)))), true},
 		{
 			NewStdFee(
 				200000,
-				sdk.NewCoins(
+				sdk.NewDecCoins(sdk.NewCoins(
 					sdk.NewInt64Coin("photino", 10),
 					sdk.NewInt64Coin("stake", 2),
-				),
+				)),
 			),
 			true,
 		},
 		{
 			NewStdFee(
 				200000,
-				sdk.NewCoins(
+				sdk.NewDecCoins(sdk.NewCoins(
 					sdk.NewInt64Coin("atom", 5),
 					sdk.NewInt64Coin("photino", 10),
 					sdk.NewInt64Coin("stake", 2),
-				),
+				)),
 			),
 			true,
 		},

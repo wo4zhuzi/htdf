@@ -74,32 +74,22 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 	if chainID == "" {
 		return authtxb.StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
 	}
-	fmt.Println("##################", txbuilder.Sequence())
-	fees := txbuilder.Fees()
-	fmt.Println("BuildSignMsg:fees", fees)
-	if !txbuilder.GasPrices().IsZero() {
-		if !fees.IsZero() {
-			return authtxb.StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
-		}
-
-		glDec := sdk.NewDec(int64(txbuilder.Gas()))
-
-		// Derive the fees based on the provided gas prices, where
-		// fee = ceil(gasPrice * gasLimit).
-		fees = make(sdk.Coins, len(txbuilder.GasPrices()))
-		for i, gp := range txbuilder.GasPrices() {
-			fee := gp.Amount.Mul(glDec)
-			fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
-		}
+	// junying-todo, 2019-11-08
+	// converted from fee based to gas*gasprice based
+	if txbuilder.GasPrices().IsZero() {
+		return authtxb.StdSignMsg{}, errors.New("gasprices can't not be zero")
 	}
-	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.Gas(), fees), txbuilder.Gas(), fees)
+	if txbuilder.Gas() <= 0 {
+		return authtxb.StdSignMsg{}, errors.New("gas must be provided")
+	}
+	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.Gas(), txbuilder.GasPrices()), txbuilder.Gas())
 	return authtxb.StdSignMsg{
 		ChainID:       txbuilder.ChainID(),
 		AccountNumber: txbuilder.AccountNumber(),
 		Sequence:      txbuilder.Sequence(),
 		Memo:          txbuilder.Memo(),
 		Msgs:          msgs,
-		Fee:           auth.NewStdFee(txbuilder.Gas(), fees),
+		Fee:           auth.NewStdFee(txbuilder.Gas(), txbuilder.GasPrices()), // auth.NewStdFee(txbuilder.Gas(), fees),
 	}, nil
 }
 

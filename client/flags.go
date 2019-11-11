@@ -40,6 +40,7 @@ const (
 	FlagSequence           = "sequence"
 	FlagMemo               = "memo"
 	FlagFees               = "fees"
+	FlagGas                = "gas" // added by junying, 2019-11-07
 	FlagGasPrices          = "gas-prices"
 	FlagBroadcastMode      = "broadcast-mode"
 	FlagPrintResponse      = "print-response"
@@ -84,8 +85,9 @@ func PostCommands(cmds ...*cobra.Command) []*cobra.Command {
 		c.Flags().Uint64P(FlagAccountNumber, "a", 0, "The account number of the signing account (offline mode only)")
 		c.Flags().Uint64P(FlagSequence, "s", 0, "The sequence number of the signing account (offline mode only)")
 		c.Flags().String(FlagMemo, "", "Memo to send along with transaction")
-		c.Flags().String(FlagFees, "", "Fees to pay along with transaction; eg: 10uatom")
-		c.Flags().String(FlagGasPrices, "", "Gas prices to determine the transaction fee (e.g. 10uatom)")
+		c.Flags().String(FlagFees, "", "Fees to pay along with transaction; eg: 10satoshi")
+		c.Flags().Uint64P(FlagGas, "g", DefaultGasLimit, "Gas to determine the transaction fee eg: 10satoshi") // added by junying, 2019-11-07
+		c.Flags().String(FlagGasPrices, "", "Gas prices to determine the transaction fee (e.g. 10satoshi)")
 		c.Flags().String(FlagNode, "tcp://localhost:26657", "<host>:<port> to tendermint rpc interface for this chain")
 		c.Flags().Bool(FlagUseLedger, false, "Use a connected Ledger device")
 		c.Flags().Float64(FlagGasAdjustment, DefaultGasAdjustment, "adjustment factor to be multiplied against the estimate returned by the tx simulation; if the gas limit is set manually this flag is ignored ")
@@ -97,10 +99,11 @@ func PostCommands(cmds ...*cobra.Command) []*cobra.Command {
 		c.Flags().BoolP(FlagSkipConfirmation, "y", false, "Skip tx broadcasting prompt confirmation")
 
 		// --gas can accept integers and "simulate"
-		c.Flags().Var(&GasFlagVar, "gas", fmt.Sprintf(
-			"gas limit to set per-transaction; set to %q to calculate required gas automatically (default %d)",
-			GasFlagAuto, DefaultGasLimit,
-		))
+		// commented by junying, 2019-11-07
+		// c.Flags().Var(&GasFlagVar, "gas", fmt.Sprintf(
+		// 	"gas limit to set per-transaction; set to %q to calculate required gas automatically (default %d)",
+		// 	GasFlagAuto, DefaultGasLimit,
+		// ))
 
 		viper.BindPFlag(FlagTrustNode, c.Flags().Lookup(FlagTrustNode))
 		viper.BindPFlag(FlagUseLedger, c.Flags().Lookup(FlagUseLedger))

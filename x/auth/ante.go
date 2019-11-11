@@ -17,7 +17,6 @@ import (
 	"github.com/orientwalt/htdf/evm/vm"
 	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
-	// htdfservice "github.com/orientwalt/htdf/x/core"
 )
 
 var (
@@ -69,7 +68,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-11-07
 		// Check if Fee.Amount > Fee.Gas * minGasPrice or not
 		// It can be rephrased in Fee.GasPrices() > minGasPrice or not?
-		if ctx.IsCheckTx() && !simulate && route != "htdfservice" {
+		if ctx.IsCheckTx() && !simulate {
 			res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
 			if !res.IsOK() {
 				return newCtx, res, true

@@ -60,18 +60,20 @@ func NewTxBuilderFromCLI() TxBuilder {
 		panic(err)
 	}
 	txbldr := TxBuilder{
-		keybase:            kb,
-		accountNumber:      uint64(viper.GetInt64(client.FlagAccountNumber)),
-		sequence:           uint64(viper.GetInt64(client.FlagSequence)),
-		gas:                client.GasFlagVar.Gas, // commented by junying, 2019-10-21, gas_wanted set to 200000 as default here.
+		keybase:       kb,
+		accountNumber: uint64(viper.GetInt64(client.FlagAccountNumber)),
+		sequence:      uint64(viper.GetInt64(client.FlagSequence)),
+		// gas:                client.GasFlagVar.Gas, // commented by junying, 2019-10-21, gas_wanted set to 200000 as default here.
+		gas:                uint64(viper.GetInt64(client.FlagGas)), // added by junying, 2019-11-07
 		gasAdjustment:      viper.GetFloat64(client.FlagGasAdjustment),
 		simulateAndExecute: client.GasFlagVar.Simulate,
 		chainID:            viper.GetString(client.FlagChainID),
 		memo:               viper.GetString(client.FlagMemo),
 	}
 
-	txbldr = txbldr.WithFees(viper.GetString(client.FlagFees))
+	// txbldr = txbldr.WithFees(viper.GetString(client.FlagFees)) // commented by junying, 2019-11-07
 	txbldr = txbldr.WithGasPrices(viper.GetString(client.FlagGasPrices))
+	txbldr = txbldr.WithGas(uint64(viper.GetInt64(client.FlagGas))) // added by junying, 2019-11-07
 
 	return txbldr
 }
@@ -182,22 +184,13 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 	if chainID == "" {
 		return StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
 	}
-
-	fees := bldr.fees
-	if !bldr.gasPrices.IsZero() {
-		if !fees.IsZero() {
-			return StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
-		}
-
-		glDec := sdk.NewDec(int64(bldr.gas))
-
-		// Derive the fees based on the provided gas prices, where
-		// fee = ceil(gasPrice * gasLimit).
-		fees = make(sdk.Coins, len(bldr.gasPrices))
-		for i, gp := range bldr.gasPrices {
-			fee := gp.Amount.Mul(glDec)
-			fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
-		}
+	// junying-todo, 2019-11-08
+	// converted from fee based to gas*gasprice based
+	if bldr.gasPrices.IsZero() {
+		return StdSignMsg{}, errors.New("gasprices can't not be zero")
+	}
+	if bldr.gas <= 0 {
+		return StdSignMsg{}, errors.New("gas must be provided")
 	}
 	return StdSignMsg{
 		ChainID:       bldr.chainID,
@@ -205,7 +198,7 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 		Sequence:      bldr.sequence,
 		Memo:          bldr.memo,
 		Msgs:          msgs,
-		Fee:           auth.NewStdFee(bldr.gas, fees),
+		Fee:           auth.NewStdFee(bldr.gas, bldr.gasPrices), // junying-todo, 2019-11-07
 	}, nil
 }
 

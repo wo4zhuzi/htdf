@@ -95,9 +95,10 @@ func FeeCollecting(ctx sdk.Context,
 	gasused uint64,
 	gasprice *big.Int) {
 	gasUsed := new(big.Int).Mul(new(big.Int).SetUint64(gasused), gasprice)
-	fmt.Printf("gasUsed=%s\n", gasUsed.String())
+	fmt.Printf("FeeCollecting:gasUsed=%s\n", gasUsed.String())
 	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsed))})
 	stateDB.Commit(false)
+	fmt.Println("FeeCollecting:stateDB commited!")
 }
 
 // junying-todo, 2019-08-26
