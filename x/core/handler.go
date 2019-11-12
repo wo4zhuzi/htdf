@@ -162,7 +162,7 @@ func HandleOpenContract(ctx sdk.Context,
 	// commented by junying, 2019-08-22
 	// default non-contract tx gas: 21000
 	// default contract tx gas: 53000 + f(tx.data)
-	itrsGas, err := auth.IntrinsicGas(inputCode, true)
+	itrsGas, err := IntrinsicGas(inputCode, true)
 	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
 	// commented by junying, 2019-08-22
 	// check if tx.gas >= calculated gas
@@ -252,7 +252,7 @@ func HandleCreateContract(ctx sdk.Context,
 	}
 
 	//Intrinsic gas calc
-	itrsGas, err := auth.IntrinsicGas(inputCode, true)
+	itrsGas, err := IntrinsicGas(inputCode, true)
 	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
 	err = st.useGas(itrsGas)
 	if err != nil {

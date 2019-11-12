@@ -28,7 +28,9 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 		Short: "create & send transaction",
 		Long: `hscli tx send cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
 								cosmos1yqgv2rhxcgrf5jqrxlg80at5szzlarlcy254re \
-								5satoshi`,
+								5satoshi \
+								--gas=30000 \
+								--gas-prices=1.0satoshi`,
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -52,20 +54,18 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			// gaspriceStr := viper.GetString(client.FlagGasPrices)
-			// var gaspriceInt uint64
-			// if gaspriceStr == "" {
-			// 	gaspriceInt = 1
-			// } else {
-			// 	gaspriceStr = strings.TrimRight(gaspriceStr, sdk.DefaultDenom)
-			// 	gaspriceInt, err = strconv.ParseUint(gaspriceStr, 10, 64)
-			// 	if err != nil {
-			// 		return err
-			// 	}
-			// }
-			msg := htdfservice.NewMsgSendFromDefault(fromaddr, toaddr, coins) //, gaspriceInt)
+			if len(txBldr.GasPrices()) == 0 {
+				return sdk.ErrTxDecode("no gasprice")
+			}
+			gasprice := txBldr.GasPrices()[0].Amount
+			fmt.Println("gasprice:", gasprice)
+
+			gas := txBldr.Gas()
+
+			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.ToUint64(), gas)
+
 			cliCtx.PrintResponse = true
-			fmt.Println("aaaaaaaaaaaaa", msg.Type())
+
 			return CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, fromaddr) //not completed yet, need account name
 		},
 	}

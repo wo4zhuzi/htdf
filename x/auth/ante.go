@@ -4,18 +4,14 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"math"
 	"strings"
 	"time"
 
-	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/orientwalt/tendermint/crypto"
 	"github.com/orientwalt/tendermint/crypto/multisig"
 	"github.com/orientwalt/tendermint/crypto/secp256k1"
 
 	"github.com/orientwalt/htdf/codec"
-	"github.com/orientwalt/htdf/evm/vm"
-	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -427,74 +423,3 @@ func GetSignBytes(chainID string, stdTx StdTx, acc Account, genesis bool) []byte
 		chainID, accNum, acc.GetSequence(), stdTx.Fee, stdTx.Msgs, stdTx.Memo,
 	)
 }
-
-// junying-todo, 2019-11-06
-// from x/core/transition.go
-// IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
-func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
-	// Set the starting gas for the raw transaction
-	var gas uint64
-	if len(data) > 0 && homestead {
-		gas = params.TxGasContractCreation // 53000 -> 60000
-	} else {
-		gas = params.TxGas // 21000 -> 30000
-	}
-	// Bump the required gas by the amount of transactional data
-	if len(data) > 0 {
-		// Zero and non-zero bytes are priced differently
-		var nz uint64
-		for _, byt := range data {
-			if byt != 0 {
-				nz++
-			}
-		}
-		// Make sure we don't exceed uint64 for all data combinations
-		if (math.MaxUint64-gas)/ethparams.TxDataNonZeroGas < nz {
-			return 0, vm.ErrOutOfGas
-		}
-		gas += nz * ethparams.TxDataNonZeroGas
-
-		z := uint64(len(data)) - nz
-		if (math.MaxUint64-gas)/ethparams.TxDataZeroGas < z {
-			return 0, vm.ErrOutOfGas
-		}
-		gas += z * ethparams.TxDataZeroGas
-	}
-	return gas, nil
-}
-
-// junying-todo, 2019-11-06
-// EVM Account Balance Prechecking
-// func PreCheck(acc Account, stdtx StdTx) (err error) {
-// 	//
-// 	// BuyGasCheck
-// 	msgs := stdtx.GetMsgs()
-// 	fee := stdtx.Fee
-// 	// amount := fee.Amount
-// 	// gas := fee.Gas
-// 	// gasprice := fee.GasPrices()
-// 	// coins := acc.GetCoins()
-// 	for i := 0; i < len(msgs); i++ {
-// 		msg := msgs[i]
-// 		msgRoute := msg.Route()
-// 		if msgRoute != "htdfservice" {
-// 			continue
-// 		}
-// 		// Intrinsic
-// 		inputCode, err := hex.DecodeString(msg.GetData())
-// 		if err != nil {
-// 			fmt.Printf("DecodeString error\n")
-// 			continue
-// 		}
-// 		itrsGas, err := IntrinsicGas(inputCode, true)
-// 		if err != nil {
-// 			fmt.Printf("useGas error|err=%s\n", err)
-// 			return err
-// 		}
-// 		if itrsGas > fee.Gas {
-// 			return errors.New("out of gas")
-// 		}
-// 	}
-// 	return
-
-// }

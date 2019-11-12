@@ -1,14 +1,54 @@
 package htdfservice
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"math"
 
+	"github.com/orientwalt/htdf/evm/vm"
 	"github.com/orientwalt/htdf/types"
 
 	"github.com/ethereum/go-ethereum/common"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
+
+// junying-todo, 2019-11-06
+// from x/core/transition.go
+// IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
+func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
+	// Set the starting gas for the raw transaction
+	var gas uint64
+	if len(data) > 0 && homestead {
+		gas = params.TxGasContractCreation // 53000 -> 60000
+	} else {
+		gas = params.TxGas // 21000 -> 30000
+	}
+	// Bump the required gas by the amount of transactional data
+	if len(data) > 0 {
+		// Zero and non-zero bytes are priced differently
+		var nz uint64
+		for _, byt := range data {
+			if byt != 0 {
+				nz++
+			}
+		}
+		// Make sure we don't exceed uint64 for all data combinations
+		if (math.MaxUint64-gas)/ethparams.TxDataNonZeroGas < nz {
+			return 0, vm.ErrOutOfGas
+		}
+		gas += nz * ethparams.TxDataNonZeroGas
+
+		z := uint64(len(data)) - nz
+		if (math.MaxUint64-gas)/ethparams.TxDataZeroGas < z {
+			return 0, vm.ErrOutOfGas
+		}
+		gas += z * ethparams.TxDataZeroGas
+	}
+	return gas, nil
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MsgSendFrom defines a SendFrom message /////////////////////////////////////////////////////////////////////
@@ -39,13 +79,13 @@ func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amoun
 
 // Normal Transaction
 // Default GasLimit, Customized GasPrice
-func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64) MsgSendFrom {
+func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, gaslimit uint64) MsgSendFrom {
 	return MsgSendFrom{
 		From:     fromaddr,
 		To:       toaddr,
 		Amount:   amount,
 		GasPrice: gasPrice,
-		GasLimit: params.TxGas,
+		GasLimit: gaslimit,
 	}
 }
 
@@ -85,11 +125,27 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		if !msg.Amount.IsAllPositive() {
 			return sdk.ErrInsufficientCoins("Amount must be positive")
 		}
+
+		// junying-todo, 2019-11-12
+		if msg.GasLimit < params.TxGas {
+			return sdk.ErrOutOfGas(fmt.Sprintf("gas must be greather than %d", params.TxGas))
+		}
+
 	} else {
-		// access smart contract, amount must be 0 ?
-		// if !msg.Amount.IsZero() {
-		// 	return sdk.NewError(types.Codespace, types.ErrCode_BeZeroAmount, "access smart contract, amount must be 0")
-		// }
+		// junying-todo, 2019-11-12
+		inputCode, err := hex.DecodeString(msg.Data)
+		if err != nil {
+			return sdk.ErrTxDecode("decoding msg.data failed. you should check msg.data")
+		}
+		//Intrinsic gas calc
+		itrsGas, err := IntrinsicGas(inputCode, true)
+		if err != nil {
+			return sdk.ErrOutOfGas("intrinsic out of gas")
+		}
+		if itrsGas > msg.GasLimit {
+			return sdk.ErrOutOfGas(fmt.Sprintf("gas must be greather than %d to pass validating", itrsGas))
+		}
+
 	}
 
 	return nil
@@ -124,10 +180,10 @@ func (msg MsgSendFrom) FromAddress() common.Address {
 	return types.ToEthAddress(msg.From)
 }
 
-// // junying-todo, 2019-11-06
-// func (msg MsgSendFrom) GetData() string {
-// 	return msg.Data
-// }
+// junying-todo, 2019-11-06
+func (msg MsgSendFrom) GetData() string {
+	return msg.Data
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MsgAdd defines a Add message ///////////////////////////////////////////////////////////////////////////////
