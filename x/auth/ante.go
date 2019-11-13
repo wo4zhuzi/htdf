@@ -43,7 +43,6 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		fmt.Println("NewAnteHandler:stdTx.Fee.Gas", stdTx.Fee.Gas)
 		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrices())
 		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
-		fmt.Println("NewAnteHandler:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		if !ok {
 			// Set a gas meter with limit 0 as to prevent an infinite gas meter attack
 			// during runTx.
@@ -72,7 +71,6 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.Gas)
-		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		// AnteHandlers must have their own defer/recover in order for the BaseApp
 		// to know how much gas was used! This is because the GasMeter is created in
 		// the AnteHandler, but if it panics the context won't be set properly in
@@ -100,19 +98,20 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			}
 		}()
 
-		if err := tx.ValidateBasic(); err != nil {
-			return newCtx, err.Result(), true
-		}
+		// moved to baseapp.ValidateTx by junying, 2019-11-13
+		// if err := tx.ValidateBasic(); err != nil {
+		// 	return newCtx, err.Result(), true
+		// }
 
 		// junying-todo, 2019-08-27
 		// conventional gas consuming isn't necessary anymore
 		// evm will replace it.
 		// junying-todo, 2019-10-24
 		// this is enabled again in order to handle non-htdfservice txs.
-		newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+		// junying-todo, 2019-11-13
+		// GasMetering Disabled, Now Constant Gas used for Staking Txs
+		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
 
-		fmt.Println("NewAnteHandler:GasCalc", params.TxSizeCostPerByte, len(newCtx.TxBytes()), params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())))
-		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
 		}

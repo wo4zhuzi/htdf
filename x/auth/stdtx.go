@@ -8,6 +8,9 @@ import (
 	"github.com/orientwalt/tendermint/crypto/multisig"
 
 	"github.com/orientwalt/htdf/codec"
+	"github.com/orientwalt/htdf/params"
+	"github.com/orientwalt/htdf/server/config"
+	"github.com/orientwalt/htdf/types"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -49,15 +52,39 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	if tx.Fee.Amount.IsAnyNegative() {
 		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
 	}
+
+	// junying-todo, 2019-11-13
+	// MinGasPrice Checking
+	var gasprice = tx.Fee.GasPrice
+	minGasPrices, err := types.ParseDecCoins(config.DefaultMinGasPrices)
+	if err != nil {
+		return sdk.ErrTxDecode("DefaultMinGasPrices decode error")
+	}
+	if !gasprice.IsAllGTE(minGasPrices) {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice must be greater than %s", config.DefaultMinGasPrices))
+	}
+	// junying-todo, 2019-11-13
+	// Validate Msgs &
+	// Check MinGas for staking txs
+	var msgs = tx.Msgs
+	if msgs == nil || len(msgs) == 0 {
+		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
+	}
+	for _, msg := range msgs {
+		// Validate the Msg.
+		err := msg.ValidateBasic()
+		if err != nil {
+			return err
+		}
+		// Checking minimum gasprice condition for staking transactions
+		if msg.Route() != "htdfservice" {
+			if tx.Fee.Gas < params.TxStakingDefaultGas {
+				return sdk.ErrInternal(fmt.Sprintf("staking tx gas must be greater than %d", params.TxStakingDefaultGas))
+			}
+		}
+	}
+
 	// added & commented by junying, 2019-11-07
-	// var gasprice = tx.Fee.GasPrice
-	// minGasPrices, err := types.ParseDecCoins(config.DefaultMinGasPrices)
-	// if err != nil {
-	// 	return sdk.ErrTxDecode("defaultMinGasPrices decode error")
-	// }
-	// if gasprice.IsAllGTE(minGasPrices) {
-	// 	return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice %s amount is lower than DefaultMinGasPrices", tx.Fee.GasPrice))
-	// }
 
 	if len(stdSigs) == 0 {
 		return sdk.ErrNoSignatures("no signers")

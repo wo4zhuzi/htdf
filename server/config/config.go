@@ -8,8 +8,7 @@ import (
 
 //
 const (
-	DefaultMinGasPrices     = "1.0satoshi"
-	DefaultMinGasPrice      = 1
+	DefaultMinGasPrices     = "20.0satoshi"
 	ValueSecurityLevel_High = "high"
 	ValueSecurityLevel_Low  = "low"
 

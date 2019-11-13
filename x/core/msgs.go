@@ -12,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/orientwalt/htdf/params"
-	cfg "github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -114,9 +113,6 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress(msg.From.String())
 	}
 
-	if msg.GasPrice < cfg.DefaultMinGasPrice {
-		return sdk.ErrTxDecode(fmt.Sprintf("gasprice must be greather than %d", cfg.DefaultMinGasPrice))
-	}
 	if len(msg.Data) == 0 {
 		// classic transfer
 

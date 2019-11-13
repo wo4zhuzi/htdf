@@ -682,21 +682,16 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 	}
 }
 
-// validateBasicTxMsgs executes basic validator calls for messages.
-func validateBasicTxMsgs(msgs []sdk.Msg) sdk.Error {
-	if msgs == nil || len(msgs) == 0 {
-		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
+// junying-todo, 2019-11-13
+// validateTx executes basic validator calls for messages
+// and checking minimum for
+func validateTx(tx sdk.Tx) sdk.Error {
+	stdtx, ok := tx.(auth.StdTx)
+	if !ok {
+		return sdk.ErrInternal("tx must be StdTx")
 	}
-
-	for _, msg := range msgs {
-		// Validate the Msg.
-		err := msg.ValidateBasic()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	// Validate Tx
+	return stdtx.ValidateBasic()
 }
 
 // retrieve the context for the tx w/ txBytes and other memoized values.
@@ -743,7 +738,6 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 		}
 
-		fmt.Println("runMsgs4:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 		fmt.Println("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
 		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
 
@@ -850,7 +844,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		return
 	}
 
-	if err := validateBasicTxMsgs(msgs); err != nil {
+	if err := validateTx(tx); err != nil {
 		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
 		return err.Result()
 	}
@@ -987,10 +981,8 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
-	fmt.Println("runTx:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", msgs, mode)
 	result = app.runMsgs(runMsgCtx, msgs, mode)
-	fmt.Println("runTx:runMsgCtx.GasMeter().GasConsumed()", runMsgCtx.GasMeter().GasConsumed())
 	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", msgs)
 	result.GasWanted = gasWanted
 
