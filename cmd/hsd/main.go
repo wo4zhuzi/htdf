@@ -7,18 +7,18 @@ import (
 	"github.com/orientwalt/htdf/server"
 	"github.com/orientwalt/htdf/store"
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/libs/log"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	bam "github.com/orientwalt/htdf/app"
 	hsinit "github.com/orientwalt/htdf/init"
 	lite "github.com/orientwalt/htdf/lite/cmd"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cfg "github.com/orientwalt/tendermint/config"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cfg "github.com/tendermint/tendermint/config"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // ExecuteT executes the command, pipes any input to STDIN and return STDOUT,

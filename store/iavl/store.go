@@ -5,11 +5,11 @@ import (
 	"io"
 	"sync"
 
-	"github.com/orientwalt/iavl"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/merkle"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	"github.com/tendermint/iavl"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/merkle"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	dbm "github.com/tendermint/tendermint/libs/db"
 
 	"github.com/orientwalt/htdf/store/cachekv"
 	"github.com/orientwalt/htdf/store/errors"

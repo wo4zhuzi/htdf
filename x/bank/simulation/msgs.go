@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 
 	"github.com/orientwalt/htdf/baseapp"
 	sdk "github.com/orientwalt/htdf/types"

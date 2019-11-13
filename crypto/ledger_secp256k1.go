@@ -10,9 +10,9 @@ import (
 	"github.com/orientwalt/htdf/crypto/keys/hd"
 	"github.com/orientwalt/htdf/types"
 
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
-	tmsecp256k1 "github.com/orientwalt/tendermint/crypto/secp256k1"
 	tmbtcec "github.com/tendermint/btcd/btcec"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
+	tmsecp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 var (

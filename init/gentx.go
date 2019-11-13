@@ -13,10 +13,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cfg "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/crypto"
-	tmcli "github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/libs/common"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/crypto"
+	tmcli "github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/common"
 
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"

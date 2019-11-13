@@ -7,7 +7,7 @@ import (
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"
 	stakeTypes "github.com/orientwalt/htdf/x/staking/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // getBenchmarkMockApp initializes a mock application for this module, for purposes of benchmarking

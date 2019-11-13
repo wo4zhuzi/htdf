@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	tmtime "github.com/orientwalt/tendermint/types/time"
+	tmtime "github.com/tendermint/tendermint/types/time"
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"

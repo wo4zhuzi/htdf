@@ -6,8 +6,8 @@ import (
 
 	bam "github.com/orientwalt/htdf/mock/baseapp"
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 type (

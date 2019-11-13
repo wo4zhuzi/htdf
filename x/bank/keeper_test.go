@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
-	tmtime "github.com/orientwalt/tendermint/types/time"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+	tmtime "github.com/tendermint/tendermint/types/time"
 
 	codec "github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/store"

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orientwalt/tendermint/libs/cli"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/orientwalt/htdf/tests"
 

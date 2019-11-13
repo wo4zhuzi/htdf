@@ -12,7 +12,7 @@ import (
 	"github.com/orientwalt/htdf/codec"
 
 	amino "github.com/tendermint/go-amino"
-	"github.com/orientwalt/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/common"
 
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/keys"

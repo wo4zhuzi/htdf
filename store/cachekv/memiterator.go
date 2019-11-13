@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"container/list"
 
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	dbm "github.com/tendermint/tendermint/libs/db"
 )
 
 // Iterates over iterKVCache items.

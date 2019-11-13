@@ -9,7 +9,7 @@ import (
 	"github.com/orientwalt/htdf/x/params"
 
 	"github.com/orientwalt/htdf/x/guardian"
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 const (

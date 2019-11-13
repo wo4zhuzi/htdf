@@ -18,11 +18,11 @@ import (
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/x/staking"
 
-	tmconfig "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/crypto"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	"github.com/orientwalt/tendermint/types"
-	tmtime "github.com/orientwalt/tendermint/types/time"
+	tmconfig "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/crypto"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/types"
+	tmtime "github.com/tendermint/tendermint/types/time"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

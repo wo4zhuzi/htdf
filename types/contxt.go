@@ -8,8 +8,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/orientwalt/htdf/store/gaskv"
 	stypes "github.com/orientwalt/htdf/store/types"

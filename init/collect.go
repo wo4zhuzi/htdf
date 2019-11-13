@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	cfg "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/types"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

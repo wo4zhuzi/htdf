@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	sdk "github.com/orientwalt/htdf/types"
 )

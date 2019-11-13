@@ -8,16 +8,16 @@ import (
 	"github.com/orientwalt/htdf/x/params"
 	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/require"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 	"os"
 
 	newevmtypes "github.com/orientwalt/htdf/evm/types"
 
 	"github.com/orientwalt/htdf/codec"
 
-	tmlog "github.com/orientwalt/tendermint/libs/log"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/ethereum/go-ethereum/common"
 

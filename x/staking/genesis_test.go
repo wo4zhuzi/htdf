@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/orientwalt/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/orientwalt/htdf/types"
 	keep "github.com/orientwalt/htdf/x/staking/keeper"

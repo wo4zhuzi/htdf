@@ -12,8 +12,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	tiavl "github.com/orientwalt/iavl"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	tiavl "github.com/tendermint/iavl"
+	dbm "github.com/tendermint/tendermint/libs/db"
 )
 
 // copied from iavl/store_test.go

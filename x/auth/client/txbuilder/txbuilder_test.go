@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/orientwalt/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"

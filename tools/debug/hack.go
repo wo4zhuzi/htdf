@@ -7,14 +7,14 @@ import (
 	"os"
 	"path"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
 	bam "github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/app/protocol"
@@ -23,8 +23,8 @@ import (
 	"encoding/json"
 
 	sdk "github.com/orientwalt/htdf/types"
-	cfg "github.com/orientwalt/tendermint/config"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	cfg "github.com/tendermint/tendermint/config"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func runHackCmd(cmd *cobra.Command, args []string) error {

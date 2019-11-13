@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
 	"github.com/stretchr/testify/require"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 var invalidStrs = []string{

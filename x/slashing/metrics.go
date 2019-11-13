@@ -4,7 +4,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/discard"
 	"github.com/go-kit/kit/metrics/prometheus"
-	cfg "github.com/orientwalt/tendermint/config"
+	cfg "github.com/tendermint/tendermint/config"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 

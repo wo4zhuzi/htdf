@@ -3,8 +3,8 @@ package rootmulti
 import (
 	"testing"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/stretchr/testify/require"
 
 	"github.com/orientwalt/htdf/store/iavl"

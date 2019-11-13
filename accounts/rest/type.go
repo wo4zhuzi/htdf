@@ -2,7 +2,7 @@ package rest
 
 import (
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 //accinfo

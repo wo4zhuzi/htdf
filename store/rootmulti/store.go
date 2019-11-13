@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/merkle"
-	"github.com/orientwalt/tendermint/crypto/tmhash"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/merkle"
+	"github.com/tendermint/tendermint/crypto/tmhash"
+	dbm "github.com/tendermint/tendermint/libs/db"
 
 	"github.com/orientwalt/htdf/store/cachemulti"
 	"github.com/orientwalt/htdf/store/dbadapter"

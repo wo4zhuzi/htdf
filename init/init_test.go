@@ -14,10 +14,10 @@ import (
 	"github.com/orientwalt/htdf/server/mock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
-	abciServer "github.com/orientwalt/tendermint/abci/server"
-	tcmd "github.com/orientwalt/tendermint/cmd/tendermint/commands"
-	"github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/libs/log"
+	abciServer "github.com/tendermint/tendermint/abci/server"
+	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 func TestInitCmd(t *testing.T) {

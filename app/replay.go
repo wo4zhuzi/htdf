@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/orientwalt/htdf/server"
-	bc "github.com/orientwalt/tendermint/blockchain"
-	tmcli "github.com/orientwalt/tendermint/libs/cli"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
-	"github.com/orientwalt/tendermint/node"
-	sm "github.com/orientwalt/tendermint/state"
+	bc "github.com/tendermint/tendermint/blockchain"
+	tmcli "github.com/tendermint/tendermint/libs/cli"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+	"github.com/tendermint/tendermint/node"
+	sm "github.com/tendermint/tendermint/state"
 	"github.com/spf13/viper"
 )
 

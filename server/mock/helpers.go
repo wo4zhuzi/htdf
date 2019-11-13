@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 // SetupApp returns an application as well as a clean-up function

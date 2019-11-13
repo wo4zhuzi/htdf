@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/orientwalt/htdf/crypto/keys/hd"

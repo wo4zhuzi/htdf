@@ -10,8 +10,8 @@ import (
 	"github.com/orientwalt/htdf/crypto/keys/hd"
 	"github.com/orientwalt/htdf/crypto/keys/mintkey"
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 func init() {

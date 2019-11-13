@@ -17,7 +17,7 @@ import (
 	"github.com/orientwalt/htdf/x/slashing"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 // export the state of iris for a genesis file

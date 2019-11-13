@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/orientwalt/tendermint/libs/log"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 // flags

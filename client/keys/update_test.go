@@ -9,7 +9,7 @@ import (
 
 	"github.com/orientwalt/htdf/tests"
 	"github.com/spf13/viper"
-	"github.com/orientwalt/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/stretchr/testify/assert"
 )

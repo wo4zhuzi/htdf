@@ -1,7 +1,7 @@
 package types
 
 import (
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	cmn "github.com/tendermint/tendermint/libs/common"
 
 	"github.com/orientwalt/htdf/store/types"
 )

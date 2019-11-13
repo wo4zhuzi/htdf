@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
 
 	"github.com/orientwalt/htdf/mock"
 	sdk "github.com/orientwalt/htdf/types"

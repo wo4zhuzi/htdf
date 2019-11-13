@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/merkle"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/merkle"
+	dbm "github.com/tendermint/tendermint/libs/db"
 
 	"github.com/orientwalt/htdf/store/errors"
 	"github.com/orientwalt/htdf/store/types"

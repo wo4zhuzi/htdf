@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	amino "github.com/tendermint/go-amino"
-	"github.com/orientwalt/tendermint/crypto/multisig"
-	"github.com/orientwalt/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/crypto/multisig"
+	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"

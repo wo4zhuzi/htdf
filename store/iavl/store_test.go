@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/orientwalt/iavl"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	"github.com/tendermint/iavl"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	dbm "github.com/tendermint/tendermint/libs/db"
 
 	"github.com/orientwalt/htdf/store/errors"
 	"github.com/orientwalt/htdf/store/types"

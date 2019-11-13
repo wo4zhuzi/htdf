@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	"github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/stretchr/testify/require"
 
 	"github.com/orientwalt/htdf/app/v0"
@@ -22,7 +22,7 @@ import (
 	"github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func setGenesis(happ *HtdfServiceApp, accs ...*auth.BaseAccount) error {

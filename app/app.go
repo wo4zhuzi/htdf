@@ -11,8 +11,8 @@ import (
 	"github.com/orientwalt/htdf/app/protocol"
 	"github.com/spf13/viper"
 
-	"github.com/orientwalt/tendermint/libs/log"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	"github.com/tendermint/tendermint/libs/log"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/x/auth"
@@ -20,12 +20,12 @@ import (
 	//"github.com/orientwalt/htdf/x/mint"
 
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
 
 	v0 "github.com/orientwalt/htdf/app/v0"
-	cfg "github.com/orientwalt/tendermint/config"
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	cfg "github.com/tendermint/tendermint/config"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 const (
