@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/orientwalt/htdf/params"
+	cfg "github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -90,7 +91,7 @@ func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.C
 }
 
 // Contract Transaction
-func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gas uint64, gasPrice uint64, gasLimit uint64) MsgSendFrom {
+func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, gasLimit uint64) MsgSendFrom {
 	return MsgSendFrom{
 		From:     fromaddr,
 		To:       toaddr,
@@ -113,6 +114,9 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress(msg.From.String())
 	}
 
+	if msg.GasPrice < cfg.DefaultMinGasPrice {
+		return sdk.ErrTxDecode(fmt.Sprintf("gasprice must be greather than %d", cfg.DefaultMinGasPrice))
+	}
 	if len(msg.Data) == 0 {
 		// classic transfer
 

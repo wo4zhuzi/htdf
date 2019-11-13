@@ -6,8 +6,10 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 )
 
+//
 const (
 	DefaultMinGasPrices     = "1.0satoshi"
+	DefaultMinGasPrice      = 1
 	ValueSecurityLevel_High = "high"
 	ValueSecurityLevel_Low  = "low"
 

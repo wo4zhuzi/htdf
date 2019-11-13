@@ -15,7 +15,7 @@ BLK_TIME = 5
 #### gasprice < 1satoshi
 TX_AMOUNT = 1000000
 UNIT = satoshi
-TxGas = 20000
+TxGas = 30000
 GAS_PRICE = 1.0
 test.normal:
 	@acc1=$$(hscli accounts list|row 1);\
