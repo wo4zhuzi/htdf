@@ -17,6 +17,7 @@
 package core
 
 import (
+	"github.com/orientwalt/htdf/utils"
 	"math/big"
 	"time"
 
@@ -48,7 +49,7 @@ func (self FooChainContext) GetHeader(hash common.Hash, number uint64) *types.He
 		Number:     big.NewInt(int64(number)),
 		GasLimit:   0,
 		GasUsed:    0,
-		Time:       big.NewInt(time.Now().Unix()),
+		Time:       big.NewInt(time.Now().Unix()).Uint64(),
 		Extra:      nil,
 	}
 }
@@ -67,7 +68,7 @@ func NewEVMContext(msg IMessage, author *common.Address, height uint64) vm.Conte
 	beneficiary = *author
 
 	var fooChainContext FooChainContext
-	fooHash := common.StringToHash("xxx")
+	fooHash := utils.StringToHash("xxx")
 	fooHeader := fooChainContext.GetHeader(fooHash, height)
 
 	return vm.Context{
@@ -77,7 +78,7 @@ func NewEVMContext(msg IMessage, author *common.Address, height uint64) vm.Conte
 		Origin:      msg.FromAddress(),
 		Coinbase:    beneficiary,
 		BlockNumber: new(big.Int).Set(fooHeader.Number),
-		Time:        new(big.Int).Set(fooHeader.Time),
+		Time:        new(big.Int).Set(big.NewInt(int64(fooHeader.Time))),
 		Difficulty:  new(big.Int).Set(fooHeader.Difficulty),
 		GasLimit:    fooHeader.GasLimit,
 		GasPrice:    big.NewInt(0),
