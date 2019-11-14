@@ -3,6 +3,7 @@ module github.com/orientwalt/htdf
 go 1.12
 
 require (
+	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/aristanetworks/goarista v0.0.0-20191023202215-f096da5361bb
 	github.com/astaxie/beego v1.12.0
 	github.com/bartekn/go-bip39 v0.0.0-20171116152956-a05967ea095d
@@ -14,7 +15,7 @@ require (
 	github.com/deckarep/golang-set v1.7.1
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/emicklei/proto v1.8.0
-	github.com/ethereum/go-ethereum v1.8.0
+	github.com/ethereum/go-ethereum v1.8.27
 	github.com/go-kit/kit v0.9.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.2
