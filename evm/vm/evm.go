@@ -42,15 +42,15 @@ type (
 
 // run runs the given contract and takes care of running precompiles with a fallback to the byte code interpreter.
 func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, error) {
-	if contract.CodeAddr != nil {
-		precompiles := PrecompiledContractsHomestead
-		if evm.ChainConfig().IsByzantium(evm.BlockNumber) {
-			precompiles = PrecompiledContractsByzantium
-		}
-		if p := precompiles[*contract.CodeAddr]; p != nil {
-			return RunPrecompiledContract(p, input, contract)
-		}
-	}
+	//if contract.CodeAddr != nil {
+	//	precompiles := PrecompiledContractsHomestead
+	//	if evm.ChainConfig().IsByzantium(evm.BlockNumber) {
+	//		precompiles = PrecompiledContractsByzantium
+	//	}
+	//	if p := precompiles[*contract.CodeAddr]; p != nil {
+	//		return RunPrecompiledContract(p, input, contract)
+	//	}
+	//}
 	for _, interpreter := range evm.interpreters {
 		if interpreter.CanRun(contract.Code) {
 			if evm.interpreter != interpreter {
@@ -197,18 +197,18 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		snapshot = evm.StateDB.Snapshot()
 	)
 	if !evm.StateDB.Exist(addr) {
-		precompiles := PrecompiledContractsHomestead
-		if evm.ChainConfig().IsByzantium(evm.BlockNumber) {
-			precompiles = PrecompiledContractsByzantium
-		}
-		if precompiles[addr] == nil && evm.ChainConfig().IsEIP158(evm.BlockNumber) && value.Sign() == 0 {
-			// Calling a non existing account, don't do anything, but ping the tracer
-			if evm.vmConfig.Debug && evm.depth == 0 {
-				evm.vmConfig.Tracer.CaptureStart(caller.Address(), addr, false, input, gas, value)
-				evm.vmConfig.Tracer.CaptureEnd(ret, 0, 0, nil)
-			}
-			return nil, gas, nil
-		}
+		//precompiles := PrecompiledContractsHomestead
+		//if evm.ChainConfig().IsByzantium(evm.BlockNumber) {
+		//	precompiles = PrecompiledContractsByzantium
+		//}
+		//if precompiles[addr] == nil && evm.ChainConfig().IsEIP158(evm.BlockNumber) && value.Sign() == 0 {
+		//	// Calling a non existing account, don't do anything, but ping the tracer
+		//	if evm.vmConfig.Debug && evm.depth == 0 {
+		//		evm.vmConfig.Tracer.CaptureStart(caller.Address(), addr, false, input, gas, value)
+		//		evm.vmConfig.Tracer.CaptureEnd(ret, 0, 0, nil)
+		//	}
+		//	return nil, gas, nil
+		//}
 		evm.StateDB.CreateAccount(addr)
 	}
 	evm.Transfer(evm.StateDB, caller.Address(), to.Address(), value)
@@ -380,8 +380,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	if !evm.CanTransfer(evm.StateDB, caller.Address(), value) {
 		return nil, common.Address{}, gas, ErrInsufficientBalance
 	}
-	nonce := evm.StateDB.GetNonce(caller.Address())
-	evm.StateDB.SetNonce(caller.Address(), nonce+1)
+	//nonce := evm.StateDB.GetNonce(caller.Address())
 
 	// Ensure there's no existing contract already at the designated address
 	contractHash := evm.StateDB.GetCodeHash(address)
