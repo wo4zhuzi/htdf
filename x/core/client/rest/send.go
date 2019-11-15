@@ -165,7 +165,7 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 		}
 
 		if baseReq.Simulate {
-			rest.WriteSimulationResponse(w, cdc, txBldr.Gas())
+			rest.WriteSimulationResponse(w, cdc, txBldr.GasWanted())
 			return
 		}
 	}

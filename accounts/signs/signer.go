@@ -69,7 +69,7 @@ func BuildAndSign(txbuilder authtxb.TxBuilder, privKey tmcrypto.PrivKey, msgs []
 
 //
 func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignMsg, error) {
-	fmt.Println("BuildSignMsg:txbuilder.Gas()", txbuilder.Gas())
+	fmt.Println("BuildSignMsg:txbuilder.GasWanted()", txbuilder.GasWanted())
 	chainID := txbuilder.ChainID()
 	if chainID == "" {
 		return authtxb.StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
@@ -79,17 +79,17 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 	if txbuilder.GasPrices().IsZero() {
 		return authtxb.StdSignMsg{}, errors.New("gasprices can't not be zero")
 	}
-	if txbuilder.Gas() <= 0 {
+	if txbuilder.GasWanted() <= 0 {
 		return authtxb.StdSignMsg{}, errors.New("gas must be provided")
 	}
-	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.Gas(), txbuilder.GasPrices()), txbuilder.Gas())
+	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrices()), txbuilder.GasWanted())
 	return authtxb.StdSignMsg{
 		ChainID:       txbuilder.ChainID(),
 		AccountNumber: txbuilder.AccountNumber(),
 		Sequence:      txbuilder.Sequence(),
 		Memo:          txbuilder.Memo(),
 		Msgs:          msgs,
-		Fee:           auth.NewStdFee(txbuilder.Gas(), txbuilder.GasPrices()), // auth.NewStdFee(txbuilder.Gas(), fees),
+		Fee:           auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrices()), // auth.NewStdFee(txbuilder.GasWanted(), fees),
 	}, nil
 }
 

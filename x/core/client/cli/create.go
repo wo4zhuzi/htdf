@@ -70,7 +70,7 @@ func PrintUnsignedStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msg
 			return err
 		}
 
-		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.Gas())
+		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.GasWanted())
 	}
 	stdSignMsg, err := txBldr.BuildSignMsg(msgs)
 	if err != nil {

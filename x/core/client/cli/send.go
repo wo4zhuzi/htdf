@@ -37,7 +37,7 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			fmt.Println("GetCmdSend:txBldr.Gas()", txBldr.Gas())
+			fmt.Println("GetCmdSend:txBldr.GasWanted()", txBldr.GasWanted())
 
 			fromaddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
@@ -60,7 +60,7 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 			gasprice := txBldr.GasPrices()[0].Amount
 			fmt.Println("gasprice:", gasprice)
 
-			gas := txBldr.Gas()
+			gas := txBldr.GasWanted()
 			fmt.Println("gasprice:", gasprice.ToUint64())
 			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.ToUint64(), gas)
 
@@ -119,7 +119,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 			return err
 		}
 
-		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.Gas()}
+		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.GasWanted()}
 		fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
 	}
 	fmt.Println("1--------------------")

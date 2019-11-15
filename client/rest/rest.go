@@ -50,7 +50,7 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 		}
 
 		if br.Simulate {
-			rest.WriteSimulationResponse(w, cdc, txBldr.Gas())
+			rest.WriteSimulationResponse(w, cdc, txBldr.GasWanted())
 			return
 		}
 	}
