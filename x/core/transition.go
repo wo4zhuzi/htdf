@@ -27,11 +27,11 @@ type StateTransition struct {
 
 func NewStateTransition(evm *vm.EVM, msg MsgSendFrom, stateDB *evmstate.CommitStateDB) *StateTransition {
 	return &StateTransition{
-		gpGasLimit: new(ethcore.GasPool).AddGas(msg.GasLimit),
+		gpGasLimit: new(ethcore.GasPool).AddGas(msg.Fee.GasWanted),
 		evm:        evm,
 		stateDB:    stateDB,
 		msg:        msg,
-		gasPrice:   big.NewInt(int64(msg.GasPrice)),
+		gasPrice:   big.NewInt(int64(msg.Fee.GetGasPrice())),
 	}
 }
 
@@ -45,13 +45,13 @@ func (st *StateTransition) useGas(amount uint64) error {
 }
 
 func (st *StateTransition) buyGas() error {
-	st.gas = st.msg.GasLimit
+	st.gas = st.msg.Fee.GasWanted
 	st.initialGas = st.gas
 	fmt.Printf("msgGas=%d\n", st.initialGas)
 
 	eaSender := apptypes.ToEthAddress(st.msg.From)
 
-	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.GasLimit), st.gasPrice)
+	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.Fee.GasWanted), st.gasPrice)
 	fmt.Printf("msgGasVal=%s\n", msgGasVal.String())
 
 	if st.stateDB.GetBalance(eaSender).Cmp(msgGasVal) < 0 {
@@ -59,7 +59,7 @@ func (st *StateTransition) buyGas() error {
 	}
 
 	// try call subGas method, to check gas limit
-	if err := st.gpGasLimit.SubGas(st.msg.GasLimit); err != nil {
+	if err := st.gpGasLimit.SubGas(st.msg.Fee.GasWanted); err != nil {
 		fmt.Printf("SubGas error|err=%s\n", err)
 		return err
 	}

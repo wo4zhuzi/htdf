@@ -86,7 +86,7 @@ type BaseApp struct {
 
 	// The minimum gas prices a validator is willing to accept for processing a
 	// transaction. This is mainly used for DoS and spam prevention.
-	minGasPrices sdk.DecCoins
+	minGasPrices sdk.Coins
 
 	// flag for sealing options and parameters to a BaseApp
 	sealed bool
@@ -267,7 +267,7 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	return nil
 }
 
-func (app *BaseApp) setMinGasPrices(gasPrices sdk.DecCoins) {
+func (app *BaseApp) setMinGasPrices(gasPrices sdk.Coins) {
 	app.minGasPrices = gasPrices
 }
 
@@ -709,72 +709,53 @@ func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Con
 }
 
 // runMsgs iterates through all the messages and executes them.
-func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (result sdk.Result) {
-	idxLogs := make([]sdk.ABCIMessageLog, 0, len(msgs)) // a list of JSON-encoded logs with msg index
+func (app *BaseApp) runMsgs(ctx sdk.Context, msg sdk.Msg, mode runTxMode) (result sdk.Result) {
 
 	var data []byte   // NOTE: we just append them all (?!)
 	var tags sdk.Tags // also just append them all
 	var code sdk.CodeType
 	var codespace sdk.CodespaceType
 	var gasUsed uint64
-
+	var idxLog sdk.ABCIMessageLog
 	fmt.Println("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
 	fmt.Println("runMsgs0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
-	for msgIdx, msg := range msgs {
-		// match message route
-		msgRoute := msg.Route()
-		fmt.Println("999999999999", msgRoute)
-		//handler := app.router.Route(msgRoute)
-		handler := app.Engine.GetCurrentProtocol().GetRouter().Route(msgRoute)
-		if handler == nil {
-			return sdk.ErrUnknownRequest("Unrecognized Msg type: " + msgRoute).Result()
-		}
-
-		var msgResult sdk.Result
-		// skip actual execution for CheckTx mode
-		if mode != runTxModeCheck {
-			fmt.Println("runMsgs/msgResult.IsOK()~~~~~~~~~~~~~~~~~~~~~~~~", msgRoute)
-			msgResult = handler(ctx, msg)
-
-		}
-
-		fmt.Println("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
-		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
-
-		// Result.Data must be length prefixed in order to separate each result
-		data = append(data, msgResult.Data...)
-		tags = append(tags, sdk.MakeTag(sdk.TagAction, msg.Type()))
-		tags = append(tags, msgResult.Tags...)
-
-		idxLog := sdk.ABCIMessageLog{MsgIndex: msgIdx, Log: msgResult.Log}
-
-		// stop execution and return on first failed message
-		if !msgResult.IsOK() {
-			idxLog.Success = false
-			idxLogs = append(idxLogs, idxLog)
-
-			code = msgResult.Code
-			codespace = msgResult.Codespace
-
-			// junying-todo, 2019-11-05
-			if msgRoute == "htdfservice" {
-				gasUsed = gasUsed + msgResult.GasUsed
-			}
-			break
-		}
-
-		idxLog.Success = true
-		idxLogs = append(idxLogs, idxLog)
-
-		// junying-todo, 2019-10-24
-		// this is for non-htdfservice txs
-		if msgRoute == "htdfservice" {
-			gasUsed = gasUsed + msgResult.GasUsed
-		} else {
-			gasUsed = ctx.GasMeter().GasConsumed()
-		}
+	// match message route
+	msgRoute := msg.Route()
+	fmt.Println("999999999999", msgRoute)
+	//handler := app.router.Route(msgRoute)
+	handler := app.Engine.GetCurrentProtocol().GetRouter().Route(msgRoute)
+	if handler == nil {
+		return sdk.ErrUnknownRequest("Unrecognized Msg type: " + msgRoute).Result()
 	}
-	logJSON := codec.Cdc.MustMarshalJSON(idxLogs)
+
+	var msgResult sdk.Result
+	// skip actual execution for CheckTx mode
+	if mode != runTxModeCheck {
+		fmt.Println("runMsgs/msgResult.IsOK()~~~~~~~~~~~~~~~~~~~~~~~~", msgRoute)
+		msgResult = handler(ctx, msg)
+
+	}
+
+	fmt.Println("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
+	// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
+
+	// Result.Data must be length prefixed in order to separate each result
+	data = append(data, msgResult.Data...)
+	tags = append(tags, sdk.MakeTag(sdk.TagAction, msg.Type()))
+	tags = append(tags, msgResult.Tags...)
+
+	idxLog = sdk.ABCIMessageLog{MsgIndex: 0, Log: msgResult.Log}
+
+	// stop execution and return on first failed message
+	if !msgResult.IsOK() {
+		idxLog.Success = false
+		code = msgResult.Code
+		codespace = msgResult.Codespace
+	} else {
+		idxLog.Success = true
+	}
+	gasUsed = msgResult.GasUsed
+	logJSON := codec.Cdc.MustMarshalJSON(idxLog)
 	//
 	result = sdk.Result{
 		Code:      code,
@@ -838,8 +819,8 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		return
 	}
 
-	var msgs = tx.GetMsgs()
-	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msgs); err != nil {
+	var msg = tx.GetMsg()
+	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msg); err != nil {
 		result = err.Result()
 		return
 	}
@@ -981,9 +962,9 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
-	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", msgs, mode)
-	result = app.runMsgs(runMsgCtx, msgs, mode)
-	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", msgs)
+	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", msg, mode)
+	result = app.runMsgs(runMsgCtx, msg, mode)
+	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", msg)
 	result.GasWanted = gasWanted
 
 	if mode == runTxModeSimulate {

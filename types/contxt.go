@@ -51,7 +51,7 @@ func NewContext(ms MultiStore, header abci.Header, isCheckTx bool, logger log.Lo
 	c = c.WithVoteInfos(nil)
 	// c = c.WithGasMeter(stypes.NewInfiniteGasMeter())// commented & added by junying, 2019-11-11
 	c = c.WithGasMeter(stypes.NewFalseGasMeter()) // in order to disable gasmeter for tx
-	c = c.WithMinGasPrices(DecCoins{})
+	c = c.WithMinGasPrices(Coins{})               // DecCoins to Coins
 	c = c.WithConsensusParams(nil)
 	c = c.WithCheckValidNum(0)
 	c = c.WithCoinFlowTrigger("")
@@ -235,7 +235,8 @@ func (c Context) WithIsCheckTx(isCheckTx bool) Context {
 	return c.withValue(contextKeyIsCheckTx, isCheckTx)
 }
 
-func (c Context) WithMinGasPrices(gasPrices DecCoins) Context {
+// DecCoins to Coins
+func (c Context) WithMinGasPrices(gasPrices Coins) Context {
 	return c.withValue(contextKeyMinGasPrices, gasPrices)
 }
 

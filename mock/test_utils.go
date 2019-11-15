@@ -51,10 +51,10 @@ func CheckBalance(t *testing.T, app *App, addr sdk.AccAddress, exp sdk.Coins) {
 // compared against the parameter 'expPass'. A test assertion is made using the
 // parameter 'expPass' against the result. A corresponding result is returned.
 func CheckGenTx(
-	t *testing.T, app *baseapp.BaseApp, msgs []sdk.Msg, accNums []uint64,
-	seq []uint64, expPass bool, priv ...crypto.PrivKey,
+	t *testing.T, app *baseapp.BaseApp, msg sdk.Msg, accNum uint64,
+	seq uint64, expPass bool, priv crypto.PrivKey,
 ) sdk.Result {
-	tx := GenTx(msgs, accNums, seq, priv...)
+	tx := GenTx(msg, accNum, seq, priv)
 	res := app.Check(tx)
 
 	if expPass {
@@ -71,10 +71,10 @@ func CheckGenTx(
 // the parameter 'expPass' against the result. A corresponding result is
 // returned.
 func SignCheckDeliver(
-	t *testing.T, app *baseapp.BaseApp, msgs []sdk.Msg, accNums []uint64,
-	seq []uint64, expSimPass, expPass bool, priv ...crypto.PrivKey,
+	t *testing.T, app *baseapp.BaseApp, msg sdk.Msg, accNum uint64,
+	seq uint64, expSimPass, expPass bool, priv crypto.PrivKey,
 ) sdk.Result {
-	tx := GenTx(msgs, accNums, seq, priv...)
+	tx := GenTx(msg, accNum, seq, priv)
 	// Must simulate now as CheckTx doesn't run Msgs anymore
 	res := app.Simulate(tx)
 

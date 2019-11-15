@@ -39,7 +39,7 @@ const (
 	RunTxModeDeliver RunTxMode = iota
 )
 
-type RunMsg func(ctx sdk.Context, msgs []sdk.Msg, mode RunTxMode) sdk.Result
+type RunMsg func(ctx sdk.Context, msg sdk.Msg, mode RunTxMode) sdk.Result
 
 // BaseApp reflects the ABCI application implementation.
 type BaseApp struct {
@@ -531,21 +531,14 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 }
 
 // Basic validator for msgs
-func validateBasicTxMsgs(msgs []sdk.Msg) sdk.Error {
-	if msgs == nil || len(msgs) == 0 {
+func validateBasicTxMsgs(msg sdk.Msg) sdk.Error {
+	if msg == nil {
 		// TODO: probably shouldn't be ErrInternal. Maybe new ErrInvalidMessage, or ?
 		return sdk.ErrInternal("Tx.GetMsgs() must return at least one message in list")
 	}
 
-	for _, msg := range msgs {
-		// Validate the Msg.
-		err := msg.ValidateBasic()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	// Validate the Msg.
+	return msg.ValidateBasic()
 }
 
 // retrieve the context for the ante handler and store the tx bytes; store
@@ -560,49 +553,45 @@ func (app *BaseApp) getContextForAnte(mode RunTxMode, txBytes []byte) (ctx sdk.C
 }
 
 // Iterates through msgs and executes them
-func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode RunTxMode) (result sdk.Result) {
+func (app *BaseApp) runMsgs(ctx sdk.Context, msg sdk.Msg, mode RunTxMode) (result sdk.Result) {
 	if app.runMsg != nil {
-		return app.runMsg(ctx, msgs, mode)
+		return app.runMsg(ctx, msg, mode)
 	}
 
 	// accumulate results
-	logs := make([]string, 0, len(msgs))
+	var log string
 	var data []byte   // NOTE: we just append them all (?!)
 	var tags sdk.Tags // also just append them all
 	var code sdk.CodeType
 	var codespace sdk.CodespaceType
-	for msgIdx, msg := range msgs {
-		// Match route.
-		msgRoute := msg.Route()
-		handler := app.router.Route(msgRoute)
-		if handler == nil {
-			return sdk.ErrUnknownRequest("Unrecognized Msg type: " + msgRoute).Result()
-		}
+	// Match route.
+	msgRoute := msg.Route()
+	handler := app.router.Route(msgRoute)
+	if handler == nil {
+		return sdk.ErrUnknownRequest("Unrecognized Msg type: " + msgRoute).Result()
+	}
 
-		var msgResult sdk.Result
-		// Skip actual execution for CheckTx
-		if mode != RunTxModeCheck {
-			msgResult = handler(ctx, msg)
-		}
-		msgResult.Tags = append(msgResult.Tags, sdk.MakeTag("action", msg.Type()))
+	var msgResult sdk.Result
+	// Skip actual execution for CheckTx
+	if mode != RunTxModeCheck {
+		msgResult = handler(ctx, msg)
+	}
+	msgResult.Tags = append(msgResult.Tags, sdk.MakeTag("action", msg.Type()))
 
-		// NOTE: GasWanted is determined by ante handler and
-		// GasUsed by the GasMeter
+	// NOTE: GasWanted is determined by ante handler and
+	// GasUsed by the GasMeter
 
-		// Append Data and Tags
-		data = append(data, msgResult.Data...)
-		tags = append(tags, msgResult.Tags...)
+	// Append Data and Tags
+	data = append(data, msgResult.Data...)
+	tags = append(tags, msgResult.Tags...)
 
-		// Stop execution and return on first failed message.
-		if !msgResult.IsOK() {
-			logs = append(logs, fmt.Sprintf("Msg %d failed: %s", msgIdx, msgResult.Log))
-			code = msgResult.Code
-			codespace = msgResult.Codespace
-			break
-		}
-
-		// Construct usable logs in multi-message transactions.
-		logs = append(logs, fmt.Sprintf("Msg %d: %s", msgIdx, msgResult.Log))
+	// Stop execution and return on first failed message.
+	if !msgResult.IsOK() {
+		log = fmt.Sprintf("Msg %d failed: %s\n", msgResult.Log)
+		code = msgResult.Code
+		codespace = msgResult.Codespace
+	} else {
+		log = fmt.Sprintf("Msg: %s\n", msgResult.Log)
 	}
 
 	// Set the final gas values.
@@ -610,7 +599,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode RunTxMode) (re
 		Code:      code,
 		Codespace: codespace,
 		Data:      data,
-		Log:       strings.Join(logs, "\n"),
+		Log:       log,
 		GasUsed:   ctx.GasMeter().GasConsumed(),
 		// TODO: FeeAmount/FeeDenom
 		Tags: tags,
@@ -676,8 +665,8 @@ func (app *BaseApp) runTx(mode RunTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		}
 	}()
 
-	var msgs = tx.GetMsgs()
-	if err := validateBasicTxMsgs(msgs); err != nil {
+	var msg = tx.GetMsg()
+	if err := validateBasicTxMsgs(tx.GetMsg()); err != nil {
 		return err.Result()
 	}
 
@@ -704,7 +693,7 @@ func (app *BaseApp) runTx(mode RunTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 
 	if mode == RunTxModeSimulate {
-		result = app.runMsgs(ctx, msgs, mode)
+		result = app.runMsgs(ctx, msg, mode)
 		result.GasWanted = gasWanted
 		return
 	}
@@ -719,7 +708,7 @@ func (app *BaseApp) runTx(mode RunTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 
 	ctx = ctx.WithMultiStore(msCache)
-	result = app.runMsgs(ctx, msgs, mode)
+	result = app.runMsgs(ctx, msg, mode)
 	result.GasWanted = gasWanted
 
 	// only update state if all messages pass

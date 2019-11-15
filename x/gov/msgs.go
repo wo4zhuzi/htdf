@@ -3,6 +3,7 @@ package gov
 import (
 	"fmt"
 
+	"github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -25,6 +26,7 @@ type MsgSubmitProposal struct {
 	ProposalType   ProposalKind   `json:"proposal_type"`   //  Type of proposal. Initial set {PlainTextProposal, SoftwareUpgradeProposal}
 	Proposer       sdk.AccAddress `json:"proposer"`        //  Address of the proposer
 	InitialDeposit sdk.Coins      `json:"initial_deposit"` //  Initial deposit paid by sender. Must be strictly positive.
+	Fee            sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSubmitProposal(title, description string, proposalType ProposalKind, proposer sdk.AccAddress, initialDeposit sdk.Coins) MsgSubmitProposal {
@@ -34,6 +36,7 @@ func NewMsgSubmitProposal(title, description string, proposalType ProposalKind, 
 		ProposalType:   proposalType,
 		Proposer:       proposer,
 		InitialDeposit: initialDeposit,
+		Fee:            sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -81,16 +84,24 @@ func (msg MsgSubmitProposal) GetSignBytes() []byte {
 }
 
 // Implements Msg.
-func (msg MsgSubmitProposal) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Proposer}
+func (msg MsgSubmitProposal) GetSigner() sdk.AccAddress {
+	return msg.Proposer
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSubmitProposal) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSubmitProposal) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 type MsgSubmitSoftwareUpgradeProposal struct {
 	MsgSubmitProposal
-	Version      uint64  `json:"version"`
-	Software     string  `json:"software"`
-	SwitchHeight uint64  `json:"switch_height"`
-	Threshold    sdk.Dec `json:"threshold"`
+	Version      uint64     `json:"version"`
+	Software     string     `json:"software"`
+	SwitchHeight uint64     `json:"switch_height"`
+	Threshold    sdk.Dec    `json:"threshold"`
+	Fee          sdk.StdFee `json:"fee"`
 }
 
 func NewMsgSubmitSoftwareUpgradeProposal(msgSubmitProposal MsgSubmitProposal, version uint64, software string, switchHeight uint64, threshold sdk.Dec) MsgSubmitSoftwareUpgradeProposal {
@@ -100,6 +111,7 @@ func NewMsgSubmitSoftwareUpgradeProposal(msgSubmitProposal MsgSubmitProposal, ve
 		Software:          software,
 		SwitchHeight:      switchHeight,
 		Threshold:         threshold,
+		Fee:               sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -129,11 +141,19 @@ func (msg MsgSubmitSoftwareUpgradeProposal) GetSignBytes() []byte {
 	return sdk.MustSortJSON(b)
 }
 
+// junying -todo, 2019-11-14
+//
+func (msg MsgSubmitSoftwareUpgradeProposal) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSubmitSoftwareUpgradeProposal) SetFee(fee sdk.StdFee) { msg.Fee = fee }
+
 // MsgDeposit
 type MsgDeposit struct {
 	ProposalID uint64         `json:"proposal_id"` // ID of the proposal
 	Depositor  sdk.AccAddress `json:"depositor"`   // Address of the depositor
-	Amount     sdk.Coins      `json:"amount"`      // Coins to add to the proposal's deposit
+	Amount     sdk.Coins      `json:"amount"`      // Coins to add to the proposal's
+	Fee        sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgDeposit(depositor sdk.AccAddress, proposalID uint64, amount sdk.Coins) MsgDeposit {
@@ -141,6 +161,7 @@ func NewMsgDeposit(depositor sdk.AccAddress, proposalID uint64, amount sdk.Coins
 		ProposalID: proposalID,
 		Depositor:  depositor,
 		Amount:     amount,
+		Fee:        sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -177,15 +198,23 @@ func (msg MsgDeposit) GetSignBytes() []byte {
 }
 
 // Implements Msg.
-func (msg MsgDeposit) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Depositor}
+func (msg MsgDeposit) GetSigner() sdk.AccAddress {
+	return msg.Depositor
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgDeposit) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgDeposit) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 // MsgVote
 type MsgVote struct {
 	ProposalID uint64         `json:"proposal_id"` // ID of the proposal
 	Voter      sdk.AccAddress `json:"voter"`       //  address of the voter
 	Option     VoteOption     `json:"option"`      //  option from OptionSet chosen by the voter
+	Fee        sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgVote(voter sdk.AccAddress, proposalID uint64, option VoteOption) MsgVote {
@@ -193,6 +222,7 @@ func NewMsgVote(voter sdk.AccAddress, proposalID uint64, option VoteOption) MsgV
 		ProposalID: proposalID,
 		Voter:      voter,
 		Option:     option,
+		Fee:        sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -226,6 +256,13 @@ func (msg MsgVote) GetSignBytes() []byte {
 }
 
 // Implements Msg.
-func (msg MsgVote) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Voter}
+func (msg MsgVote) GetSigner() sdk.AccAddress {
+	return msg.Voter
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgVote) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgVote) SetFee(fee sdk.StdFee) { msg.Fee = fee }

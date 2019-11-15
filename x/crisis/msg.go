@@ -1,6 +1,7 @@
 package crisis
 
 import (
+	"github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -9,6 +10,9 @@ type MsgVerifyInvariant struct {
 	Sender              sdk.AccAddress `json:"sender"`
 	InvariantModuleName string         `json:"invariant_module_name"`
 	InvariantRoute      string         `json:"invariant_route"`
+	Fee                 sdk.StdFee     `json:"fee"`
+	// GasWanted           uint64         `json:"gas_wanted"`
+	// GasPrice            string         `json:"gas_price"`
 }
 
 // ensure Msg interface compliance at compile time
@@ -22,15 +26,20 @@ func NewMsgVerifyInvariant(sender sdk.AccAddress, invariantModuleName,
 		Sender:              sender,
 		InvariantModuleName: invariantModuleName,
 		InvariantRoute:      invariantRoute,
+		Fee:                 sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
+		// GasWanted:           uint64(10000),
+		// GasPrice:            config.DefaultMinGasPrices,
 	}
 }
 
 //nolint
 func (msg MsgVerifyInvariant) Route() string { return ModuleName }
-func (msg MsgVerifyInvariant) Type() string  { return "verify_invariant" }
+
+//
+func (msg MsgVerifyInvariant) Type() string { return "verify_invariant" }
 
 // get the bytes for the message signer to sign on
-func (msg MsgVerifyInvariant) GetSigners() []sdk.AccAddress { return []sdk.AccAddress{msg.Sender} }
+func (msg MsgVerifyInvariant) GetSigner() sdk.AccAddress { return msg.Sender }
 
 // GetSignBytes gets the sign bytes for the msg MsgVerifyInvariant
 func (msg MsgVerifyInvariant) GetSignBytes() []byte {
@@ -50,3 +59,28 @@ func (msg MsgVerifyInvariant) ValidateBasic() sdk.Error {
 func (msg MsgVerifyInvariant) FullInvariantRoute() string {
 	return msg.InvariantModuleName + "/" + msg.InvariantRoute
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgVerifyInvariant) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgVerifyInvariant) SetFee(fee sdk.StdFee) { msg.Fee = fee }
+
+// func (msg MsgVerifyInvariant) GetGasWanted() uint64 { return msg.GasWanted }
+
+// //
+// func (msg MsgVerifyInvariant) SetGasWanted(gaswanted uint64) { msg.GasWanted = gaswanted }
+
+// //
+// func (msg MsgVerifyInvariant) GetGasPrice() uint64 {
+// 	gasprice, err := types.ParseCoin(msg.GasPrice)
+// 	if err != nil {
+// 		return 0
+// 	}
+// 	amount := gasprice.Amount
+// 	return amount.Uint64()
+// }
+
+// //
+// func (msg MsgVerifyInvariant) SetGasPrice(gasprice string) { msg.GasPrice = gasprice }

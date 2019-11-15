@@ -56,36 +56,36 @@ type (
 )
 
 // Withdraw delegator rewards
-func withdrawDelegatorRewardsHandlerFn(
-	cdc *codec.Codec, cliCtx context.CLIContext, queryRoute string,
-) http.HandlerFunc {
+// func withdrawDelegatorRewardsHandlerFn(
+// 	cdc *codec.Codec, cliCtx context.CLIContext, queryRoute string,
+// ) http.HandlerFunc {
 
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req withdrawRewardsReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			return
-		}
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		var req withdrawRewardsReq
+// 		if !rest.ReadRESTReq(w, r, cdc, &req) {
+// 			return
+// 		}
 
-		req.BaseReq = req.BaseReq.Sanitize()
-		if !req.BaseReq.ValidateBasic(w) {
-			return
-		}
+// 		req.BaseReq = req.BaseReq.Sanitize()
+// 		if !req.BaseReq.ValidateBasic(w) {
+// 			return
+// 		}
 
-		// read and validate URL's variables
-		delAddr, ok := checkDelegatorAddressVar(w, r)
-		if !ok {
-			return
-		}
+// 		// read and validate URL's variables
+// 		delAddr, ok := checkDelegatorAddressVar(w, r)
+// 		if !ok {
+// 			return
+// 		}
 
-		msgs, err := common.WithdrawAllDelegatorRewards(cliCtx, cdc, queryRoute, delAddr)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		msgs, err := common.WithdrawAllDelegatorRewards(cliCtx, cdc, queryRoute, delAddr)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, msgs)
-	}
-}
+// 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, msgs)
+// 	}
+// }
 
 // Withdraw delegation rewards
 func withdrawDelegationRewardsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -118,7 +118,7 @@ func withdrawDelegationRewardsHandlerFn(cdc *codec.Codec, cliCtx context.CLICont
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, sdk.Msg(msg))
 	}
 }
 

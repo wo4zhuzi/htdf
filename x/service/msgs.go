@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/orientwalt/htdf/server/config"
 	"github.com/orientwalt/htdf/tools/protoidl"
 	sdk "github.com/orientwalt/htdf/types"
 )
@@ -35,6 +36,7 @@ func NewMsgSvcDef(name, chainId, description string, tags []string, author sdk.A
 			Author:            author,
 			AuthorDescription: authorDescription,
 			IDLContent:        idlContent,
+			Fee:               sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 		},
 	}
 }
@@ -79,9 +81,16 @@ func (msg MsgSvcDef) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcDef) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Author}
+func (msg MsgSvcDef) GetSigner() sdk.AccAddress {
+	return msg.Author
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcDef) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcDef) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 func validateMethods(methods []protoidl.Method) (bool, sdk.Error) {
 	for _, method := range methods {
@@ -144,6 +153,9 @@ type MsgSvcBind struct {
 	Deposit     sdk.Coins      `json:"deposit"`
 	Prices      []sdk.Coin     `json:"price"`
 	Level       Level          `json:"level"`
+	Fee         sdk.StdFee     `json:"fee"`
+	// GasWanted        uint64         `json:"gas_wanted"`
+	// GasPrice         string         `json:"gas_price"`
 }
 
 func NewMsgSvcBind(defChainID, defName, bindChainID string, provider sdk.AccAddress, bindingType BindingType, deposit sdk.Coins, prices []sdk.Coin, level Level) MsgSvcBind {
@@ -156,6 +168,7 @@ func NewMsgSvcBind(defChainID, defName, bindChainID string, provider sdk.AccAddr
 		Deposit:     deposit,
 		Prices:      prices,
 		Level:       level,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -203,9 +216,16 @@ func (msg MsgSvcBind) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcBind) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcBind) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcBind) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcBind) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -219,6 +239,7 @@ type MsgSvcBindingUpdate struct {
 	Deposit     sdk.Coins      `json:"deposit"`
 	Prices      []sdk.Coin     `json:"price"`
 	Level       Level          `json:"level"`
+	Fee         sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcBindingUpdate(defChainID, defName, bindChainID string, provider sdk.AccAddress, bindingType BindingType, deposit sdk.Coins, prices []sdk.Coin, level Level) MsgSvcBindingUpdate {
@@ -231,6 +252,7 @@ func NewMsgSvcBindingUpdate(defChainID, defName, bindChainID string, provider sd
 		Deposit:     deposit,
 		Prices:      prices,
 		Level:       level,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 func (msg MsgSvcBindingUpdate) Route() string { return MsgRoute }
@@ -277,9 +299,16 @@ func (msg MsgSvcBindingUpdate) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcBindingUpdate) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcBindingUpdate) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcBindingUpdate) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcBindingUpdate) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -289,6 +318,7 @@ type MsgSvcDisable struct {
 	DefChainID  string         `json:"def_chain_id"`
 	BindChainID string         `json:"bind_chain_id"`
 	Provider    sdk.AccAddress `json:"provider"`
+	Fee         sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcDisable(defChainID, defName, bindChainID string, provider sdk.AccAddress) MsgSvcDisable {
@@ -297,6 +327,7 @@ func NewMsgSvcDisable(defChainID, defName, bindChainID string, provider sdk.AccA
 		DefName:     defName,
 		BindChainID: bindChainID,
 		Provider:    provider,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -330,9 +361,16 @@ func (msg MsgSvcDisable) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcDisable) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcDisable) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcDisable) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcDisable) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -343,6 +381,7 @@ type MsgSvcEnable struct {
 	BindChainID string         `json:"bind_chain_id"`
 	Provider    sdk.AccAddress `json:"provider"`
 	Deposit     sdk.Coins      `json:"deposit"`
+	Fee         sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcEnable(defChainID, defName, bindChainID string, provider sdk.AccAddress, deposit sdk.Coins) MsgSvcEnable {
@@ -352,6 +391,7 @@ func NewMsgSvcEnable(defChainID, defName, bindChainID string, provider sdk.AccAd
 		BindChainID: bindChainID,
 		Provider:    provider,
 		Deposit:     deposit,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -388,9 +428,16 @@ func (msg MsgSvcEnable) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcEnable) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcEnable) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcEnable) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcEnable) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -400,6 +447,7 @@ type MsgSvcRefundDeposit struct {
 	DefChainID  string         `json:"def_chain_id"`
 	BindChainID string         `json:"bind_chain_id"`
 	Provider    sdk.AccAddress `json:"provider"`
+	Fee         sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcRefundDeposit(defChainID, defName, bindChainID string, provider sdk.AccAddress) MsgSvcRefundDeposit {
@@ -408,6 +456,7 @@ func NewMsgSvcRefundDeposit(defChainID, defName, bindChainID string, provider sd
 		DefName:     defName,
 		BindChainID: bindChainID,
 		Provider:    provider,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -441,9 +490,16 @@ func (msg MsgSvcRefundDeposit) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcRefundDeposit) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcRefundDeposit) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcRefundDeposit) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcRefundDeposit) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -459,6 +515,7 @@ type MsgSvcRequest struct {
 	Input       []byte         `json:"input"`
 	ServiceFee  sdk.Coins      `json:"service_fee"`
 	Profiling   bool           `json:"profiling"`
+	Fee         sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcRequest(defChainID, defName, bindChainID, reqChainID string, consumer, provider sdk.AccAddress, methodID int16, input []byte, serviceFee sdk.Coins, profiling bool) MsgSvcRequest {
@@ -473,6 +530,7 @@ func NewMsgSvcRequest(defChainID, defName, bindChainID, reqChainID string, consu
 		Input:       input,
 		ServiceFee:  serviceFee,
 		Profiling:   profiling,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -515,9 +573,16 @@ func (msg MsgSvcRequest) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcRequest) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Consumer}
+func (msg MsgSvcRequest) GetSigner() sdk.AccAddress {
+	return msg.Consumer
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcRequest) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcRequest) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -528,6 +593,7 @@ type MsgSvcResponse struct {
 	Provider   sdk.AccAddress `json:"provider"`
 	Output     []byte         `json:"output"`
 	ErrorMsg   []byte         `json:"error_msg"`
+	Fee        sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcResponse(reqChainID string, requestId string, provider sdk.AccAddress, output, errorMsg []byte) MsgSvcResponse {
@@ -537,6 +603,7 @@ func NewMsgSvcResponse(reqChainID string, requestId string, provider sdk.AccAddr
 		Provider:   provider,
 		Output:     output,
 		ErrorMsg:   errorMsg,
+		Fee:        sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -572,20 +639,29 @@ func (msg MsgSvcResponse) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcResponse) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcResponse) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcResponse) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcResponse) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
 // MsgSvcRefundFees - struct for refund fees
 type MsgSvcRefundFees struct {
 	Consumer sdk.AccAddress `json:"consumer"`
+	Fee      sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcRefundFees(consumer sdk.AccAddress) MsgSvcRefundFees {
 	return MsgSvcRefundFees{
 		Consumer: consumer,
+		Fee:      sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -604,20 +680,29 @@ func (msg MsgSvcRefundFees) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcRefundFees) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Consumer}
+func (msg MsgSvcRefundFees) GetSigner() sdk.AccAddress {
+	return msg.Consumer
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcRefundFees) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcRefundFees) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
 // MsgSvcWithdrawFees - struct for withdraw fees
 type MsgSvcWithdrawFees struct {
 	Provider sdk.AccAddress `json:"provider"`
+	Fee      sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcWithdrawFees(provider sdk.AccAddress) MsgSvcWithdrawFees {
 	return MsgSvcWithdrawFees{
 		Provider: provider,
+		Fee:      sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -636,9 +721,14 @@ func (msg MsgSvcWithdrawFees) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcWithdrawFees) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Provider}
+func (msg MsgSvcWithdrawFees) GetSigner() sdk.AccAddress {
+	return msg.Provider
 }
+
+func (msg MsgSvcWithdrawFees) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcWithdrawFees) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 
@@ -647,6 +737,7 @@ type MsgSvcWithdrawTax struct {
 	Trustee     sdk.AccAddress `json:"trustee"`
 	DestAddress sdk.AccAddress `json:"dest_address"`
 	Amount      sdk.Coins      `json:"amount"`
+	Fee         sdk.StdFee     `json:"fee"`
 }
 
 func NewMsgSvcWithdrawTax(trustee, destAddress sdk.AccAddress, amount sdk.Coins) MsgSvcWithdrawTax {
@@ -654,6 +745,7 @@ func NewMsgSvcWithdrawTax(trustee, destAddress sdk.AccAddress, amount sdk.Coins)
 		Trustee:     trustee,
 		DestAddress: destAddress,
 		Amount:      amount,
+		Fee:         sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 
@@ -681,9 +773,16 @@ func (msg MsgSvcWithdrawTax) ValidateBasic() sdk.Error {
 	return nil
 }
 
-func (msg MsgSvcWithdrawTax) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Trustee}
+func (msg MsgSvcWithdrawTax) GetSigner() sdk.AccAddress {
+	return msg.Trustee
 }
+
+// junying -todo, 2019-11-14
+//
+func (msg MsgSvcWithdrawTax) GetFee() sdk.StdFee { return msg.Fee }
+
+//
+func (msg MsgSvcWithdrawTax) SetFee(fee sdk.StdFee) { msg.Fee = fee }
 
 //______________________________________________________________________
 

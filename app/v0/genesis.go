@@ -153,12 +153,12 @@ func IrisAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []js
 		if err := cdc.UnmarshalJSON(genTx, &tx); err != nil {
 			return genesisState, err
 		}
-		msgs := tx.GetMsgs()
-		if len(msgs) != 1 {
+		msg := tx.GetMsg()
+		if msg == nil {
 			return genesisState, errors.New(
 				"must provide genesis StdTx with exactly 1 CreateValidator message")
 		}
-		if _, ok := msgs[0].(stake.MsgCreateValidator); !ok {
+		if _, ok := msg.(stake.MsgCreateValidator); !ok {
 			return genesisState, fmt.Errorf(
 				"Genesis transaction %v does not contain a MsgCreateValidator", i)
 		}
@@ -292,17 +292,16 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 		}
 
 		// genesis transactions must be single-message
-		msgs := genStdTx.GetMsgs()
-		if len(msgs) != 1 {
-
+		msg := genStdTx.GetMsg()
+		if msg == nil {
 			return appGenTxs, persistentPeers, errors.New(
 				"each genesis transaction must provide a single genesis message")
 		}
 
-		msg := msgs[0].(stake.MsgCreateValidator)
+		msgC := msg.(stake.MsgCreateValidator)
 		// validate delegator and validator addresses and funds against the accounts in the state
-		delAddr := msg.DelegatorAddress.String()
-		valAddr := sdk.AccAddress(msg.ValidatorAddress).String()
+		delAddr := msgC.GetSigner().String()
+		valAddr := sdk.AccAddress(msgC.ValidatorAddress).String()
 
 		delAcc, delOk := addrMap[delAddr]
 		_, valOk := addrMap[valAddr]
@@ -319,14 +318,14 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 				"account(s) %v not in genesis.json: %+v", strings.Join(accsNotInGenesis, " "), addrMap)
 		}
 
-		if delAcc.Coins.AmountOf(msg.Value.Denom).LT(msg.Value.Amount) {
+		if delAcc.Coins.AmountOf(msgC.Value.Denom).LT(msgC.Value.Amount) {
 			return appGenTxs, persistentPeers, fmt.Errorf(
 				"insufficient fund for delegation %v: %v < %v",
-				delAcc.Address, delAcc.Coins.AmountOf(msg.Value.Denom), msg.Value.Amount)
+				delAcc.Address, delAcc.Coins.AmountOf(msgC.Value.Denom), msgC.Value.Amount)
 		}
 
 		// exclude itself from persistent peers
-		if msg.Description.Moniker != moniker {
+		if msgC.Description.Moniker != moniker {
 			addressesIPs = append(addressesIPs, nodeAddrIP)
 		}
 	}
@@ -383,17 +382,17 @@ func CollectStdTxsEx(cdc *codec.Codec, moniker string, genTxsDir string, genDoc 
 		appGenTxs = append(appGenTxs, genStdTx)
 
 		// genesis transactions must be single-message
-		msgs := genStdTx.GetMsgs()
-		if len(msgs) != 1 {
+		msg := genStdTx.GetMsg()
+		if msg == nil {
 
 			return appGenTxs, persistentPeers, errors.New(
 				"each genesis transaction must provide a single genesis message")
 		}
 
-		msg := msgs[0].(staking.MsgCreateValidator)
+		msgC := msg.(staking.MsgCreateValidator)
 		// validate delegator and validator addresses and funds against the accounts in the state
-		delAddr := msg.DelegatorAddress.String()
-		valAddr := sdk.AccAddress(msg.ValidatorAddress).String()
+		delAddr := msg.GetSigner().String()
+		valAddr := sdk.AccAddress(msgC.ValidatorAddress).String()
 
 		delAcc, delOk := addrMap[delAddr]
 		_, valOk := addrMap[valAddr]
@@ -410,10 +409,10 @@ func CollectStdTxsEx(cdc *codec.Codec, moniker string, genTxsDir string, genDoc 
 				"account(s) %v not in genesis.json: %+v", strings.Join(accsNotInGenesis, " "), addrMap)
 		}
 
-		if delAcc.Coins.AmountOf(msg.Value.Denom).LT(msg.Value.Amount) {
+		if delAcc.Coins.AmountOf(msgC.Value.Denom).LT(msgC.Value.Amount) {
 			return appGenTxs, persistentPeers, fmt.Errorf(
 				"insufficient fund for delegation %v: %v < %v",
-				delAcc.Address, delAcc.Coins.AmountOf(msg.Value.Denom), msg.Value.Amount,
+				delAcc.Address, delAcc.Coins.AmountOf(msgC.Value.Denom), msgC.Value.Amount,
 			)
 		}
 

@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/orientwalt/htdf/evm/vm"
+	"github.com/orientwalt/htdf/server/config"
 	"github.com/orientwalt/htdf/types"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -54,12 +55,13 @@ func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
 // MsgSendFrom defines a SendFrom message /////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 type MsgSendFrom struct {
-	From     sdk.AccAddress
-	To       sdk.AccAddress
-	Amount   sdk.Coins
-	Data     string
-	GasPrice uint64 //unit,  satoshi/gallon
-	GasLimit uint64 //unit,  gallon
+	From   sdk.AccAddress
+	To     sdk.AccAddress
+	Amount sdk.Coins
+	Data   string
+	Fee    sdk.StdFee
+	// GasPrice  string //unit,  satoshi/gallon
+	// GasWanted uint64 //unit,  gallon
 }
 
 var _ sdk.Msg = MsgSendFrom{}
@@ -69,35 +71,38 @@ var _ sdk.Msg = MsgSendFrom{}
 // Default GasLimit, Default GasPrice
 func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
 	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		GasPrice: 1,
-		GasLimit: params.TxGas,
+		From:   fromaddr,
+		To:     toaddr,
+		Amount: amount,
+		Fee:    sdk.NewStdFee(params.TxGas, config.DefaultMinGasPrices),
+		// GasPrice:  config.DefaultMinGasPrices,
+		// GasWanted: params.TxGas,
 	}
 }
 
 // Normal Transaction
 // Default GasLimit, Customized GasPrice
-func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, gaslimit uint64) MsgSendFrom {
+func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasprice string, gaswanted uint64) MsgSendFrom {
 	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		GasPrice: gasPrice,
-		GasLimit: gaslimit,
+		From:   fromaddr,
+		To:     toaddr,
+		Amount: amount,
+		Fee:    sdk.NewStdFee(gaswanted, gasprice),
+		// GasPrice:  gasprice,
+		// GasWanted: gaswanted,
 	}
 }
 
 // Contract Transaction
-func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, gasLimit uint64) MsgSendFrom {
+func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasprice string, gaswanted uint64) MsgSendFrom {
 	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		Data:     data,
-		GasPrice: gasPrice,
-		GasLimit: gasLimit,
+		From:   fromaddr,
+		To:     toaddr,
+		Amount: amount,
+		Data:   data,
+		Fee:    sdk.NewStdFee(gaswanted, gasprice),
+		// GasPrice:  gasprice,
+		// GasWanted: gaswanted,
 	}
 }
 
@@ -127,7 +132,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		}
 
 		// junying-todo, 2019-11-12
-		if msg.GasLimit < params.TxGas {
+		if msg.Fee.GasWanted < params.TxGas {
 			return sdk.ErrOutOfGas(fmt.Sprintf("gas must be greather than %d", params.TxGas))
 		}
 
@@ -142,7 +147,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		if err != nil {
 			return sdk.ErrOutOfGas("intrinsic out of gas")
 		}
-		if itrsGas > msg.GasLimit {
+		if msg.Fee.GasWanted < itrsGas {
 			return sdk.ErrOutOfGas(fmt.Sprintf("gas must be greather than %d to pass validating", itrsGas))
 		}
 
@@ -161,8 +166,8 @@ func (msg MsgSendFrom) GetSignBytes() []byte {
 }
 
 // GetSigners defines whose signature is required
-func (msg MsgSendFrom) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.From}
+func (msg MsgSendFrom) GetSigner() sdk.AccAddress {
+	return msg.From
 }
 
 // GetStringAddr defines whose fromaddr is required
@@ -185,61 +190,27 @@ func (msg MsgSendFrom) GetData() string {
 	return msg.Data
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MsgAdd defines a Add message ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-type MsgAdd struct {
-	SystemIssuer sdk.AccAddress
-	Amount       sdk.Coins
-}
-
-var _ sdk.Msg = MsgAdd{}
-
-// NewMsgAdd is a constructor function for Msgadd
-func NewMsgAdd(addr sdk.AccAddress, amount sdk.Coins) MsgAdd {
-	return MsgAdd{
-		SystemIssuer: addr,
-		Amount:       amount,
-	}
-}
-
-// Route should return the name of the module
-func (msg MsgAdd) Route() string { return "htdfservice" }
-
-// Type should return the action
-func (msg MsgAdd) Type() string { return "add" }
-
-// ValidateBasic runs stateless checks on the message
-func (msg MsgAdd) ValidateBasic() sdk.Error {
-	if msg.SystemIssuer.Empty() {
-		return sdk.ErrInvalidAddress(msg.SystemIssuer.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("Amount must be positive")
-	}
-	return nil
-}
-
-// GetSignBytes encodes the message for signing
-func (msg MsgAdd) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return sdk.MustSortJSON(b)
-}
-
-// GetSigners defines whose signature is required
-func (msg MsgAdd) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.SystemIssuer}
-}
-
-// GetStringAddr defines whose fromaddr is required
-func (msg MsgAdd) GetSystemIssuerStr() string {
-	return sdk.AccAddress.String(msg.SystemIssuer)
-}
+// junying -todo, 2019-11-14
+//
+func (msg MsgSendFrom) GetFee() sdk.StdFee { return msg.Fee }
 
 //
-func (msg MsgAdd) GeSystemIssuer() sdk.AccAddress {
-	return msg.SystemIssuer
-}
+func (msg MsgSendFrom) SetFee(fee sdk.StdFee) { msg.Fee = fee }
+
+// func (msg MsgSendFrom) GetGasWanted() uint64 { return msg.GasWanted }
+
+// //
+// func (msg MsgSendFrom) SetGasWanted(gaswanted uint64) { msg.GasWanted = gaswanted }
+
+// //
+// func (msg MsgSendFrom) GetGasPrice() uint64 {
+// 	gasprice, err := types.ParseCoin(msg.GasPrice)
+// 	if err != nil {
+// 		return 0
+// 	}
+// 	amount := gasprice.Amount
+// 	return amount.Uint64()
+// }
+
+// //
+// func (msg MsgSendFrom) SetGasPrice(gasprice string) { msg.GasPrice = gasprice }

@@ -3,18 +3,18 @@ package cli
 import (
 	"fmt"
 
+	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
+	hsutils "github.com/orientwalt/htdf/utils"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
-	hsutils "github.com/orientwalt/htdf/utils"
 	htdfservice "github.com/orientwalt/htdf/x/core"
+	tmcrypto "github.com/orientwalt/tendermint/crypto"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
 )
 
 // junying-todo-20190327
@@ -41,11 +41,11 @@ func GetCmdSign(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// if no signers
-			if len(stdTx.GetSigners()) == 0 {
-				return err //err.
+			if stdTx.GetSigner() == nil {
+				return sdk.ErrNoSignatures("signer no exists.")
 			}
 
-			priv, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(stdTx.GetSigners()[0]))
+			priv, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(stdTx.GetSigner()))
 			if err != nil {
 				return err
 			}
@@ -96,13 +96,12 @@ func populateAccountFromState(txBldr authtxb.TxBuilder, cliCtx context.CLIContex
 //
 func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.StdTx, privKey tmcrypto.PrivKey, offline bool) (signedTx auth.StdTx, err error) {
 	// from address
-	if len(stdTx.GetSigners()) == 0 {
+	if stdTx.GetSigner() == nil {
 		return signedTx, nil
 	}
-	fromaddr := stdTx.GetSigners()[0]
 	// accountnumber, accountsequence check
 	if !offline {
-		txBldr, err = populateAccountFromState(txBldr, cliCtx, fromaddr)
+		txBldr, err = populateAccountFromState(txBldr, cliCtx, stdTx.GetSigner())
 		if err != nil {
 			return signedTx, err
 		}

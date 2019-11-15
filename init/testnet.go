@@ -232,7 +232,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			sdk.OneInt(),
 		)
 		// make unsigned transaction
-		unsignedTx := auth.NewStdTx([]sdk.Msg{msg}, auth.StdFee{}, []auth.StdSignature{}, memo)
+		unsignedTx := auth.NewStdTx(sdk.Msg(msg), auth.StdSignature{}, memo)
 		txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID).WithMemo(memo)
 		priv, err := keystore.GetPrivKeyEx(accaddr, keyPass, clientDir)
 		if err != nil {

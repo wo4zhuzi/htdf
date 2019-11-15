@@ -27,16 +27,16 @@ func GetCmdCreateValidator(cdc *codec.Codec) *cobra.Command {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			validatorAddr, err := sdk.AccAddressFromBech32(args[0])
+			delegateAddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
-			txBldr, msg, err := BuildCreateValidatorMsg(cliCtx, txBldr, validatorAddr)
+			txBldr, msg, err := BuildCreateValidatorMsg(cliCtx, txBldr, delegateAddr)
 			if err != nil {
 				return err
 			}
 
-			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, validatorAddr)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, sdk.Msg(msg))
 		},
 	}
 
@@ -103,7 +103,7 @@ func GetCmdEditValidator(cdc *codec.Codec) *cobra.Command {
 			msg := staking.NewMsgEditValidator(sdk.ValAddress(validatorAddr), description, newRate, newMinSelfDelegation)
 
 			// build and sign the transaction, then broadcast to Tendermint
-			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, validatorAddr)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, sdk.Msg(msg))
 		},
 	}
 
@@ -146,7 +146,7 @@ $ hscli tx staking delegate htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 			}
 
 			msg := staking.NewMsgDelegate(delAddr, valAddr, amount)
-			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, sdk.Msg(msg))
 		},
 	}
 }
@@ -188,7 +188,7 @@ $ hscli tx staking redelegate htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 			}
 
 			msg := staking.NewMsgBeginRedelegate(delAddr, valSrcAddr, valDstAddr, amount)
-			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, sdk.Msg(msg))
 		},
 	}
 }
@@ -223,13 +223,13 @@ $ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 			}
 
 			msg := staking.NewMsgUndelegate(delAddr, valAddr, amount)
-			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, sdk.Msg(msg))
 		},
 	}
 }
 
 // BuildCreateValidatorMsg makes a new MsgCreateValidator.
-func BuildCreateValidatorMsg(cliCtx context.CLIContext, txBldr authtxb.TxBuilder, valAddr sdk.AccAddress) (authtxb.TxBuilder, sdk.Msg, error) {
+func BuildCreateValidatorMsg(cliCtx context.CLIContext, txBldr authtxb.TxBuilder, delAddr sdk.AccAddress) (authtxb.TxBuilder, sdk.Msg, error) {
 	amounstStr := viper.GetString(FlagAmount)
 	amount, err := sdk.ParseCoin(amounstStr)
 	if err != nil {
@@ -266,7 +266,7 @@ func BuildCreateValidatorMsg(cliCtx context.CLIContext, txBldr authtxb.TxBuilder
 	}
 
 	msg := staking.NewMsgCreateValidator(
-		sdk.ValAddress(valAddr), pk, amount, description, commissionMsg, minSelfDelegation,
+		sdk.ValAddress(delAddr), pk, amount, description, commissionMsg, minSelfDelegation,
 	)
 
 	if viper.GetBool(client.FlagGenerateOnly) {

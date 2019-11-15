@@ -18,19 +18,19 @@ import (
 	tmcli "github.com/orientwalt/tendermint/libs/cli"
 	"github.com/orientwalt/tendermint/libs/common"
 
+	"github.com/orientwalt/htdf/app"
+	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
+	"github.com/orientwalt/htdf/server"
 	sdk "github.com/orientwalt/htdf/types"
+	hsutils "github.com/orientwalt/htdf/utils"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	"github.com/orientwalt/htdf/x/staking/client/cli"
-	"github.com/orientwalt/htdf/app"
-	"github.com/orientwalt/htdf/app/v0"
-	"github.com/orientwalt/htdf/server"
-	hsutils "github.com/orientwalt/htdf/utils"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
+	"github.com/orientwalt/htdf/x/staking/client/cli"
 	hstakingcli "github.com/orientwalt/htdf/x/staking/client/cli"
 )
 
@@ -128,7 +128,7 @@ following delegation and commission default parameters:
 			// write the unsigned transaction to the buffer
 			w := bytes.NewBuffer([]byte{})
 			cliCtx = cliCtx.WithOutput(w)
-			if err = hscorecli.PrintUnsignedStdTx(txBldr, cliCtx, []sdk.Msg{msg}, false); err != nil {
+			if err = hscorecli.PrintUnsignedStdTx(txBldr, cliCtx, sdk.Msg(msg), false); err != nil {
 				return err
 			}
 
@@ -139,7 +139,7 @@ following delegation and commission default parameters:
 			}
 
 			// get private key
-			privkey, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(stdTx.GetSigners()[0]))
+			privkey, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(stdTx.GetSigner()))
 			if err != nil {
 				return err
 			}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/orientwalt/htdf/server/config"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/pkg/errors"
 )
@@ -16,6 +17,7 @@ type SvcDef struct {
 	Author            sdk.AccAddress `json:"author"`
 	AuthorDescription string         `json:"author_description"`
 	IDLContent        string         `json:"idl_content"`
+	Fee               sdk.StdFee     `json:"fee"`
 }
 
 type MethodProperty struct {
@@ -35,6 +37,7 @@ func NewSvcDef(name, chainId, description string, tags []string, author sdk.AccA
 		Author:            author,
 		AuthorDescription: authorDescription,
 		IDLContent:        idlContent,
+		Fee:               sdk.NewStdFee(uint64(10000), config.DefaultMinGasPrices),
 	}
 }
 

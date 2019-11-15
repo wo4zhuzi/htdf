@@ -53,10 +53,8 @@ func newTestMsg(addrs ...sdk.AccAddress) *sdk.TestMsg {
 	return sdk.NewTestMsg(addrs...)
 }
 
-func newStdFee() StdFee {
-	return NewStdFee(50000,
-		sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 150))),
-	)
+func newStdFee() sdk.StdFee {
+	return sdk.NewStdFee(50000, "250atom")
 }
 
 // coins to more than cover the fee
@@ -73,51 +71,50 @@ func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 	return key, pub, addr
 }
 
-func newTestTx(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivKey, accNums []uint64, seqs []uint64, fee StdFee) sdk.Tx {
-	sigs := make([]StdSignature, len(privs))
-	for i, priv := range privs {
-		signBytes := StdSignBytes(ctx.ChainID(), accNums[i], seqs[i], fee, msgs, "")
+// junying-todo, 2019-11-14
+// multi-msg to uni-msg
+func newTestTx(ctx sdk.Context, msg sdk.Msg, priv crypto.PrivKey, accNum uint64, seq uint64) sdk.Tx {
+	var sig StdSignature
+	signBytes := StdSignBytes(ctx.ChainID(), accNum, seq, msg, "")
 
-		sig, err := priv.Sign(signBytes)
-		if err != nil {
-			panic(err)
-		}
-
-		sigs[i] = StdSignature{PubKey: priv.PubKey(), Signature: sig}
+	sign, err := priv.Sign(signBytes)
+	if err != nil {
+		panic(err)
 	}
 
-	tx := NewStdTx(msgs, fee, sigs, "")
+	sig = StdSignature{PubKey: priv.PubKey(), Signature: sign}
+
+	tx := NewStdTx(msg, sig, "")
 	return tx
 }
 
-func newTestTxWithMemo(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivKey, accNums []uint64, seqs []uint64, fee StdFee, memo string) sdk.Tx {
-	sigs := make([]StdSignature, len(privs))
-	for i, priv := range privs {
-		signBytes := StdSignBytes(ctx.ChainID(), accNums[i], seqs[i], fee, msgs, memo)
+// junying-todo, 2019-11-14
+// multi-msg to uni-msg
+func newTestTxWithMemo(ctx sdk.Context, msg sdk.Msg, priv crypto.PrivKey, accNum uint64, seq uint64, memo string) sdk.Tx {
+	var sig StdSignature
+	signBytes := StdSignBytes(ctx.ChainID(), accNum, seq, msg, memo)
 
-		sig, err := priv.Sign(signBytes)
-		if err != nil {
-			panic(err)
-		}
-
-		sigs[i] = StdSignature{PubKey: priv.PubKey(), Signature: sig}
+	sign, err := priv.Sign(signBytes)
+	if err != nil {
+		panic(err)
 	}
 
-	tx := NewStdTx(msgs, fee, sigs, memo)
+	sig = StdSignature{PubKey: priv.PubKey(), Signature: sign}
+
+	tx := NewStdTx(msg, sig, memo)
 	return tx
 }
 
-func newTestTxWithSignBytes(msgs []sdk.Msg, privs []crypto.PrivKey, accNums []uint64, seqs []uint64, fee StdFee, signBytes []byte, memo string) sdk.Tx {
-	sigs := make([]StdSignature, len(privs))
-	for i, priv := range privs {
-		sig, err := priv.Sign(signBytes)
-		if err != nil {
-			panic(err)
-		}
+func newTestTxWithSignBytes(msg sdk.Msg, priv crypto.PrivKey, accNum uint64, seq uint64, signBytes []byte, memo string) sdk.Tx {
+	var sig StdSignature
 
-		sigs[i] = StdSignature{PubKey: priv.PubKey(), Signature: sig}
+	sign, err := priv.Sign(signBytes)
+	if err != nil {
+		panic(err)
 	}
 
-	tx := NewStdTx(msgs, fee, sigs, memo)
+	sig = StdSignature{PubKey: priv.PubKey(), Signature: sign}
+
+	tx := NewStdTx(msg, sig, memo)
 	return tx
 }

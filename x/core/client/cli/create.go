@@ -54,7 +54,7 @@ func GetCmdCreate(cdc *codec.Codec) *cobra.Command {
 
 			msg := htdfservice.NewMsgSendFromDefault(fromaddr, toaddr, coins)
 
-			return PrintUnsignedStdTx(txBldr, cliCtx, []sdk.Msg{msg}, encodeflag)
+			return PrintUnsignedStdTx(txBldr, cliCtx, sdk.Msg(msg), encodeflag)
 		},
 	}
 	cmd.Flags().Bool(htdfservice.FlagEncode, true, "encode enabled")
@@ -63,21 +63,21 @@ func GetCmdCreate(cdc *codec.Codec) *cobra.Command {
 
 // PrintUnsignedStdTx builds an unsigned StdTx and prints it to os.Stdout.
 // Don't perform online validation or lookups if offline is true.
-func PrintUnsignedStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg, encodeflag bool) (err error) {
+func PrintUnsignedStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msg sdk.Msg, encodeflag bool) (err error) {
 	if txBldr.SimulateAndExecute() {
-		txBldr, err = utils.EnrichWithGas(txBldr, cliCtx, msgs)
+		txBldr, err = utils.EnrichWithGas(txBldr, cliCtx, msg)
 		if err != nil {
 			return err
 		}
 
-		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.Gas())
+		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.GasWanted())
 	}
-	stdSignMsg, err := txBldr.BuildSignMsg(msgs)
+	stdSignMsg, err := txBldr.BuildSignMsg(msg)
 	if err != nil {
 		return
 	}
 	//var stdTx auth.StdTx
-	stdTx := auth.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo)
+	stdTx := auth.NewStdTx(stdSignMsg.Msg, auth.StdSignature{}, stdSignMsg.Memo)
 
 	if err != nil {
 		return

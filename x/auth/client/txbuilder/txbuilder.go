@@ -22,19 +22,19 @@ type TxBuilder struct {
 	keybase            crkeys.Keybase
 	accountNumber      uint64
 	sequence           uint64
-	gas                uint64
+	gasWanted          uint64
 	gasAdjustment      float64
 	simulateAndExecute bool
 	chainID            string
 	memo               string
 	fees               sdk.Coins
-	gasPrices          sdk.DecCoins
+	gasPrices          sdk.Coins
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
 func NewTxBuilder(
-	txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, fees sdk.Coins, gasPrices sdk.DecCoins,
+	txEncoder sdk.TxEncoder, accNumber, seq, gaswanted uint64, gasAdj float64,
+	simulateAndExecute bool, chainID, memo string, gasPrices sdk.Coins,
 ) TxBuilder {
 
 	return TxBuilder{
@@ -42,12 +42,11 @@ func NewTxBuilder(
 		keybase:            nil,
 		accountNumber:      accNumber,
 		sequence:           seq,
-		gas:                gas,
+		gasWanted:          gaswanted,
 		gasAdjustment:      gasAdj,
 		simulateAndExecute: simulateAndExecute,
 		chainID:            chainID,
 		memo:               memo,
-		fees:               fees,
 		gasPrices:          gasPrices,
 	}
 }
@@ -64,7 +63,7 @@ func NewTxBuilderFromCLI() TxBuilder {
 		accountNumber: uint64(viper.GetInt64(client.FlagAccountNumber)),
 		sequence:      uint64(viper.GetInt64(client.FlagSequence)),
 		// gas:                client.GasFlagVar.Gas, // commented by junying, 2019-10-21, gas_wanted set to 200000 as default here.
-		gas:                uint64(viper.GetInt64(client.FlagGas)), // added by junying, 2019-11-07
+		gasWanted:          uint64(viper.GetInt64(client.FlagGas)), // added by junying, 2019-11-07
 		gasAdjustment:      viper.GetFloat64(client.FlagGasAdjustment),
 		simulateAndExecute: client.GasFlagVar.Simulate,
 		chainID:            viper.GetString(client.FlagChainID),
@@ -88,7 +87,7 @@ func (bldr TxBuilder) AccountNumber() uint64 { return bldr.accountNumber }
 func (bldr TxBuilder) Sequence() uint64 { return bldr.sequence }
 
 // Gas returns the gas for the transaction
-func (bldr TxBuilder) Gas() uint64 { return bldr.gas }
+func (bldr TxBuilder) GasWanted() uint64 { return bldr.gasWanted }
 
 // GasAdjustment returns the gas adjustment
 func (bldr TxBuilder) GasAdjustment() float64 { return bldr.gasAdjustment }
@@ -110,7 +109,7 @@ func (bldr TxBuilder) Memo() string { return bldr.memo }
 func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }
 
 // GasPrices returns the gas prices set for the transaction, if any.
-func (bldr TxBuilder) GasPrices() sdk.DecCoins { return bldr.gasPrices }
+func (bldr TxBuilder) GasPrices() sdk.Coins { return bldr.gasPrices }
 
 // WithTxEncoder returns a copy of the context with an updated codec.
 func (bldr TxBuilder) WithTxEncoder(txEncoder sdk.TxEncoder) TxBuilder {
@@ -125,8 +124,8 @@ func (bldr TxBuilder) WithChainID(chainID string) TxBuilder {
 }
 
 // WithGas returns a copy of the context with an updated gas.
-func (bldr TxBuilder) WithGas(gas uint64) TxBuilder {
-	bldr.gas = gas
+func (bldr TxBuilder) WithGas(gaswanted uint64) TxBuilder {
+	bldr.gasWanted = gaswanted
 	return bldr
 }
 
@@ -143,7 +142,7 @@ func (bldr TxBuilder) WithFees(fees string) TxBuilder {
 
 // WithGasPrices returns a copy of the context with updated gas prices.
 func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
-	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices) // junying-todo, 2019-09-10, ParseDecCoins to ParseCoins, due to be replaced
+	parsedGasPrices, err := sdk.ParseCoins(gasPrices) // junying-todo, 2019-09-10, ParseDecCoins to ParseCoins, due to be replaced
 	if err != nil {
 		panic(err)
 	}
@@ -179,7 +178,7 @@ func (bldr TxBuilder) WithAccountNumber(accnum uint64) TxBuilder {
 // BuildSignMsg builds a single message to be signed from a TxBuilder given a
 // set of messages. It returns an error if a fee is supplied but cannot be
 // parsed.
-func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
+func (bldr TxBuilder) BuildSignMsg(msg sdk.Msg) (StdSignMsg, error) {
 	chainID := bldr.chainID
 	if chainID == "" {
 		return StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
@@ -189,16 +188,15 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 	if bldr.gasPrices.IsZero() {
 		return StdSignMsg{}, errors.New("gasprices can't not be zero")
 	}
-	if bldr.gas <= 0 {
-		return StdSignMsg{}, errors.New("gas must be provided")
+	if bldr.gasWanted <= 0 {
+		return StdSignMsg{}, errors.New("gaswanted must be provided")
 	}
 	return StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,
 		Sequence:      bldr.sequence,
 		Memo:          bldr.memo,
-		Msgs:          msgs,
-		Fee:           auth.NewStdFee(bldr.gas, bldr.gasPrices), // junying-todo, 2019-11-07
+		Msg:           msg,
 	}, nil
 }
 
@@ -210,31 +208,31 @@ func (bldr TxBuilder) Sign(name, passphrase string, msg StdSignMsg) ([]byte, err
 		return nil, err
 	}
 
-	return bldr.txEncoder(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
+	return bldr.txEncoder(auth.NewStdTx(msg.Msg, sig, msg.Memo))
 }
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
 // with the built message given a name, passphrase, and a set of messages.
-func (bldr TxBuilder) BuildAndSign(name, passphrase string, msgs []sdk.Msg) ([]byte, error) {
-	msg, err := bldr.BuildSignMsg(msgs)
+func (bldr TxBuilder) BuildAndSign(name, passphrase string, msg sdk.Msg) ([]byte, error) {
+	signed, err := bldr.BuildSignMsg(msg)
 	if err != nil {
 		return nil, err
 	}
 
-	return bldr.Sign(name, passphrase, msg)
+	return bldr.Sign(name, passphrase, signed)
 }
 
 // BuildTxForSim creates a StdSignMsg and encodes a transaction with the
 // StdSignMsg with a single empty StdSignature for tx simulation.
-func (bldr TxBuilder) BuildTxForSim(msgs []sdk.Msg) ([]byte, error) {
-	signMsg, err := bldr.BuildSignMsg(msgs)
+func (bldr TxBuilder) BuildTxForSim(msg sdk.Msg) ([]byte, error) {
+	signMsg, err := bldr.BuildSignMsg(msg)
 	if err != nil {
 		return nil, err
 	}
 
 	// the ante handler will populate with a sentinel pubkey
-	sigs := []auth.StdSignature{{}}
-	return bldr.txEncoder(auth.NewStdTx(signMsg.Msgs, signMsg.Fee, sigs, signMsg.Memo))
+	sig := auth.StdSignature{}
+	return bldr.txEncoder(auth.NewStdTx(signMsg.Msg, sig, signMsg.Memo))
 }
 
 // SignStdTx appends a signature to a StdTx and returns a copy of it. If append
@@ -248,21 +246,18 @@ func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx auth.StdTx, appen
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,
 		Sequence:      bldr.sequence,
-		Fee:           stdTx.Fee,
-		Msgs:          stdTx.GetMsgs(),
+		Msg:           stdTx.GetMsg(),
 		Memo:          stdTx.GetMemo(),
 	})
 	if err != nil {
 		return
 	}
 
-	sigs := stdTx.GetSignatures()
-	if len(sigs) == 0 || !appendSig {
-		sigs = []auth.StdSignature{stdSignature}
-	} else {
-		sigs = append(sigs, stdSignature)
+	sig := stdTx.GetSignature()
+	if sig.IsEmpty() || !appendSig {
+		sig = stdSignature
 	}
-	signedStdTx = auth.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
+	signedStdTx = auth.NewStdTx(stdTx.GetMsg(), sig, stdTx.GetMemo())
 	return
 }
 

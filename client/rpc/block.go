@@ -258,24 +258,23 @@ func GetBlockDetailFn(cliCtx context.CLIContext, cdc *codec.Codec) http.HandlerF
 			switch currTx := sdkTx.(type) {
 			case auth.StdTx:
 				var displayTx DisplayTx
-				for _, msg := range currTx.GetMsgs() {
-					//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
-					switch msg := msg.(type) {
-					case htdfservice.MsgSendFrom:
+				msg := currTx.GetMsg()
+				//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
+				switch msg := msg.(type) {
+				case htdfservice.MsgSendFrom:
 
-						displayTx.From = msg.From
-						displayTx.To = msg.To
-						displayTx.Hash = hex.EncodeToString(tx.Hash())
-						displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)
-						displayTx.Memo = currTx.Memo
-						blockInfo.Block.Txs = append(blockInfo.Block.Txs, displayTx)
+					displayTx.From = msg.From
+					displayTx.To = msg.To
+					displayTx.Hash = hex.EncodeToString(tx.Hash())
+					displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)
+					displayTx.Memo = currTx.Memo
+					blockInfo.Block.Txs = append(blockInfo.Block.Txs, displayTx)
 
-						//fmt.Printf("msg|from=%s|to=%s\n", msg.From, msg.To)
+					//fmt.Printf("msg|from=%s|to=%s\n", msg.From, msg.To)
 
-					default:
-						fmt.Printf("ignore type|type=%s|route=%s\n", msg.Type(), msg.Route())
-						continue
-					}
+				default:
+					fmt.Printf("ignore type|type=%s|route=%s\n", msg.Type(), msg.Route())
+					continue
 				}
 
 			default:
@@ -364,25 +363,23 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 
 		switch currTx := txResp.Tx.(type) {
 		case auth.StdTx:
-			getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Fee.Amount)
-			getTxResponse.Tx.Fee.Gas = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Fee.Gas, 10))
-			getTxResponse.Tx.Signatures = currTx.Signatures
+			getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Msg.GetFee().Amount)
+			getTxResponse.Tx.Fee.Gas = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Msg.GetFee().GasWanted, 10))
+			getTxResponse.Tx.Signature = currTx.Signature
 			getTxResponse.Tx.Memo = currTx.Memo
 
 			var displayTx DisplayTx
-			for _, msg := range currTx.GetMsgs() {
-				//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
-				switch msg := msg.(type) {
-				case htdfservice.MsgSendFrom:
-					displayTx.From = msg.From
-					displayTx.To = msg.To
-					displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)
-					getTxResponse.Tx.Msgs = append(getTxResponse.Tx.Msgs, displayTx)
+			msg := currTx.GetMsg()
+			//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
+			switch msg := msg.(type) {
+			case htdfservice.MsgSendFrom:
+				displayTx.From = msg.From
+				displayTx.To = msg.To
+				displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)
+				getTxResponse.Tx.Msgs = append(getTxResponse.Tx.Msgs, displayTx)
 
-				default:
-					fmt.Printf("ignore type|type=%s|route=%s\n", msg.Type(), msg.Route())
-					continue
-				}
+			default:
+				fmt.Printf("ignore type|type=%s|route=%s\n", msg.Type(), msg.Route())
 			}
 
 		default:

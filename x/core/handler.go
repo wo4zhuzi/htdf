@@ -148,7 +148,7 @@ func HandleOpenContract(ctx sdk.Context,
 	fmt.Printf("transferAmount: %d\n", transferAmount)
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
+	fmt.Printf("gasPrice=%d|gasLimit=%d\n", msg.Fee.GetGasPrice(), msg.Fee.GasWanted)
 
 	// commented by junying, 2019-08-22
 	// subtract gaslimit*gasprice from sender
@@ -182,7 +182,7 @@ func HandleOpenContract(ctx sdk.Context,
 	if err != nil {
 		fmt.Printf("evm call error|err=%s\n", err)
 		// junying-todo, 2019-11-05
-		gasUsed = msg.GasLimit
+		gasUsed = msg.Fee.GasWanted
 		evmOutput = fmt.Sprintf("evm call error|err=%s\n", err)
 	} else {
 		st.gas = gasLeftover
@@ -243,7 +243,7 @@ func HandleCreateContract(ctx sdk.Context,
 
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gasPrice=%d|gasLimit=%d\n", msg.GasPrice, msg.GasLimit)
+	fmt.Printf("gasPrice=%d|gasLimit=%d\n", msg.Fee.GasPrice, msg.Fee.GasWanted)
 
 	err = st.buyGas()
 	if err != nil {
@@ -264,7 +264,7 @@ func HandleCreateContract(ctx sdk.Context,
 	if err != nil {
 		fmt.Printf("evm Create error|err=%s\n", err)
 		// junying-todo, 2019-11-05
-		gasUsed = msg.GasLimit
+		gasUsed = msg.Fee.GasWanted
 		evmOutput = fmt.Sprintf("evm Create error|err=%s\n", err)
 	} else {
 		st.gas = gasLeftover

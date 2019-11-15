@@ -53,27 +53,26 @@ func QueryDepositsByTxQuery(
 		return nil, err
 	}
 
-	var deposits []gov.Deposit
+	var deposit gov.Deposit
 
 	for _, info := range infos {
-		for _, msg := range info.Tx.GetMsgs() {
-			if msg.Type() == gov.TypeMsgDeposit {
-				depMsg := msg.(gov.MsgDeposit)
+		msg := info.Tx.GetMsg()
+		if msg.Type() == gov.TypeMsgDeposit {
+			depMsg := msg.(gov.MsgDeposit)
 
-				deposits = append(deposits, gov.Deposit{
-					Depositor:  depMsg.Depositor,
-					ProposalID: params.ProposalID,
-					Amount:     depMsg.Amount,
-				})
+			deposit = gov.Deposit{
+				Depositor:  depMsg.Depositor,
+				ProposalID: params.ProposalID,
+				Amount:     depMsg.Amount,
 			}
 		}
 	}
 
 	if cliCtx.Indent {
-		return cdc.MarshalJSONIndent(deposits, "", "  ")
+		return cdc.MarshalJSONIndent(deposit, "", "  ")
 	}
 
-	return cdc.MarshalJSON(deposits)
+	return cdc.MarshalJSON(deposit)
 }
 
 // QueryVotesByTxQuery will query for votes via a direct txs tags query. It
@@ -98,27 +97,26 @@ func QueryVotesByTxQuery(
 		return nil, err
 	}
 
-	var votes []gov.Vote
+	var vote gov.Vote
 
 	for _, info := range infos {
-		for _, msg := range info.Tx.GetMsgs() {
-			if msg.Type() == gov.TypeMsgVote {
-				voteMsg := msg.(gov.MsgVote)
+		msg := info.Tx.GetMsg()
+		if msg.Type() == gov.TypeMsgVote {
+			voteMsg := msg.(gov.MsgVote)
 
-				votes = append(votes, gov.Vote{
-					Voter:      voteMsg.Voter,
-					ProposalID: params.ProposalID,
-					Option:     voteMsg.Option,
-				})
+			vote = gov.Vote{
+				Voter:      voteMsg.Voter,
+				ProposalID: params.ProposalID,
+				Option:     voteMsg.Option,
 			}
 		}
 	}
 
 	if cliCtx.Indent {
-		return cdc.MarshalJSONIndent(votes, "", "  ")
+		return cdc.MarshalJSONIndent(vote, "", "  ")
 	}
 
-	return cdc.MarshalJSON(votes)
+	return cdc.MarshalJSON(vote)
 }
 
 // QueryVoteByTxQuery will query for a single vote via a direct txs tags query.
@@ -140,23 +138,22 @@ func QueryVoteByTxQuery(
 	}
 
 	for _, info := range infos {
-		for _, msg := range info.Tx.GetMsgs() {
-			// there should only be a single vote under the given conditions
-			if msg.Type() == gov.TypeMsgVote {
-				voteMsg := msg.(gov.MsgVote)
+		msg := info.Tx.GetMsg()
+		// there should only be a single vote under the given conditions
+		if msg.Type() == gov.TypeMsgVote {
+			voteMsg := msg.(gov.MsgVote)
 
-				vote := gov.Vote{
-					Voter:      voteMsg.Voter,
-					ProposalID: params.ProposalID,
-					Option:     voteMsg.Option,
-				}
-
-				if cliCtx.Indent {
-					return cdc.MarshalJSONIndent(vote, "", "  ")
-				}
-
-				return cdc.MarshalJSON(vote)
+			vote := gov.Vote{
+				Voter:      voteMsg.Voter,
+				ProposalID: params.ProposalID,
+				Option:     voteMsg.Option,
 			}
+
+			if cliCtx.Indent {
+				return cdc.MarshalJSONIndent(vote, "", "  ")
+			}
+
+			return cdc.MarshalJSON(vote)
 		}
 	}
 
@@ -183,23 +180,22 @@ func QueryDepositByTxQuery(
 	}
 
 	for _, info := range infos {
-		for _, msg := range info.Tx.GetMsgs() {
-			// there should only be a single deposit under the given conditions
-			if msg.Type() == gov.TypeMsgDeposit {
-				depMsg := msg.(gov.MsgDeposit)
+		msg := info.Tx.GetMsg()
+		// there should only be a single deposit under the given conditions
+		if msg.Type() == gov.TypeMsgDeposit {
+			depMsg := msg.(gov.MsgDeposit)
 
-				deposit := gov.Deposit{
-					Depositor:  depMsg.Depositor,
-					ProposalID: params.ProposalID,
-					Amount:     depMsg.Amount,
-				}
-
-				if cliCtx.Indent {
-					return cdc.MarshalJSONIndent(deposit, "", "  ")
-				}
-
-				return cdc.MarshalJSON(deposit)
+			deposit := gov.Deposit{
+				Depositor:  depMsg.Depositor,
+				ProposalID: params.ProposalID,
+				Amount:     depMsg.Amount,
 			}
+
+			if cliCtx.Indent {
+				return cdc.MarshalJSONIndent(deposit, "", "  ")
+			}
+
+			return cdc.MarshalJSON(deposit)
 		}
 	}
 
@@ -225,12 +221,11 @@ func QueryProposerByTxQuery(
 	}
 
 	for _, info := range infos {
-		for _, msg := range info.Tx.GetMsgs() {
-			// there should only be a single proposal under the given conditions
-			if msg.Type() == gov.TypeMsgSubmitProposal {
-				subMsg := msg.(gov.MsgSubmitProposal)
-				return NewProposer(proposalID, subMsg.Proposer.String()), nil
-			}
+		msg := info.Tx.GetMsg()
+		// there should only be a single proposal under the given conditions
+		if msg.Type() == gov.TypeMsgSubmitProposal {
+			subMsg := msg.(gov.MsgSubmitProposal)
+			return NewProposer(proposalID, subMsg.Proposer.String()), nil
 		}
 	}
 	return Proposer{}, fmt.Errorf("failed to find the proposer for proposalID %d", proposalID)

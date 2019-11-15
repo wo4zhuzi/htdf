@@ -1,3 +1,12 @@
+/*
+	modified by junying, 2019-11-13
+	[StdTx]
+	Msgs -> Msg
+	Fee removed
+	[Msg]
+	Gas
+	GasPrice
+*/
 package auth
 
 import (
@@ -23,40 +32,42 @@ var (
 // StdTx is a standard way to wrap a Msg with Fee and Signatures.
 // NOTE: the first signature is the fee payer (Signatures must not be nil).
 type StdTx struct {
-	Msgs       []sdk.Msg      `json:"msg"`
-	Fee        StdFee         `json:"fee"`
-	Signatures []StdSignature `json:"signatures"`
-	Memo       string         `json:"memo"`
+	Msg       sdk.Msg      `json:"msg"`
+	Signature StdSignature `json:"signature"`
+	Memo      string       `json:"memo"`
 }
 
-func NewStdTx(msgs []sdk.Msg, fee StdFee, sigs []StdSignature, memo string) StdTx {
+func NewStdTx(msg sdk.Msg, sig StdSignature, memo string) StdTx {
 	return StdTx{
-		Msgs:       msgs,
-		Fee:        fee,
-		Signatures: sigs,
-		Memo:       memo,
+		Msg:       msg,
+		Signature: sig,
+		Memo:      memo,
 	}
 }
 
 // GetMsgs returns the all the transaction's messages.
-func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
+func (tx StdTx) GetMsg() sdk.Msg { return tx.Msg }
+
+// junying-todo, 2019-11-14
+func (tx StdTx) GetFee() sdk.StdFee {
+	return tx.Msg.GetFee()
+}
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.
 func (tx StdTx) ValidateBasic() sdk.Error {
-	stdSigs := tx.GetSignatures()
-
-	if tx.Fee.Gas > maxGasWanted {
-		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.Gas, maxGasWanted))
+	fee := tx.GetFee()
+	if fee.GasWanted > maxGasWanted {
+		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", fee.GasWanted, maxGasWanted))
 	}
-	if tx.Fee.Amount.IsAnyNegative() {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
+	if fee.Amount.IsAnyNegative() {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", fee.Amount))
 	}
 
 	// junying-todo, 2019-11-13
 	// MinGasPrice Checking
-	var gasprice = tx.Fee.GasPrice
-	minGasPrices, err := types.ParseDecCoins(config.DefaultMinGasPrices)
+	var gasprice = fee.GasPrice
+	minGasPrices, err := types.ParseCoins(config.DefaultMinGasPrices)
 	if err != nil {
 		return sdk.ErrTxDecode("DefaultMinGasPrices decode error")
 	}
@@ -66,42 +77,24 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	// junying-todo, 2019-11-13
 	// Validate Msgs &
 	// Check MinGas for staking txs
-	var msgs = tx.Msgs
-	if msgs == nil || len(msgs) == 0 {
-		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
+	var msg = tx.Msg
+	if msg == nil {
+		return sdk.ErrUnknownRequest("Tx.GetMsg() must return at least one message in list")
 	}
-	for _, msg := range msgs {
-		// Validate the Msg.
-		err := msg.ValidateBasic()
-		if err != nil {
-			return err
-		}
-		// Checking minimum gasprice condition for staking transactions
-		if msg.Route() != "htdfservice" {
-			if tx.Fee.Gas < params.TxStakingDefaultGas {
-				return sdk.ErrInternal(fmt.Sprintf("staking tx gas must be greater than %d", params.TxStakingDefaultGas))
-			}
+	// Validate the Msg.
+	if err := msg.ValidateBasic(); err != nil {
+		return err
+	}
+	// Checking minimum gasprice condition for staking transactions
+	if msg.Route() != "htdfservice" {
+		if fee.GasWanted < params.TxStakingDefaultGas {
+			return sdk.ErrInternal(fmt.Sprintf("staking tx gas must be greater than %d", params.TxStakingDefaultGas))
 		}
 	}
 
-	// added & commented by junying, 2019-11-07
-
-	if len(stdSigs) == 0 {
-		return sdk.ErrNoSignatures("no signers")
-	}
-	if len(stdSigs) != len(tx.GetSigners()) {
-		return sdk.ErrUnauthorized("wrong number of signers")
-	}
-
-	sigCount := 0
-	for i := 0; i < len(stdSigs); i++ {
-		sigCount += countSubKeys(stdSigs[i].PubKey)
-		if uint64(sigCount) > DefaultTxSigLimit {
-			return sdk.ErrTooManySignatures(
-				fmt.Sprintf("signatures: %d, limit: %d", sigCount, DefaultTxSigLimit),
-			)
-		}
-	}
+	// junying-todo-expected, 2019-11-14
+	// sign exist checking
+	// stdSig := tx.GetSignature()
 
 	return nil
 }
@@ -126,18 +119,8 @@ func countSubKeys(pub crypto.PubKey) int {
 // They are accumulated from the GetSigners method for each Msg
 // in the order they appear in tx.GetMsgs().
 // Duplicate addresses will be omitted.
-func (tx StdTx) GetSigners() []sdk.AccAddress {
-	seen := map[string]bool{}
-	var signers []sdk.AccAddress
-	for _, msg := range tx.GetMsgs() {
-		for _, addr := range msg.GetSigners() {
-			if !seen[addr.String()] {
-				signers = append(signers, addr)
-				seen[addr.String()] = true
-			}
-		}
-	}
-	return signers
+func (tx StdTx) GetSigner() sdk.AccAddress {
+	return tx.GetMsg().GetSigner()
 }
 
 // GetMemo returns the memo
@@ -150,75 +133,9 @@ func (tx StdTx) GetMemo() string { return tx.Memo }
 // CONTRACT: If the signature is missing (ie the Msg is
 // invalid), then the corresponding signature is
 // .Empty().
-func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
+func (tx StdTx) GetSignature() StdSignature { return tx.Signature }
 
 //__________________________________________________________
-
-// StdFee includes the amount of coins paid in fees and the maximum
-// gas to be used by the transaction. The ratio yields an effective "gasprice",
-// which must be above some miminum to be accepted into the mempool.
-type StdFee struct {
-	Amount   sdk.Coins    `json:"amount"`
-	Gas      uint64       `json:"gas"`
-	GasPrice sdk.DecCoins `json:"gasprice"`
-}
-
-// junying-todo, 2019-11-07
-// fee = gas * gasprice
-func CalcFees(gas uint64, gasprices sdk.DecCoins) sdk.Coins {
-	Fees := make(sdk.Coins, len(gasprices))
-	glDec := sdk.NewDec(int64(gas))
-	for i, gp := range gasprices {
-		fee := gp.Amount.Mul(glDec)
-		Fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
-	}
-	return Fees
-}
-
-// NewStdFee returns a new instance of StdFee
-// func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
-// 	return StdFee{
-// 		Amount: amount,
-// 		Gas:    gas,
-// 	}
-// }
-func NewStdFee(gas uint64, gasprice sdk.DecCoins) StdFee {
-	return StdFee{
-		Amount:   CalcFees(gas, gasprice),
-		Gas:      gas,
-		GasPrice: gasprice,
-	}
-}
-
-// Bytes for signing later
-func (fee StdFee) Bytes() []byte {
-	// normalize. XXX
-	// this is a sign of something ugly
-	// (in the lcd_test, client side its null,
-	// server side its [])
-	if len(fee.Amount) == 0 {
-		fee.Amount = sdk.NewCoins()
-	}
-	bz, err := msgCdc.MarshalJSON(fee) // TODO
-	if err != nil {
-		panic(err)
-	}
-	return bz
-}
-
-// GasPrices returns the gas prices for a StdFee.
-//
-// NOTE: The gas prices returned are not the true gas prices that were
-// originally part of the submitted transaction because the fee is computed
-// as fee = ceil(gasWanted * gasPrices).
-func (fee StdFee) GasPrices() sdk.DecCoins {
-	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
-}
-
-// junying-todo, 2019-11-07
-func (fee StdFee) GetAmount() sdk.DecCoins {
-	return fee.GasPrice.MulDec(sdk.NewDec(int64(fee.Gas)))
-}
 
 //__________________________________________________________
 
@@ -228,26 +145,20 @@ func (fee StdFee) GetAmount() sdk.DecCoins {
 // and the Sequence numbers for each signature (prevent
 // inchain replay and enforce tx ordering per account).
 type StdSignDoc struct {
-	AccountNumber uint64            `json:"account_number"`
-	ChainID       string            `json:"chain_id"`
-	Fee           json.RawMessage   `json:"fee"`
-	Memo          string            `json:"memo"`
-	Msgs          []json.RawMessage `json:"msgs"`
-	Sequence      uint64            `json:"sequence"`
+	AccountNumber uint64          `json:"account_number"`
+	ChainID       string          `json:"chain_id"`
+	Memo          string          `json:"memo"`
+	Msg           json.RawMessage `json:"msg"`
+	Sequence      uint64          `json:"sequence"`
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee StdFee, msgs []sdk.Msg, memo string) []byte {
-	var msgsBytes []json.RawMessage
-	for _, msg := range msgs {
-		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
-	}
+func StdSignBytes(chainID string, accnum uint64, sequence uint64, msg sdk.Msg, memo string) []byte {
 	bz, err := msgCdc.MarshalJSON(StdSignDoc{
 		AccountNumber: accnum,
 		ChainID:       chainID,
-		Fee:           json.RawMessage(fee.Bytes()),
 		Memo:          memo,
-		Msgs:          msgsBytes,
+		Msg:           json.RawMessage(msg.GetSignBytes()),
 		Sequence:      sequence,
 	})
 	if err != nil {
@@ -260,6 +171,14 @@ func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee StdFee, ms
 type StdSignature struct {
 	crypto.PubKey `json:"pub_key"` // optional
 	Signature     []byte           `json:"signature"`
+}
+
+// junying-todo, 2019-11-14
+func (s *StdSignature) IsEmpty() bool {
+	if s.Signature == nil {
+		return true
+	}
+	return false
 }
 
 // DefaultTxDecoder logic for standard transaction decoding

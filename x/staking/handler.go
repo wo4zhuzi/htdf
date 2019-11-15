@@ -137,7 +137,7 @@ func handleMsgCreateValidator(ctx sdk.Context, msg types.MsgCreateValidator, k k
 
 	// move coins from the msg.Address account to a (self-delegation) delegator account
 	// the validator account and global shares are updated within here
-	_, err = k.Delegate(ctx, msg.DelegatorAddress, msg.Value.Amount, validator, true)
+	_, err = k.Delegate(ctx, msg.GetSigner(), msg.Value.Amount, validator, true)
 	if err != nil {
 		return err.Result()
 	}

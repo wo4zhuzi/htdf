@@ -207,29 +207,23 @@ func SetGenesis(app *App, accs []auth.Account) {
 }
 
 // GenTx generates a signed mock transaction.
-func GenTx(msgs []sdk.Msg, accnums []uint64, seq []uint64, priv ...crypto.PrivKey) auth.StdTx {
+func GenTx(msg sdk.Msg, accnum uint64, seq uint64, priv crypto.PrivKey) auth.StdTx {
 	// Make the transaction free
-	fee := auth.StdFee{
-		Amount: sdk.Coins{sdk.NewInt64Coin("stake", 0)},
-		Gas:    20000,
-	}
+	// fee := sdk.NewStdFee(20000, "0stake")
 
-	sigs := make([]auth.StdSignature, len(priv))
 	memo := "testmemotestmemo"
 
-	for i, p := range priv {
-		sig, err := p.Sign(auth.StdSignBytes(chainID, accnums[i], seq[i], fee, msgs, memo))
-		if err != nil {
-			panic(err)
-		}
-
-		sigs[i] = auth.StdSignature{
-			PubKey:    p.PubKey(),
-			Signature: sig,
-		}
+	signed, err := priv.Sign(auth.StdSignBytes(chainID, accnum, seq, msg, memo))
+	if err != nil {
+		panic(err)
 	}
 
-	return auth.NewStdTx(msgs, fee, sigs, memo)
+	sig := auth.StdSignature{
+		PubKey:    priv.PubKey(),
+		Signature: signed,
+	}
+
+	return auth.NewStdTx(msg, sig, memo)
 }
 
 // GeneratePrivKeys generates a total n Ed25519 private keys.
@@ -323,11 +317,11 @@ func GetAllAccounts(mapper auth.AccountKeeper, ctx sdk.Context) []auth.Account {
 // GenSequenceOfTxs generates a set of signed transactions of messages, such
 // that they differ only by having the sequence numbers incremented between
 // every transaction.
-func GenSequenceOfTxs(msgs []sdk.Msg, accnums []uint64, initSeqNums []uint64, numToGenerate int, priv ...crypto.PrivKey) []auth.StdTx {
+func GenSequenceOfTxs(msg sdk.Msg, accnum uint64, initSeqNum uint64, numToGenerate int, priv crypto.PrivKey) []auth.StdTx {
 	txs := make([]auth.StdTx, numToGenerate, numToGenerate)
 	for i := 0; i < numToGenerate; i++ {
-		txs[i] = GenTx(msgs, accnums, initSeqNums, priv...)
-		incrementAllSequenceNumbers(initSeqNums)
+		txs[i] = GenTx(msg, accnum, initSeqNum, priv)
+		initSeqNum++
 	}
 
 	return txs

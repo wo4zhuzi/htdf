@@ -19,22 +19,22 @@ import (
 
 // WriteGenerateStdTxResponse writes response for the generate only mode.
 func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
-	cliCtx context.CLIContext, br rest.BaseReq, msgs []sdk.Msg) {
+	cliCtx context.CLIContext, br rest.BaseReq, msg sdk.Msg) {
 
 	gasAdj, ok := rest.ParseFloat64OrReturnBadRequest(w, br.GasAdjustment, client.DefaultGasAdjustment)
 	if !ok {
 		return
 	}
 
-	simAndExec, gas, err := client.ParseGas(br.Gas)
+	simAndExec, gasWanted, err := client.ParseGas(br.GasWanted)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	txBldr := authtxb.NewTxBuilder(
-		utils.GetTxEncoder(cdc), br.AccountNumber, br.Sequence, gas, gasAdj,
-		br.Simulate, br.ChainID, br.Memo, br.Fees, br.GasPrices,
+		utils.GetTxEncoder(cdc), br.AccountNumber, br.Sequence, gasWanted, gasAdj,
+		br.Simulate, br.ChainID, br.Memo, br.GasPrices,
 	)
 
 	if br.Simulate || simAndExec {
@@ -43,25 +43,25 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 			return
 		}
 
-		txBldr, err = utils.EnrichWithGas(txBldr, cliCtx, msgs)
+		txBldr, err = utils.EnrichWithGas(txBldr, cliCtx, msg)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		if br.Simulate {
-			rest.WriteSimulationResponse(w, cdc, txBldr.Gas())
+			rest.WriteSimulationResponse(w, cdc, txBldr.GasWanted())
 			return
 		}
 	}
 
-	stdMsg, err := txBldr.BuildSignMsg(msgs)
+	stdMsg, err := txBldr.BuildSignMsg(msg)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	output, err := cdc.MarshalJSON(auth.NewStdTx(stdMsg.Msgs, stdMsg.Fee, nil, stdMsg.Memo))
+	output, err := cdc.MarshalJSON(auth.NewStdTx(stdMsg.Msg, auth.StdSignature{}, stdMsg.Memo))
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return

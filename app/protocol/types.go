@@ -16,7 +16,7 @@ type Protocol interface {
 	GetFeeRefundHandler() sdk.FeeRefundHandler         // fee handler for fee refund
 	GetFeePreprocessHandler() sdk.FeePreprocessHandler // fee handler for fee preprocessor
 	ExportAppStateAndValidators(ctx sdk.Context, forZeroHeight bool, jailWhiteList []string) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error)
-	ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg) sdk.Error
+	ValidateTx(ctx sdk.Context, txBytes []byte, msg sdk.Msg) sdk.Error
 
 	// may be nil
 	GetInitChainer() sdk.InitChainer1  // initialize state with validators and state blob

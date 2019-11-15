@@ -37,7 +37,7 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 
-			fmt.Println("GetCmdSend:txBldr.Gas()", txBldr.Gas())
+			fmt.Println("GetCmdSend:txBldr.GasWanted()", txBldr.GasWanted())
 
 			fromaddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
@@ -57,16 +57,13 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 			if len(txBldr.GasPrices()) == 0 {
 				return sdk.ErrTxDecode("no gasprice")
 			}
-			gasprice := txBldr.GasPrices()[0].Amount
+			gasprice := txBldr.GasPrices()[0].Amount.String()
 			fmt.Println("gasprice:", gasprice)
-
-			gas := txBldr.Gas()
-			fmt.Println("gasprice:", gasprice.ToUint64())
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.ToUint64(), gas)
+			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice, txBldr.GasWanted())
 
 			cliCtx.PrintResponse = true
 
-			return CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, fromaddr) //not completed yet, need account name
+			return CompleteAndBroadcastTxCLI(txBldr, cliCtx, sdk.Msg(msg)) //not completed yet, need account name
 		},
 	}
 	return client.PostCommands(cmd)[0]
@@ -104,22 +101,22 @@ func PrepareTxBuilder(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, froma
 // supplied messages. Finally, it broadcasts the signed transaction to a node.
 //
 // NOTE: Also see CompleteAndBroadcastTxREST.
-func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg, fromaddr sdk.AccAddress) error {
-	// get fromaddr
-	// fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetFromAddr()
-	//
+func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msg sdk.Msg) error {
+	// junying-todo, 2019-11-14
+	fromaddr := msg.(htdfservice.MsgSendFrom).GetFromAddr()
+
 	txBldr, err := PrepareTxBuilder(txBldr, cliCtx, fromaddr)
 	if err != nil {
 		return err
 	}
 
 	if txBldr.SimulateAndExecute() || cliCtx.Simulate {
-		txBldr, err := utils.EnrichWithGas(txBldr, cliCtx, msgs)
+		txBldr, err := utils.EnrichWithGas(txBldr, cliCtx, msg)
 		if err != nil {
 			return err
 		}
 
-		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.Gas()}
+		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.GasWanted()}
 		fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
 	}
 	fmt.Println("1--------------------")
@@ -129,7 +126,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 	}
 	fmt.Println("2--------------------")
 	// build and sign the transaction
-	txBytes, err := hsign.BuildAndSign(txBldr, privkey, msgs)
+	txBytes, err := hsign.BuildAndSign(txBldr, privkey, msg)
 	if err != nil {
 		return err
 	}

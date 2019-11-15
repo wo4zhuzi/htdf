@@ -19,7 +19,7 @@ func SetPruning(opts sdk.PruningOptions) func(*BaseApp) {
 
 // SetMinGasPrices returns an option that sets the minimum gas prices on the app.
 func SetMinGasPrices(gasPricesStr string) func(*BaseApp) {
-	gasPrices, err := sdk.ParseDecCoins(gasPricesStr)
+	gasPrices, err := sdk.ParseCoins(gasPricesStr)
 	if err != nil {
 		panic(fmt.Sprintf("invalid minimum gas prices: %v", err))
 	}

@@ -28,13 +28,12 @@ func TestTxBuilderBuild(t *testing.T) {
 		SimulateGas   bool
 		ChainID       string
 		Memo          string
-		Fees          sdk.Coins
 		GasPrices     sdk.DecCoins
 	}
-	defaultMsg := []sdk.Msg{sdk.NewTestMsg(addr)}
+	defaultMsg := sdk.Msg(sdk.NewTestMsg(addr))
 	tests := []struct {
 		fields  fields
-		msgs    []sdk.Msg
+		msg     sdk.Msg
 		want    StdSignMsg
 		wantErr bool
 	}{
@@ -48,7 +47,6 @@ func TestTxBuilderBuild(t *testing.T) {
 				SimulateGas:   false,
 				ChainID:       "test-chain",
 				Memo:          "hello from Voyager 1!",
-				Fees:          sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))},
 			},
 			defaultMsg,
 			StdSignMsg{
@@ -56,8 +54,7 @@ func TestTxBuilderBuild(t *testing.T) {
 				AccountNumber: 1,
 				Sequence:      1,
 				Memo:          "hello from Voyager 1!",
-				Msgs:          defaultMsg,
-				Fee:           auth.NewStdFee(200000, sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))}),
+				Msg:           defaultMsg,
 			},
 			false,
 		},

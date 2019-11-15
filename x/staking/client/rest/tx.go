@@ -87,7 +87,7 @@ func postDelegationsHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx context.
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, sdk.Msg(msg))
 	}
 }
 
@@ -121,7 +121,7 @@ func postRedelegationsHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx contex
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, sdk.Msg(msg))
 	}
 }
 
@@ -155,6 +155,6 @@ func postUnbondingDelegationsHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx
 			return
 		}
 
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, sdk.Msg(msg))
 	}
 }

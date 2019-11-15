@@ -138,20 +138,14 @@ func (p *ProtocolV0) GetVersion() uint64 {
 	return p.version
 }
 
-func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg) sdk.Error {
+func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msg sdk.Msg) sdk.Error {
 
-	serviceMsgNum := 0
-	for _, msg := range msgs {
-		if msg.Route() == service.MsgRoute {
-			serviceMsgNum++
-		}
-	}
-	// fmt.Println("1111111111@@@@@@@@@@@@@!!!!!!!!!")
-	if serviceMsgNum != 0 && serviceMsgNum != len(msgs) {
-		return sdk.ErrServiceTxLimit("Can't mix service msgs with other types of msg in one transaction!")
+	var IsServiceMsg = false
+	if msg.Route() == service.MsgRoute {
+		IsServiceMsg = true
 	}
 
-	if serviceMsgNum == 0 {
+	if !IsServiceMsg {
 		subspace, found := p.paramsKeeper.GetSubspace(auth.DefaultParamspace)
 		var txSizeLimit uint64
 		if found {
@@ -164,9 +158,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 		if uint64(len(txBytes)) > txSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), txSizeLimit))
 		}
-	}
-
-	if serviceMsgNum == len(msgs) {
+	} else {
 		subspace, found := p.paramsKeeper.GetSubspace(service.DefaultParamSpace)
 		var serviceTxSizeLimit uint64
 		if found {
@@ -290,7 +282,7 @@ func (p *ProtocolV0) configRouters() {
 
 	p.router.
 		AddRoute(RouterKey, htdfservice.NewHandler(p.accountMapper, p.feeCollectionKeeper, protocol.KeyStorage, protocol.KeyCode)).
-		AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
+		// AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
 		AddRoute(protocol.StakeRoute, stake.NewHandler(p.StakeKeeper)).
 		AddRoute(protocol.SlashingRoute, slashing.NewHandler(p.slashingKeeper)).
 		AddRoute(protocol.DistrRoute, distr.NewHandler(p.distrKeeper)).
