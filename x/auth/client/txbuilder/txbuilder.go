@@ -190,7 +190,7 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 		return StdSignMsg{}, errors.New("gasprices can't not be zero")
 	}
 	if bldr.gasWanted <= 0 {
-		return StdSignMsg{}, errors.New("gas must be provided")
+		return StdSignMsg{}, errors.New("gasWanted must be provided")
 	}
 	return StdSignMsg{
 		ChainID:       bldr.chainID,

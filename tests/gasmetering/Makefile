@@ -16,7 +16,7 @@ BLK_TIME = 5
 TX_AMOUNT = 1000000
 UNIT = satoshi
 TxGas = 30000
-GAS_PRICE = 1.0
+GAS_PRICE = 20.0
 test.normal:
 	@acc1=$$(hscli accounts list|row 1);\
 	 acc2=$$(hscli accounts list|row 2);\
@@ -24,7 +24,7 @@ test.normal:
 	 orgn1=$$(findkey amount ${TMP_PATH});\
 	 hscli query account $$acc2 > ${TMP_PATH};\
 	 orgn2=$$(findkey amount ${TMP_PATH});\
-	 hscli tx send $$acc1 $$acc2 ${TX_AMOUNT}${UNIT} --gas=${TxGas} --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
+	 hscli tx send $$acc1 $$acc2 ${TX_AMOUNT}${UNIT} --gas-wanted=${TxGas} --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
 	 txhash=$$(findstr txhash ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 sleep ${BLK_TIME};\
 	 hscli query tx $$txhash > ${TMP_PATH};\

@@ -80,7 +80,7 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 		return authtxb.StdSignMsg{}, errors.New("gasprices can't not be zero")
 	}
 	if txbuilder.GasWanted() <= 0 {
-		return authtxb.StdSignMsg{}, errors.New("gas must be provided")
+		return authtxb.StdSignMsg{}, errors.New("gasWanted must be provided")
 	}
 	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrices()), txbuilder.GasWanted())
 	return authtxb.StdSignMsg{
