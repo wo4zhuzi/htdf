@@ -11,8 +11,6 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 
-	"errors"
-
 	"github.com/spf13/viper"
 )
 
@@ -186,12 +184,12 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 	}
 	// junying-todo, 2019-11-08
 	// converted from fee based to gas*gasprice based
-	if bldr.gasPrices.IsZero() {
-		return StdSignMsg{}, errors.New("gasprices can't not be zero")
-	}
-	if bldr.gasWanted <= 0 {
-		return StdSignMsg{}, errors.New("gasWanted must be provided")
-	}
+	// if bldr.gasPrices.IsZero() {
+	// 	return StdSignMsg{}, errors.New("gasprices can't not be zero")
+	// }
+	// if bldr.gasWanted <= 0 {
+	// 	return StdSignMsg{}, errors.New("gasWanted must be provided")
+	// }
 	return StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,

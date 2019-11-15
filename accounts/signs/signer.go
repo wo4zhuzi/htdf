@@ -1,7 +1,6 @@
 package signs
 
 import (
-	"errors"
 	"fmt"
 
 	sdk "github.com/orientwalt/htdf/types"
@@ -76,12 +75,12 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 	}
 	// junying-todo, 2019-11-08
 	// converted from fee based to gas*gasprice based
-	if txbuilder.GasPrices().IsZero() {
-		return authtxb.StdSignMsg{}, errors.New("gasprices can't not be zero")
-	}
-	if txbuilder.GasWanted() <= 0 {
-		return authtxb.StdSignMsg{}, errors.New("gasWanted must be provided")
-	}
+	// if txbuilder.GasPrices().IsZero() {
+	// 	return authtxb.StdSignMsg{}, errors.New("gasprices can't not be zero")
+	// }
+	// if txbuilder.GasWanted() <= 0 {
+	// 	return authtxb.StdSignMsg{}, errors.New("gasWanted must be provided")
+	// }
 	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrices()), txbuilder.GasWanted())
 	return authtxb.StdSignMsg{
 		ChainID:       txbuilder.ChainID(),
