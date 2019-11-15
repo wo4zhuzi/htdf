@@ -40,8 +40,8 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
 		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
 		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount)
-		fmt.Println("NewAnteHandler:stdTx.Fee.Gas", stdTx.Fee.GasWanted)
-		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrices())
+		fmt.Println("NewAnteHandler:stdTx.Fee.GasWanted", stdTx.Fee.GasWanted)
+		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrice)
 		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
 		if !ok {
 			// Set a gas meter with limit 0 as to prevent an infinite gas meter attack

@@ -63,6 +63,7 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	if !gasprice.IsAllGTE(minGasPrices) {
 		return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice must be greater than %s", config.DefaultMinGasPrices))
 	}
+
 	// junying-todo, 2019-11-13
 	// Validate Msgs &
 	// Check MinGas for staking txs
@@ -79,7 +80,7 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 		// Checking minimum gasprice condition for staking transactions
 		if msg.Route() != "htdfservice" {
 			if tx.Fee.GasWanted < params.TxStakingDefaultGas {
-				return sdk.ErrInternal(fmt.Sprintf("staking tx gas must be greater than %d", params.TxStakingDefaultGas))
+				return sdk.ErrInternal(fmt.Sprintf("%s/%s gas must be greater than %d", msg.Route(), msg.Type(), params.TxStakingDefaultGas))
 			}
 		}
 	}

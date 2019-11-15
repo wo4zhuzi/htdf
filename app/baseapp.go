@@ -685,10 +685,15 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 // junying-todo, 2019-11-13
 // validateTx executes basic validator calls for messages
 // and checking minimum for
-func validateTx(tx sdk.Tx) sdk.Error {
+func validateTx(ctx sdk.Context, tx sdk.Tx) sdk.Error {
 	stdtx, ok := tx.(auth.StdTx)
 	if !ok {
 		return sdk.ErrInternal("tx must be StdTx")
+	}
+	// skip gentxs
+	fmt.Println("Current BlockHeight:", ctx.BlockHeight())
+	if ctx.BlockHeight() < 1 {
+		return nil
 	}
 	// Validate Tx
 	return stdtx.ValidateBasic()
@@ -844,7 +849,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		return
 	}
 
-	if err := validateTx(tx); err != nil {
+	if err := validateTx(ctx, tx); err != nil {
 		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
 		return err.Result()
 	}
