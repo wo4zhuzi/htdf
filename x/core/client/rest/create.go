@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 
 	htdfRest "github.com/orientwalt/htdf/accounts/rest"
@@ -41,15 +40,13 @@ func CreateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		req.BaseReq.ChainID = mreq.BaseReq.ChainID
 		req.BaseReq.AccountNumber = mreq.BaseReq.AccountNumber
 		req.BaseReq.Sequence = mreq.BaseReq.Sequence
-		req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
+		// req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
 		req.BaseReq.GasPrices = mreq.BaseReq.GasPrices
-		req.BaseReq.Gas = unit_convert.BigAmountToDefaultAmount(mreq.BaseReq.Gas)
+		req.BaseReq.GasWanted = unit_convert.BigAmountToDefaultAmount(mreq.BaseReq.GasWanted)
 		req.BaseReq.GasAdjustment = mreq.BaseReq.GasAdjustment
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
 		req.To = mreq.To
 		req.Encode = mreq.Encode
-
-		fmt.Printf("req.BaseReq.Fees=%v\n", req.BaseReq.Fees)
 
 		// Santize
 		BaseReq := req.BaseReq.Sanitize()
@@ -92,7 +89,7 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 		return
 	}
 
-	simAndExec, gas, err := client.ParseGas(br.Gas)
+	simAndExec, gas, err := client.ParseGas(br.GasWanted)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -100,7 +97,7 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 
 	txBldr := authtxb.NewTxBuilder(
 		utils.GetTxEncoder(cdc), br.AccountNumber, br.Sequence, gas, gasAdj,
-		br.Simulate, br.ChainID, br.Memo, br.Fees, br.GasPrices,
+		br.Simulate, br.ChainID, br.Memo, br.GasPrices,
 	)
 
 	if simAndExec {

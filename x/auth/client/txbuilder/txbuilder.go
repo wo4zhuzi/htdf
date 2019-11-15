@@ -32,7 +32,7 @@ type TxBuilder struct {
 // NewTxBuilder returns a new initialized TxBuilder.
 func NewTxBuilder(
 	txEncoder sdk.TxEncoder, accNumber, seq, gasWanted uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, fees sdk.Coins, gasPrices sdk.DecCoins,
+	simulateAndExecute bool, chainID, memo string, gasPrices sdk.DecCoins,
 ) TxBuilder {
 
 	return TxBuilder{
@@ -45,8 +45,8 @@ func NewTxBuilder(
 		simulateAndExecute: simulateAndExecute,
 		chainID:            chainID,
 		memo:               memo,
-		fees:               fees,
-		gasPrices:          gasPrices,
+		// fees:               fees,
+		gasPrices: gasPrices,
 	}
 }
 

@@ -46,8 +46,8 @@ func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
 func (tx StdTx) ValidateBasic() sdk.Error {
 	stdSigs := tx.GetSignatures()
 
-	if tx.Fee.Gas > maxGasWanted {
-		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.Gas, maxGasWanted))
+	if tx.Fee.GasWanted > maxGasWanted {
+		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.GasWanted, maxGasWanted))
 	}
 	if tx.Fee.Amount.IsAnyNegative() {
 		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
@@ -78,7 +78,7 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 		}
 		// Checking minimum gasprice condition for staking transactions
 		if msg.Route() != "htdfservice" {
-			if tx.Fee.Gas < params.TxStakingDefaultGas {
+			if tx.Fee.GasWanted < params.TxStakingDefaultGas {
 				return sdk.ErrInternal(fmt.Sprintf("staking tx gas must be greater than %d", params.TxStakingDefaultGas))
 			}
 		}
@@ -158,9 +158,9 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // gas to be used by the transaction. The ratio yields an effective "gasprice",
 // which must be above some miminum to be accepted into the mempool.
 type StdFee struct {
-	Amount   sdk.Coins    `json:"amount"`
-	Gas      uint64       `json:"gas"`
-	GasPrice sdk.DecCoins `json:"gasprice"`
+	Amount    sdk.Coins    `json:"amount"`
+	GasWanted uint64       `json:"gas_wanted"`
+	GasPrice  sdk.DecCoins `json:"gas_price"`
 }
 
 // junying-todo, 2019-11-07
@@ -182,11 +182,11 @@ func CalcFees(gas uint64, gasprices sdk.DecCoins) sdk.Coins {
 // 		Gas:    gas,
 // 	}
 // }
-func NewStdFee(gas uint64, gasprice sdk.DecCoins) StdFee {
+func NewStdFee(gasWanted uint64, gasPrice sdk.DecCoins) StdFee {
 	return StdFee{
-		Amount:   CalcFees(gas, gasprice),
-		Gas:      gas,
-		GasPrice: gasprice,
+		Amount:    CalcFees(gasWanted, gasPrice),
+		GasWanted: gasWanted,
+		GasPrice:  gasPrice,
 	}
 }
 
@@ -212,12 +212,12 @@ func (fee StdFee) Bytes() []byte {
 // originally part of the submitted transaction because the fee is computed
 // as fee = ceil(gasWanted * gasPrices).
 func (fee StdFee) GasPrices() sdk.DecCoins {
-	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
+	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.GasWanted)))
 }
 
 // junying-todo, 2019-11-07
 func (fee StdFee) GetAmount() sdk.DecCoins {
-	return fee.GasPrice.MulDec(sdk.NewDec(int64(fee.Gas)))
+	return fee.GasPrice.MulDec(sdk.NewDec(int64(fee.GasWanted)))
 }
 
 //__________________________________________________________

@@ -25,12 +25,12 @@ import (
 
 // SendReq defines the properties of a send request's body.
 type SendReq struct {
-	BaseReq  rest.BaseReq `json:"base_req"`
-	To       string       `json:"to"`
-	Amount   sdk.Coins    `json:"amount"`
-	Data     string       `json:"data"`
-	GasPrice string       `json:"gas_price"` // uint: HTDF/gallon
-	GasLimit string       `json:"gas_limit"` // unit: gallon
+	BaseReq   rest.BaseReq `json:"base_req"`
+	To        string       `json:"to"`
+	Amount    sdk.Coins    `json:"amount"`
+	Data      string       `json:"data"`
+	GasPrice  string       `json:"gas_price"`  // uint: HTDF/gallon
+	GasWanted string       `json:"gas_wanted"` // unit: gallon
 }
 
 var msgCdc = codec.New()
@@ -55,16 +55,15 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		req.BaseReq.ChainID = mreq.BaseReq.ChainID
 		req.BaseReq.AccountNumber = mreq.BaseReq.AccountNumber
 		req.BaseReq.Sequence = mreq.BaseReq.Sequence
-		req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
+		// req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
 		req.BaseReq.GasPrices = mreq.BaseReq.GasPrices
-		req.BaseReq.Gas = mreq.BaseReq.Gas
+		req.BaseReq.GasWanted = mreq.BaseReq.GasWanted
 		req.BaseReq.GasAdjustment = mreq.BaseReq.GasAdjustment
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
 		req.To = mreq.To
 		req.Data = mreq.Data
 		req.GasPrice = mreq.GasPrice
-		req.GasLimit = mreq.GasLimit
-		fmt.Printf("req.BaseReq.Fees=%v\n", req.BaseReq.Fees)
+		req.GasWanted = mreq.GasWanted
 
 		req.BaseReq = req.BaseReq.Sanitize()
 		if !req.BaseReq.ValidateBasic(w) {
@@ -85,14 +84,14 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			return
 		}
 
-		gas, err := strconv.ParseUint(req.BaseReq.Gas, 10, 64)
+		gas, err := strconv.ParseUint(req.BaseReq.GasWanted, 10, 64)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		// when access smart contract, extract gas field
-		var gasPrice, gasLimit uint64
+		var gasPrice, gasWanted uint64
 		if len(req.Data) > 0 {
 			gasPrice, err = strconv.ParseUint(unit_convert.BigAmountToDefaultAmount(req.GasPrice), 10, 64)
 			if err != nil {
@@ -100,16 +99,16 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 				return
 			}
 
-			gasLimit, err = strconv.ParseUint(req.GasLimit, 10, 64)
+			gasWanted, err = strconv.ParseUint(req.GasWanted, 10, 64)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
 
-		fmt.Printf("gas=%d|gasPrice=%d|gasLimit=%d\n", gas, gasPrice, gasLimit)
+		fmt.Printf("gas=%d|gasPrice=%d|gasWanted=%d\n", gas, gasPrice, gasWanted)
 
-		msg := htdfservice.NewMsgSendFromForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gasPrice, gasLimit)
+		msg := htdfservice.NewMsgSendFromForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gasPrice, gasWanted)
 		CompleteAndBroadcastTxREST(w, cliCtx, req.BaseReq, mreq.BaseReq.Password, []sdk.Msg{msg}, cdc)
 
 	}
@@ -131,7 +130,7 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 		return
 	}
 
-	simAndExec, gas, err := client.ParseGas(baseReq.Gas)
+	simAndExec, gasWanted, err := client.ParseGas(baseReq.GasWanted)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -139,8 +138,8 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 
 	txBldr := authtxb.NewTxBuilder(
 		utils.GetTxEncoder(cdc), baseReq.AccountNumber,
-		baseReq.Sequence, gas, gasAdj, baseReq.Simulate,
-		baseReq.ChainID, baseReq.Memo, baseReq.Fees, baseReq.GasPrices,
+		baseReq.Sequence, gasWanted, gasAdj, baseReq.Simulate,
+		baseReq.ChainID, baseReq.Memo, baseReq.GasPrices,
 	)
 
 	// get fromaddr

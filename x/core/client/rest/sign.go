@@ -3,6 +3,8 @@ package rest
 import (
 	"net/http"
 
+	"github.com/orientwalt/htdf/accounts/keystore"
+	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
@@ -11,8 +13,6 @@ import (
 	"github.com/orientwalt/htdf/types/rest"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	"github.com/orientwalt/htdf/accounts/keystore"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 )
@@ -66,13 +66,12 @@ func SignTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			utils.GetTxEncoder(cdc),
 			req.BaseReq.AccountNumber,
 			req.BaseReq.Sequence,
-			req.Tx.Fee.Gas,
+			req.Tx.Fee.GasWanted,
 			1.0,
 			false,
 			req.BaseReq.ChainID,
 			req.Tx.GetMemo(),
-			req.Tx.Fee.Amount,
-			nil,
+			req.Tx.Fee.GasPrice,
 		)
 
 		var signedTx auth.StdTx

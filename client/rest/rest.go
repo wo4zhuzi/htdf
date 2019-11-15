@@ -26,7 +26,7 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 		return
 	}
 
-	simAndExec, gas, err := client.ParseGas(br.Gas)
+	simAndExec, gas, err := client.ParseGas(br.GasWanted)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -34,7 +34,7 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 
 	txBldr := authtxb.NewTxBuilder(
 		utils.GetTxEncoder(cdc), br.AccountNumber, br.Sequence, gas, gasAdj,
-		br.Simulate, br.ChainID, br.Memo, br.Fees, br.GasPrices,
+		br.Simulate, br.ChainID, br.Memo, br.GasPrices,
 	)
 
 	if br.Simulate || simAndExec {

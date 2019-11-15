@@ -46,7 +46,7 @@ func NewFeePreprocessHandler(fk FeeCollectionKeeper) types.FeePreprocessHandler 
 
 		totalNativeFee := fa.getNativeFeeToken(ctx, stdTx.Fee.Amount)
 
-		return fa.feePreprocess(ctx, feeParams, sdk.Coins{totalNativeFee}, stdTx.Fee.Gas)
+		return fa.feePreprocess(ctx, feeParams, sdk.Coins{totalNativeFee}, stdTx.Fee.GasWanted)
 	}
 }
 

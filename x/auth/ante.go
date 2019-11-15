@@ -40,7 +40,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
 		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
 		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount)
-		fmt.Println("NewAnteHandler:stdTx.Fee.Gas", stdTx.Fee.Gas)
+		fmt.Println("NewAnteHandler:stdTx.Fee.Gas", stdTx.Fee.GasWanted)
 		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrices())
 		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
 		if !ok {
@@ -70,7 +70,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			}
 		}
 
-		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.Gas)
+		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.GasWanted)
 		// AnteHandlers must have their own defer/recover in order for the BaseApp
 		// to know how much gas was used! This is because the GasMeter is created in
 		// the AnteHandler, but if it panics the context won't be set properly in
@@ -86,10 +86,10 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 				case sdk.ErrorOutOfGas:
 					log := fmt.Sprintf(
 						"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
-						rType.Descriptor, stdTx.Fee.Gas, newCtx.GasMeter().GasConsumed(),
+						rType.Descriptor, stdTx.Fee.GasWanted, newCtx.GasMeter().GasConsumed(),
 					)
 					res = sdk.ErrOutOfGas(log).Result()
-					res.GasWanted = stdTx.Fee.Gas
+					res.GasWanted = stdTx.Fee.GasWanted
 					res.GasUsed = newCtx.GasMeter().GasConsumed()
 					abort = true
 				default:
@@ -164,7 +164,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 
 		// TODO: tx tags (?)
 		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
-		return newCtx, sdk.Result{GasWanted: stdTx.Fee.Gas}, false // continue...
+		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted}, false // continue...
 	}
 }
 
@@ -380,7 +380,7 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 
 		// Determine the required fees by multiplying each required minimum gas
 		// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
-		glDec := sdk.NewDec(int64(stdFee.Gas))
+		glDec := sdk.NewDec(int64(stdFee.GasWanted))
 		for i, gp := range minGasPrices {
 			fee := gp.Amount.Mul(glDec)
 			requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())

@@ -182,8 +182,9 @@ type BlockInfo struct {
 }
 
 type DisplayFee struct {
-	Amount []sdk.BigCoin `json:"amount"`
-	Gas    string        `json:"gas"`
+	Amount    []sdk.BigCoin `json:"amount"`
+	GasWanted string        `json:"gas_wanted"`
+	GasPrice  []sdk.BigCoin `json:"gas_price"`
 }
 
 type StdTx struct {
@@ -365,7 +366,7 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 		switch currTx := txResp.Tx.(type) {
 		case auth.StdTx:
 			getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Fee.Amount)
-			getTxResponse.Tx.Fee.Gas = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Fee.Gas, 10))
+			getTxResponse.Tx.Fee.GasWanted = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Fee.GasWanted, 10))
 			getTxResponse.Tx.Signatures = currTx.Signatures
 			getTxResponse.Tx.Memo = currTx.Memo
 

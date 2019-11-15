@@ -21,27 +21,27 @@ type AccountBody struct {
 
 //send
 type SendShiftReq struct {
-	BaseReq  SendDataBaseReq `json:"base_req"`
-	To       string          `json:"to"`
-	Amount   []sdk.BigCoin   `json:"amount"`
-	Data     string          `json:"data"`
-	GasPrice string          `json:"gas_price"` // unit: HTDF/gallon
-	GasLimit string          `json:"gas_limit"` // unit: gallon
+	BaseReq   SendDataBaseReq `json:"base_req"`
+	To        string          `json:"to"`
+	Amount    []sdk.BigCoin   `json:"amount"`
+	Data      string          `json:"data"`
+	GasPrice  string          `json:"gas_price"`  // unit: HTDF/gallon
+	GasWanted string          `json:"gas_wanted"` // unit: gallon
 }
 
 type SendDataBaseReq struct {
-	From          string        `json:"from"`
-	Password      string        `json:"password"`
-	Memo          string        `json:"memo"`
-	ChainID       string        `json:"chain_id"`
-	AccountNumber uint64        `json:"account_number"`
-	Sequence      uint64        `json:"sequence"`
-	Fees          []sdk.BigCoin `json:"fees"`
-	GasPrices     sdk.DecCoins  `json:"gas_prices"`
-	Gas           string        `json:"gas"`
-	GasAdjustment string        `json:"gas_adjustment"`
-	GenerateOnly  bool          `json:"generate_only"`
-	Simulate      bool          `json:"simulate"`
+	From          string `json:"from"`
+	Password      string `json:"password"`
+	Memo          string `json:"memo"`
+	ChainID       string `json:"chain_id"`
+	AccountNumber uint64 `json:"account_number"`
+	Sequence      uint64 `json:"sequence"`
+	// Fees          []sdk.BigCoin `json:"fees"`
+	GasPrices     sdk.DecCoins `json:"gas_prices"`
+	GasWanted     string       `json:"gas_wanted"`
+	GasAdjustment string       `json:"gas_adjustment"`
+	GenerateOnly  bool         `json:"generate_only"`
+	Simulate      bool         `json:"simulate"`
 }
 
 //create
