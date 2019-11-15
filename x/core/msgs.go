@@ -128,7 +128,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 
 		// junying-todo, 2019-11-12
 		if msg.GasLimit < params.TxGas {
-			return sdk.ErrOutOfGas(fmt.Sprintf("gas must be greather than %d", params.TxGas))
+			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d", params.TxGas))
 		}
 
 	} else {
@@ -143,7 +143,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 			return sdk.ErrOutOfGas("intrinsic out of gas")
 		}
 		if itrsGas > msg.GasLimit {
-			return sdk.ErrOutOfGas(fmt.Sprintf("gas must be greather than %d to pass validating", itrsGas))
+			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d to pass validating", itrsGas))
 		}
 
 	}

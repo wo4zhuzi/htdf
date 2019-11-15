@@ -80,7 +80,7 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 		// Checking minimum gasprice condition for staking transactions
 		if msg.Route() != "htdfservice" {
 			if tx.Fee.GasWanted < params.TxStakingDefaultGas {
-				return sdk.ErrInternal(fmt.Sprintf("%s/%s gas must be greater than %d", msg.Route(), msg.Type(), params.TxStakingDefaultGas))
+				return sdk.ErrInternal(fmt.Sprintf("%s/%s gaswanted must be greater than %d", msg.Route(), msg.Type(), params.TxStakingDefaultGas))
 			}
 		}
 	}
