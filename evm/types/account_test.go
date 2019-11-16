@@ -2,10 +2,9 @@ package types
 
 import (
 	"fmt"
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	"github.com/orientwalt/htdf/params"
-	"github.com/orientwalt/htdf/utils/unit_convert"
 
 	"github.com/magiconair/properties/assert"
 	"testing"
@@ -31,7 +30,7 @@ func TestAccountUpdate(t *testing.T) {
 	assert.Equal(t, err, nil)
 
 	baseAccount := auth.NewBaseAccountWithAddress(accAddr)
-	coins := sdk.Coins{sdk.NewCoin(unit_convert.DefaultDenom, sdk.NewInt(12345678)), sdk.NewCoin("stake", sdk.NewInt(2345678))}
+	coins := sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewInt(12345678)), sdk.NewCoin("stake", sdk.NewInt(2345678))}
 	baseAccount.Coins = coins
 
 	fmt.Printf("baseAccount=%v\n", baseAccount)
