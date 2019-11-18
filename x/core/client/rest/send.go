@@ -143,7 +143,7 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 	)
 
 	// get fromaddr
-	fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetFromAddr()
+	fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetSigners()[0]
 
 	txBldr, err = hscorecli.PrepareTxBuilder(txBldr, cliCtx, fromaddr)
 	if err != nil {

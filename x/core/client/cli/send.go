@@ -58,10 +58,9 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 				return sdk.ErrTxDecode("no gasprice")
 			}
 			gasprice := txBldr.GasPrices()[0].Amount
-			fmt.Println("gasprice:", gasprice)
 
 			gas := txBldr.GasWanted()
-			fmt.Println("gasprice:", gasprice.Uint64())
+			fmt.Println("GetCmdSend:txBldr.GasPrices()[0].Amount:", gasprice.Uint64())
 			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.Uint64(), gas)
 
 			cliCtx.PrintResponse = true
@@ -105,8 +104,6 @@ func PrepareTxBuilder(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, froma
 //
 // NOTE: Also see CompleteAndBroadcastTxREST.
 func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg, fromaddr sdk.AccAddress) error {
-	// get fromaddr
-	// fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetFromAddr()
 	//
 	txBldr, err := PrepareTxBuilder(txBldr, cliCtx, fromaddr)
 	if err != nil {
