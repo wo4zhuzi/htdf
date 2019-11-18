@@ -693,6 +693,12 @@ func (k Keeper) BeginRedelegation(ctx sdk.Context, delAddr sdk.AccAddress,
 	valSrcAddr, valDstAddr sdk.ValAddress, sharesAmount sdk.Dec) (
 	completionTime time.Time, errSdk sdk.Error) {
 
+	status, err := k.ValidateUnbondDelegatorStatus(ctx, delAddr, valSrcAddr)
+	if !status || err != nil {
+		completionTime, _, _ := k.getBeginInfo(ctx, valSrcAddr)
+		return completionTime, err
+	}
+
 	if bytes.Equal(valSrcAddr, valDstAddr) {
 		return time.Time{}, types.ErrSelfRedelegation(k.Codespace())
 	}
