@@ -86,7 +86,7 @@ test.staking.unbond:
 	 hscli query distr rewards $$acc > ${TMP_PATH};\
 	 rewards=$$(findstr amount ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 echo rewards:$$rewards;\
-	 hscli tx staking unbond $$acc $$val_addr ${UNBOND_AMOUNT}${UNIT} --gas-adjustment 1.5 --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
+	 hscli tx staking unbond $$acc $$val_addr ${UNBOND_AMOUNT}${UNIT} --gas-adjustment 1.5 --gas-price=${GAS_PRICE} > ${TMP_PATH};\
 	 txhash=$$(findstr txhash ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 echo txhash:$$txhash;\
 	 sleep ${BLK_TIME};\
@@ -119,7 +119,7 @@ test.staking.delegate:
 	 hscli query distr rewards $$acc > ${TMP_PATH};\
 	 rewards=$$(findstr amount ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 echo rewards:$$rewards;\
-	 hscli tx staking delegate $$acc $$val_addr ${DELEGATE_AMOUNT}${UNIT} --gas-adjustment 1.5 --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
+	 hscli tx staking delegate $$acc $$val_addr ${DELEGATE_AMOUNT}${UNIT} --gas-adjustment 1.0 --gas-price=${GAS_PRICE} > ${TMP_PATH};\
 	 txhash=$$(findstr txhash ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 echo txhash:$$txhash;\
 	 sleep ${BLK_TIME};\

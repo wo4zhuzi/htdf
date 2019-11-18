@@ -76,11 +76,14 @@ create.contract.default:
 	@echo "fill in blankets";\
 	 contract_addr=$$(hscli accounts list|row 1);\
 	 read -p "contract data:" data;\
-	 read -p "Gas:" gas;\
+	 read -p "GasWanted:" gaswanted;\
+	 read -p "GasPrice:" gasprice;\
 	 replkey From $$contract_addr contract.template y;\
 	 replkey Data $$data contract.template y;\
-	 replkey GasLimit $$gas contract.template y;\
-	 replkey gas $$gas contract.template y;\
+	 replkey GasWanted $$gaswanted contract.template y;\
+	 replkey gas_wanted $$gaswanted contract.template y;\
+	 replkey GasPrice $$gasprice contract.template y;\
+	 replkey gas_price $$gasprice contract.template y;\
 	 make -sC . execute
 
 # contract tx hash: 141D3CD4EB7B0BDB41C2313CF2170F6FBF0410898BEB05FBB7D88BA182E5028B
