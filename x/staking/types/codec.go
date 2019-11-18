@@ -11,6 +11,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgDelegate{}, "htdf/MsgDelegate", nil)
 	cdc.RegisterConcrete(MsgUndelegate{}, "htdf/MsgUndelegate", nil)
 	cdc.RegisterConcrete(MsgBeginRedelegate{}, "htdf/MsgBeginRedelegate", nil)
+	cdc.RegisterConcrete(MsgSetUndelegateStatus{}, "htdf/MsgSetUndelegateStatus", nil)
 }
 
 // generic sealed codec to be used throughout sdk

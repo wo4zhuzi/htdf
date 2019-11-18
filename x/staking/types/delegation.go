@@ -34,6 +34,7 @@ type Delegation struct {
 	DelegatorAddress sdk.AccAddress `json:"delegator_address"`
 	ValidatorAddress sdk.ValAddress `json:"validator_address"`
 	Shares           sdk.Dec        `json:"shares"`
+	Status           bool           `json:"status"`
 }
 
 // NewDelegation creates a new delegation object
@@ -44,6 +45,7 @@ func NewDelegation(delegatorAddr sdk.AccAddress, validatorAddr sdk.ValAddress,
 		DelegatorAddress: delegatorAddr,
 		ValidatorAddress: validatorAddr,
 		Shares:           shares,
+		Status:           false,
 	}
 }
 

@@ -17,6 +17,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	flagDelegatorStatus = "delegator-status"
+)
+
 // GetCmdCreateValidator implements the create validator command handler.
 // TODO: Add full description
 func GetCmdCreateValidator(cdc *codec.Codec) *cobra.Command {
@@ -226,6 +230,40 @@ $ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
 		},
 	}
+}
+
+// GetCmdUnbond implements the unbond validator command.
+func GetCmdUpgradeDelStatus(storeName string, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "upgrade [delegator-addr] [validator-addr]",
+		Short: "upgarde delegator status",
+		Args:  cobra.ExactArgs(2),
+		Long: strings.TrimSpace(`Upgrade delegator status from a validator:
+$ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
+						  htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc \
+						  --delegator-status true
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			delAddr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+			valAddr, err := sdk.ValAddressFromBech32(args[1])
+			if err != nil {
+				return err
+			}
+
+			delegatorStatus := viper.GetBool(flagDelegatorStatus)
+			msg := staking.NewMsgSetUndelegateStatus(delAddr, valAddr, delegatorStatus)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
+		},
+	}
+
+	cmd.Flags().Bool(flagDelegatorStatus, false, "Upgarde delegator status")
+	return cmd
 }
 
 // BuildCreateValidatorMsg makes a new MsgCreateValidator.

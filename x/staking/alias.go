@@ -92,11 +92,12 @@ var (
 	DefaultGenesisState   = types.DefaultGenesisState
 	RegisterCodec         = types.RegisterCodec
 
-	NewMsgCreateValidator = types.NewMsgCreateValidator
-	NewMsgEditValidator   = types.NewMsgEditValidator
-	NewMsgDelegate        = types.NewMsgDelegate
-	NewMsgUndelegate      = types.NewMsgUndelegate
-	NewMsgBeginRedelegate = types.NewMsgBeginRedelegate
+	NewMsgCreateValidator     = types.NewMsgCreateValidator
+	NewMsgEditValidator       = types.NewMsgEditValidator
+	NewMsgDelegate            = types.NewMsgDelegate
+	NewMsgUndelegate          = types.NewMsgUndelegate
+	NewMsgBeginRedelegate     = types.NewMsgBeginRedelegate
+	NewMsgSetUndelegateStatus = types.NewMsgSetUndelegateStatus
 
 	NewQuerier               = querier.NewQuerier
 	NewQueryDelegatorParams  = querier.NewQueryDelegatorParams

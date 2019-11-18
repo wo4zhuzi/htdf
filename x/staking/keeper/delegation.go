@@ -84,6 +84,13 @@ func (k Keeper) SetDelegation(ctx sdk.Context, delegation types.Delegation) {
 	store.Set(GetDelegationKey(delegation.DelegatorAddress, delegation.ValidatorAddress), b)
 }
 
+// upgrade a delegation status
+func (k Keeper) UpgradeDelegation(ctx sdk.Context, delegation types.Delegation) {
+	store := ctx.KVStore(k.storeKey)
+	b := types.MustMarshalDelegation(k.cdc, delegation)
+	store.Set(GetDelegationKey(delegation.DelegatorAddress, delegation.ValidatorAddress), b)
+}
+
 // remove a delegation
 func (k Keeper) RemoveDelegation(ctx sdk.Context, delegation types.Delegation) {
 	// TODO: Consider calling hooks outside of the store wrapper functions, it's unobvious.
@@ -586,6 +593,11 @@ func (k Keeper) Undelegate(
 	ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress, sharesAmount sdk.Dec,
 ) (time.Time, sdk.Error) {
 
+	status, err := k.ValidateUnbondDelegatorStatus(ctx, delAddr, valAddr)
+	if !status || err != nil {
+		completionTime, _, _ := k.getBeginInfo(ctx, valAddr)
+		return completionTime, err
+	}
 	// Undelegating must obey the unbonding period regardless of the validator's
 	// status for safety. Block heights prior to undelegatePatchHeight allowed
 	// delegates to unbond from an unbonded validator immediately.
@@ -797,4 +809,23 @@ func (k Keeper) ValidateUnbondAmount(
 	}
 
 	return shares, nil
+}
+
+func (k Keeper) ValidateUnbondDelegatorStatus(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) (s bool, err sdk.Error) {
+
+	_, found := k.GetValidator(ctx, valAddr)
+	if !found {
+		return false, types.ErrNoValidatorFound(k.Codespace())
+	}
+
+	del, dfound := k.GetDelegation(ctx, delAddr, valAddr)
+	if !dfound {
+		return false, types.ErrNoDelegation(k.Codespace())
+	}
+
+	if !del.Status {
+		return false, types.ErrUndelegate(k.Codespace())
+	}
+
+	return true, nil
 }

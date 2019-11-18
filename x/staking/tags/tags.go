@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ActionCompleteUnbonding    = "complete-unbonding"
-	ActionCompleteRedelegation = "complete-redelegation"
+	ActionCompleteUnbonding     = "complete-unbonding"
+	ActionCompleteRedelegation  = "complete-redelegation"
+	ActionCompleteAuthorization = "complete-authorization"
 
 	Action       = sdk.TagAction
 	SrcValidator = sdk.TagSrcValidator
