@@ -683,9 +683,9 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 }
 
 // junying-todo, 2019-11-13
-// validateTx executes basic validator calls for messages
-// and checking minimum for
-func validateTx(ctx sdk.Context, tx sdk.Tx) sdk.Error {
+// ValidateBasic executes basic validator calls for all messages
+// and checking minimum for ?
+func ValidateBasic(ctx sdk.Context, tx sdk.Tx) sdk.Error {
 	stdtx, ok := tx.(auth.StdTx)
 	if !ok {
 		return sdk.ErrInternal("tx must be StdTx")
@@ -839,12 +839,15 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 
 	var msgs = tx.GetMsgs()
+
+	// TxByteSize Check
 	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msgs); err != nil {
 		result = err.Result()
 		return
 	}
 
-	if err := validateTx(ctx, tx); err != nil {
+	// ValidateBasic
+	if err := ValidateBasic(ctx, tx); err != nil {
 		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
 		return err.Result()
 	}

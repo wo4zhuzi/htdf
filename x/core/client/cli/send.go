@@ -26,11 +26,11 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "send [fromaddr] [toaddr] [amount]",
 		Short: "create & send transaction",
-		Long: `hscli tx send cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
-								cosmos1yqgv2rhxcgrf5jqrxlg80at5szzlarlcy254re \
-								5satoshi \
-								--gas=30000 \
-								--gas-prices=1.0satoshi`,
+		Long: `hscli tx send htdf1qn38r8re3lwlf5t6zgrdycrerd5w0 \
+							 htdf1yujjc5yptpphtt665u2u6zp6gl04enlg55fajp \
+							 5satoshi \
+							 --gas=30000 \
+							 --gas-prices=1.0satoshi`,
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
