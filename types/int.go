@@ -117,6 +117,11 @@ func NewInt(n int64) Int {
 	return Int{big.NewInt(n)}
 }
 
+// junying-todo, 2019-11-14
+func (i Int) Uint64() uint64 {
+	return i.i.Uint64()
+}
+
 // NewIntFromBigInt constructs Int from big.Int
 func NewIntFromBigInt(i *big.Int) Int {
 	if i.BitLen() > maxBitLen {

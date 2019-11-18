@@ -26,13 +26,13 @@ type TxBuilder struct {
 	chainID            string
 	memo               string
 	fees               sdk.Coins
-	gasPrices          sdk.DecCoins
+	gasPrices          sdk.Coins
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
 func NewTxBuilder(
 	txEncoder sdk.TxEncoder, accNumber, seq, gasWanted uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, gasPrices sdk.DecCoins,
+	simulateAndExecute bool, chainID, memo string, gasPrices sdk.Coins,
 ) TxBuilder {
 
 	return TxBuilder{
@@ -108,7 +108,7 @@ func (bldr TxBuilder) Memo() string { return bldr.memo }
 func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }
 
 // GasPrices returns the gas prices set for the transaction, if any.
-func (bldr TxBuilder) GasPrices() sdk.DecCoins { return bldr.gasPrices }
+func (bldr TxBuilder) GasPrices() sdk.Coins { return bldr.gasPrices }
 
 // WithTxEncoder returns a copy of the context with an updated codec.
 func (bldr TxBuilder) WithTxEncoder(txEncoder sdk.TxEncoder) TxBuilder {
@@ -141,7 +141,7 @@ func (bldr TxBuilder) WithGasWanted(gasWanted uint64) TxBuilder {
 
 // WithGasPrices returns a copy of the context with updated gas prices.
 func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
-	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices) // junying-todo, 2019-09-10, ParseDecCoins to ParseCoins, due to be replaced
+	parsedGasPrices, err := sdk.ParseCoins(gasPrices) // junying-todo, 2019-09-10, ParseDecCoins to ParseCoins, due to be replaced
 	if err != nil {
 		panic(err)
 	}

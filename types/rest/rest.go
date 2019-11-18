@@ -36,16 +36,16 @@ type BaseReq struct {
 	AccountNumber uint64 `json:"account_number"`
 	Sequence      uint64 `json:"sequence"`
 	// Fees          sdk.Coins    `json:"fees"`
-	GasPrices     sdk.DecCoins `json:"gas_prices"`
-	GasWanted     string       `json:"gas_wanted"` // junying-todo, 2019-11-15
-	GasAdjustment string       `json:"gas_adjustment"`
-	Simulate      bool         `json:"simulate"`
+	GasPrices     sdk.Coins `json:"gas_prices"`
+	GasWanted     string    `json:"gas_wanted"` // junying-todo, 2019-11-15
+	GasAdjustment string    `json:"gas_adjustment"`
+	Simulate      bool      `json:"simulate"`
 }
 
 // NewBaseReq creates a new basic request instance and sanitizes its values
 func NewBaseReq(
 	from, memo, chainID string, gas, gasAdjustment string, accNumber, seq uint64,
-	gasPrices sdk.DecCoins, simulate bool,
+	gasPrices sdk.Coins, simulate bool,
 ) BaseReq {
 
 	return BaseReq{

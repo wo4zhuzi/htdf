@@ -56,7 +56,7 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	// junying-todo, 2019-11-13
 	// MinGasPrice Checking
 	var gasprice = tx.Fee.GasPrice
-	minGasPrices, err := types.ParseDecCoins(config.DefaultMinGasPrices)
+	minGasPrices, err := types.ParseCoins(config.DefaultMinGasPrices)
 	if err != nil {
 		return sdk.ErrTxDecode("DefaultMinGasPrices decode error")
 	}
@@ -159,31 +159,24 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // gas to be used by the transaction. The ratio yields an effective "gasprice",
 // which must be above some miminum to be accepted into the mempool.
 type StdFee struct {
-	Amount    sdk.Coins    `json:"amount"`
-	GasWanted uint64       `json:"gas_wanted"`
-	GasPrice  sdk.DecCoins `json:"gas_price"`
+	Amount    sdk.Coins `json:"amount"`
+	GasWanted uint64    `json:"gas_wanted"`
+	GasPrice  sdk.Coins `json:"gas_price"`
 }
 
 // junying-todo, 2019-11-07
 // fee = gas * gasprice
-func CalcFees(gas uint64, gasprices sdk.DecCoins) sdk.Coins {
+func CalcFees(gaswanted uint64, gasprices sdk.Coins) sdk.Coins {
 	Fees := make(sdk.Coins, len(gasprices))
-	glDec := sdk.NewDec(int64(gas))
+	gaslimit := sdk.NewInt(int64(gaswanted))
 	for i, gp := range gasprices {
-		fee := gp.Amount.Mul(glDec)
-		Fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+		fee := gp.Amount.Mul(gaslimit)
+		Fees[i] = sdk.NewCoin(gp.Denom, fee)
 	}
 	return Fees
 }
 
-// NewStdFee returns a new instance of StdFee
-// func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
-// 	return StdFee{
-// 		Amount: amount,
-// 		Gas:    gas,
-// 	}
-// }
-func NewStdFee(gasWanted uint64, gasPrice sdk.DecCoins) StdFee {
+func NewStdFee(gasWanted uint64, gasPrice sdk.Coins) StdFee {
 	return StdFee{
 		Amount:    CalcFees(gasWanted, gasPrice),
 		GasWanted: gasWanted,
@@ -212,13 +205,16 @@ func (fee StdFee) Bytes() []byte {
 // NOTE: The gas prices returned are not the true gas prices that were
 // originally part of the submitted transaction because the fee is computed
 // as fee = ceil(gasWanted * gasPrices).
-func (fee StdFee) GasPrices() sdk.DecCoins {
-	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.GasWanted)))
+func (fee StdFee) GetGasPrices() uint64 {
+	if len(fee.GasPrice) == 0 {
+		return 0
+	}
+	return fee.GasPrice[0].Amount.Uint64()
 }
 
 // junying-todo, 2019-11-07
-func (fee StdFee) GetAmount() sdk.DecCoins {
-	return fee.GasPrice.MulDec(sdk.NewDec(int64(fee.GasWanted)))
+func (fee StdFee) GetAmount() sdk.Coins {
+	return fee.Amount
 }
 
 //__________________________________________________________

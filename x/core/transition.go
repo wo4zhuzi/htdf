@@ -14,24 +14,24 @@ import (
 
 //
 type StateTransition struct {
-	gpGasLimit *ethcore.GasPool
-	msg        MsgSendFrom
-	gas        uint64   //unit: gallon
-	gasPrice   *big.Int //unit: satoshi/gallon
-	initialGas uint64
-	value      *big.Int
-	data       []byte
-	stateDB    vm.StateDB
-	evm        *vm.EVM
+	gpGasWanted *ethcore.GasPool
+	msg         MsgSendFrom
+	gas         uint64   //unit: gallon
+	gasPrice    *big.Int //unit: satoshi/gallon
+	initialGas  uint64
+	value       *big.Int
+	data        []byte
+	stateDB     vm.StateDB
+	evm         *vm.EVM
 }
 
 func NewStateTransition(evm *vm.EVM, msg MsgSendFrom, stateDB *evmstate.CommitStateDB) *StateTransition {
 	return &StateTransition{
-		gpGasLimit: new(ethcore.GasPool).AddGas(msg.GasLimit),
-		evm:        evm,
-		stateDB:    stateDB,
-		msg:        msg,
-		gasPrice:   big.NewInt(int64(msg.GasPrice)),
+		gpGasWanted: new(ethcore.GasPool).AddGas(msg.GasWanted),
+		evm:         evm,
+		stateDB:     stateDB,
+		msg:         msg,
+		gasPrice:    big.NewInt(int64(msg.GasPrice)),
 	}
 }
 
@@ -45,13 +45,13 @@ func (st *StateTransition) useGas(amount uint64) error {
 }
 
 func (st *StateTransition) buyGas() error {
-	st.gas = st.msg.GasLimit
+	st.gas = st.msg.GasWanted
 	st.initialGas = st.gas
 	fmt.Printf("msgGas=%d\n", st.initialGas)
 
 	eaSender := apptypes.ToEthAddress(st.msg.From)
 
-	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.GasLimit), st.gasPrice)
+	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.GasWanted), st.gasPrice)
 	fmt.Printf("msgGasVal=%s\n", msgGasVal.String())
 
 	if st.stateDB.GetBalance(eaSender).Cmp(msgGasVal) < 0 {
@@ -59,7 +59,7 @@ func (st *StateTransition) buyGas() error {
 	}
 
 	// try call subGas method, to check gas limit
-	if err := st.gpGasLimit.SubGas(st.msg.GasLimit); err != nil {
+	if err := st.gpGasWanted.SubGas(st.msg.GasWanted); err != nil {
 		fmt.Printf("SubGas error|err=%s\n", err)
 		return err
 	}
@@ -85,7 +85,7 @@ func (st *StateTransition) refundGas() {
 
 	// Also return remaining gas to the block gas counter so it is
 	// available for the next transaction.
-	st.gpGasLimit.AddGas(st.gas)
+	st.gpGasWanted.AddGas(st.gas)
 }
 
 // gasUsed returns the amount of gas used up by the state transition.

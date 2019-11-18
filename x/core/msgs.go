@@ -54,50 +54,50 @@ func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
 // MsgSendFrom defines a SendFrom message /////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 type MsgSendFrom struct {
-	From     sdk.AccAddress
-	To       sdk.AccAddress
-	Amount   sdk.Coins
-	Data     string
-	GasPrice uint64 //unit,  satoshi/gallon
-	GasLimit uint64 //unit,  gallon
+	From      sdk.AccAddress
+	To        sdk.AccAddress
+	Amount    sdk.Coins
+	Data      string
+	GasPrice  uint64 //unit,  satoshi/gallon
+	GasWanted uint64 //unit,  gallon
 }
 
 var _ sdk.Msg = MsgSendFrom{}
 
 // NewMsgSend is a constructor function for MsgSend
 // Normal Transaction
-// Default GasLimit, Default GasPrice
+// Default GasWanted, Default GasPrice
 func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
 	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		GasPrice: 1,
-		GasLimit: params.TxGas,
+		From:      fromaddr,
+		To:        toaddr,
+		Amount:    amount,
+		GasPrice:  1,
+		GasWanted: params.TxGas,
 	}
 }
 
 // Normal Transaction
-// Default GasLimit, Customized GasPrice
-func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, gaslimit uint64) MsgSendFrom {
+// Default GasWanted, Customized GasPrice
+func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, GasWanted uint64) MsgSendFrom {
 	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		GasPrice: gasPrice,
-		GasLimit: gaslimit,
+		From:      fromaddr,
+		To:        toaddr,
+		Amount:    amount,
+		GasPrice:  gasPrice,
+		GasWanted: GasWanted,
 	}
 }
 
 // Contract Transaction
-func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, gasLimit uint64) MsgSendFrom {
+func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, GasWanted uint64) MsgSendFrom {
 	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		Data:     data,
-		GasPrice: gasPrice,
-		GasLimit: gasLimit,
+		From:      fromaddr,
+		To:        toaddr,
+		Amount:    amount,
+		Data:      data,
+		GasPrice:  gasPrice,
+		GasWanted: GasWanted,
 	}
 }
 
@@ -127,7 +127,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		}
 
 		// junying-todo, 2019-11-12
-		if msg.GasLimit < params.TxGas {
+		if msg.GasWanted < params.TxGas {
 			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d", params.TxGas))
 		}
 
@@ -142,7 +142,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		if err != nil {
 			return sdk.ErrOutOfGas("intrinsic out of gas")
 		}
-		if itrsGas > msg.GasLimit {
+		if itrsGas > msg.GasWanted {
 			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d to pass validating", itrsGas))
 		}
 

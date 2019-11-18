@@ -61,8 +61,8 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 			fmt.Println("gasprice:", gasprice)
 
 			gas := txBldr.GasWanted()
-			fmt.Println("gasprice:", gasprice.ToUint64())
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.ToUint64(), gas)
+			fmt.Println("gasprice:", gasprice.Uint64())
+			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.Uint64(), gas)
 
 			cliCtx.PrintResponse = true
 

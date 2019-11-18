@@ -86,7 +86,7 @@ type BaseApp struct {
 
 	// The minimum gas prices a validator is willing to accept for processing a
 	// transaction. This is mainly used for DoS and spam prevention.
-	minGasPrices sdk.DecCoins
+	minGasPrices sdk.Coins
 
 	// flag for sealing options and parameters to a BaseApp
 	sealed bool
@@ -267,7 +267,7 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	return nil
 }
 
-func (app *BaseApp) setMinGasPrices(gasPrices sdk.DecCoins) {
+func (app *BaseApp) setMinGasPrices(gasPrices sdk.Coins) {
 	app.minGasPrices = gasPrices
 }
 
@@ -724,7 +724,6 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 	var gasUsed uint64
 
 	fmt.Println("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
-	fmt.Println("runMsgs0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	for msgIdx, msg := range msgs {
 		// match message route
 		msgRoute := msg.Route()
@@ -753,6 +752,13 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 		idxLog := sdk.ABCIMessageLog{MsgIndex: msgIdx, Log: msgResult.Log}
 
+		// junying-todo, 2019-11-05
+		if msgRoute == "htdfservice" {
+			gasUsed = gasUsed + msgResult.GasUsed
+		} else {
+			gasUsed = ctx.GasMeter().GasConsumed()
+		}
+
 		// stop execution and return on first failed message
 		if !msgResult.IsOK() {
 			idxLog.Success = false
@@ -761,23 +767,12 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 			code = msgResult.Code
 			codespace = msgResult.Codespace
 
-			// junying-todo, 2019-11-05
-			if msgRoute == "htdfservice" {
-				gasUsed = gasUsed + msgResult.GasUsed
-			}
 			break
 		}
 
 		idxLog.Success = true
 		idxLogs = append(idxLogs, idxLog)
 
-		// junying-todo, 2019-10-24
-		// this is for non-htdfservice txs
-		if msgRoute == "htdfservice" {
-			gasUsed = gasUsed + msgResult.GasUsed
-		} else {
-			gasUsed = ctx.GasMeter().GasConsumed()
-		}
 	}
 	logJSON := codec.Cdc.MustMarshalJSON(idxLogs)
 	//

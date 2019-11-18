@@ -111,6 +111,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-11-13
 		// GasMetering Disabled, Now Constant Gas used for Staking Txs
 		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+		newCtx.GasMeter().UseGas(sdk.Gas(stdTx.Fee.GasWanted), "AnteHandler")
 
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
@@ -142,7 +143,6 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
 		stdSigs := stdTx.GetSignatures()
-		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
 		for i := 0; i < len(stdSigs); i++ {
 			// skip the fee payer, account is cached and fees were deducted already
 			if i != 0 {
@@ -163,8 +163,8 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// TODO: tx tags (?)
-		fmt.Println("NewAnteHandler:newCtx.GasMeter().GasConsumed()", newCtx.GasMeter().GasConsumed())
-		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted}, false // continue...
+		fmt.Println("NewAnteHandler:----------FINISHED")
+		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted, GasUsed: newCtx.GasMeter().GasConsumed()}, false // continue...
 	}
 }
 
@@ -380,10 +380,10 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 
 		// Determine the required fees by multiplying each required minimum gas
 		// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
-		glDec := sdk.NewDec(int64(stdFee.GasWanted))
+		gaslimit := sdk.NewInt(int64(stdFee.GasWanted))
 		for i, gp := range minGasPrices {
-			fee := gp.Amount.Mul(glDec)
-			requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+			fee := gp.Amount.Mul(gaslimit)
+			requiredFees[i] = sdk.NewCoin(gp.Denom, fee)
 		}
 		fmt.Println("EnsureSufficientMempoolFees:requiredFees", requiredFees)
 		fmt.Println("EnsureSufficientMempoolFees:stdFee", stdFee)

@@ -94,7 +94,7 @@ unittest:
 CHAIN_ID = testchain
 GENESIS_ACCOUNT_PASSWORD = 12345678
 GENESIS_ACCOUNT_BALANCE = 1000000000000000satoshi#,1000000000stake
-MINIMUM_GAS_PRICES = 0.000001satoshi#,0.000001stake
+MINIMUM_GAS_PRICES = 20satoshi#,0.000001stake
 
 new: install clear hsinit accs conf vals start
 
