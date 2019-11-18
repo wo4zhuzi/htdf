@@ -35,26 +35,24 @@ type BaseReq struct {
 	ChainID       string `json:"chain_id"`
 	AccountNumber uint64 `json:"account_number"`
 	Sequence      uint64 `json:"sequence"`
-	// Fees          sdk.Coins    `json:"fees"`
-	GasPrices     sdk.Coins `json:"gas_prices"`
-	GasWanted     string    `json:"gas_wanted"` // junying-todo, 2019-11-15
-	GasAdjustment string    `json:"gas_adjustment"`
-	Simulate      bool      `json:"simulate"`
+	GasWanted     string `json:"gas_wanted"` // junying-todo, 2019-11-15
+	GasPrice      string `json:"gas_price"`
+	GasAdjustment string `json:"gas_adjustment"`
+	Simulate      bool   `json:"simulate"`
 }
 
 // NewBaseReq creates a new basic request instance and sanitizes its values
 func NewBaseReq(
-	from, memo, chainID string, gas, gasAdjustment string, accNumber, seq uint64,
-	gasPrices sdk.Coins, simulate bool,
+	from, memo, chainID string, gasWanted, gasPrice, gasAdjustment string, accNumber, seq uint64,
+	simulate bool,
 ) BaseReq {
 
 	return BaseReq{
-		From:    strings.TrimSpace(from),
-		Memo:    strings.TrimSpace(memo),
-		ChainID: strings.TrimSpace(chainID),
-		// Fees:          fees,
-		GasPrices:     gasPrices,
-		GasWanted:     strings.TrimSpace(gas),
+		From:          strings.TrimSpace(from),
+		Memo:          strings.TrimSpace(memo),
+		ChainID:       strings.TrimSpace(chainID),
+		GasWanted:     strings.TrimSpace(gasWanted),
+		GasPrice:      strings.TrimSpace(gasPrice),
 		GasAdjustment: strings.TrimSpace(gasAdjustment),
 		AccountNumber: accNumber,
 		Sequence:      seq,
@@ -65,8 +63,8 @@ func NewBaseReq(
 // Sanitize performs basic sanitization on a BaseReq object.
 func (br BaseReq) Sanitize() BaseReq {
 	return NewBaseReq(
-		br.From, br.Memo, br.ChainID, br.GasWanted, br.GasAdjustment,
-		br.AccountNumber, br.Sequence, br.GasPrices, br.Simulate,
+		br.From, br.Memo, br.ChainID, br.GasWanted, br.GasPrice, br.GasAdjustment,
+		br.AccountNumber, br.Sequence, br.Simulate,
 	)
 }
 
@@ -80,15 +78,15 @@ func (br BaseReq) ValidateBasic(w http.ResponseWriter) bool {
 			WriteErrorResponse(w, http.StatusUnauthorized, "chain-id required but not specified")
 			return false
 
-		// case !br.Fees.IsZero() && !br.GasPrices.IsZero():
-		// 	// both fees and gas prices were provided
-		// 	WriteErrorResponse(w, http.StatusBadRequest, "cannot provide both fees and gas prices")
-		// 	return false
+			// case !br.Fees.IsZero() && !br.GasPrices.IsZero():
+			// 	// both fees and gas prices were provided
+			// 	WriteErrorResponse(w, http.StatusBadRequest, "cannot provide both fees and gas prices")
+			// 	return false
 
-		case !br.GasPrices.IsValid():
-			// neither fees or gas prices were provided
-			WriteErrorResponse(w, http.StatusPaymentRequired, "invalid fees or gas prices provided")
-			return false
+			// case !br.GasPrices.IsValid():
+			// 	// neither fees or gas prices were provided
+			// 	WriteErrorResponse(w, http.StatusPaymentRequired, "invalid fees or gas prices provided")
+			// 	return false
 		}
 	}
 

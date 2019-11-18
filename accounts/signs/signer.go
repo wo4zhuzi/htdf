@@ -81,14 +81,14 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 	// if txbuilder.GasWanted() <= 0 {
 	// 	return authtxb.StdSignMsg{}, errors.New("gasWanted must be provided")
 	// }
-	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrices()), txbuilder.GasWanted())
+	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrice()), txbuilder.GasWanted())
 	return authtxb.StdSignMsg{
 		ChainID:       txbuilder.ChainID(),
 		AccountNumber: txbuilder.AccountNumber(),
 		Sequence:      txbuilder.Sequence(),
 		Memo:          txbuilder.Memo(),
 		Msgs:          msgs,
-		Fee:           auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrices()), // auth.NewStdFee(txbuilder.GasWanted(), fees),
+		Fee:           auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrice()), // auth.NewStdFee(txbuilder.GasWanted(), fees),
 	}, nil
 }
 

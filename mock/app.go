@@ -209,7 +209,7 @@ func SetGenesis(app *App, accs []auth.Account) {
 // GenTx generates a signed mock transaction.
 func GenTx(msgs []sdk.Msg, accnums []uint64, seq []uint64, priv ...crypto.PrivKey) auth.StdTx {
 	// Make the transaction free
-	fee := auth.NewStdFee(20000, sdk.Coins{sdk.NewInt64Coin("stake", 0)})
+	fee := auth.NewStdFee(20000, 0)
 
 	sigs := make([]auth.StdSignature, len(priv))
 	memo := "testmemotestmemo"

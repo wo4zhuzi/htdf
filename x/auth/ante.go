@@ -132,12 +132,12 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-08-27
 		// conventional deducting fee module doesn't needed anymore.
 		// evm will replace it.
-		if !stdTx.Fee.Amount.IsZero() && route != "htdfservice" {
+		if !stdTx.Fee.Amount().IsZero() && route != "htdfservice" {
 			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
 			if !res.IsOK() {
 				return newCtx, res, true
 			}
-			fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
+			fck.AddCollectedFees(newCtx, stdTx.Fee.Amount())
 		}
 
 		// stdSigs contains the sequence number, account number, and signatures.
@@ -336,7 +336,7 @@ func consumeMultisignatureVerificationGas(meter sdk.GasMeter,
 // the CoinKeeper doesn't give us accounts), but it seems easier to do this.
 func DeductFees(blockTime time.Time, acc Account, fee StdFee) (Account, sdk.Result) {
 	coins := acc.GetCoins()
-	feeAmount := fee.Amount
+	feeAmount := fee.Amount()
 
 	if !feeAmount.IsValid() {
 		return nil, sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee amount: %s", feeAmount)).Result()
@@ -387,7 +387,7 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 		}
 		fmt.Println("EnsureSufficientMempoolFees:requiredFees", requiredFees)
 		fmt.Println("EnsureSufficientMempoolFees:stdFee", stdFee)
-		if !stdFee.Amount.IsAnyGTE(requiredFees) {
+		if !stdFee.Amount().IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(
 					"insufficient fees; got: %q required: %q", stdFee.Amount, requiredFees,

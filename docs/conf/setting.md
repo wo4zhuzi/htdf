@@ -1,6 +1,6 @@
 ### minimum gas price
     ~/.hsd/config/hsd.toml
-    server/config/config.go - DefaultMinGasPrices
+    params/fee.go - DefaultMinGasPrice
     init/testnet.go - FlagMinGasPrices
 ### persistant peers
     ~/.hsd/config/config.toml

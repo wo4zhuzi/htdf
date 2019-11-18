@@ -21,18 +21,17 @@ type TxBuilder struct {
 	accountNumber      uint64
 	sequence           uint64
 	gasWanted          uint64
+	gasPrice           uint64
 	gasAdjustment      float64
 	simulateAndExecute bool
 	chainID            string
 	memo               string
-	fees               sdk.Coins
-	gasPrices          sdk.Coins
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
 func NewTxBuilder(
 	txEncoder sdk.TxEncoder, accNumber, seq, gasWanted uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, gasPrices sdk.Coins,
+	simulateAndExecute bool, chainID, memo string, gasPrice uint64,
 ) TxBuilder {
 
 	return TxBuilder{
@@ -41,12 +40,11 @@ func NewTxBuilder(
 		accountNumber:      accNumber,
 		sequence:           seq,
 		gasWanted:          gasWanted,
+		gasPrice:           gasPrice,
 		gasAdjustment:      gasAdj,
 		simulateAndExecute: simulateAndExecute,
 		chainID:            chainID,
 		memo:               memo,
-		// fees:               fees,
-		gasPrices: gasPrices,
 	}
 }
 
@@ -69,8 +67,7 @@ func NewTxBuilderFromCLI() TxBuilder {
 		memo:               viper.GetString(client.FlagMemo),
 	}
 
-	// txbldr = txbldr.WithFees(viper.GetString(client.FlagFees)) // commented by junying, 2019-11-07
-	txbldr = txbldr.WithGasPrices(viper.GetString(client.FlagGasPrices))
+	txbldr = txbldr.WithGasPrices(uint64(viper.GetInt64(client.FlagGasPrices)))
 	txbldr = txbldr.WithGasWanted(uint64(viper.GetInt64(client.FlagGasWanted))) // added by junying, 2019-11-07
 
 	return txbldr
@@ -105,10 +102,10 @@ func (bldr TxBuilder) ChainID() string { return bldr.chainID }
 func (bldr TxBuilder) Memo() string { return bldr.memo }
 
 // Fees returns the fees for the transaction
-func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }
+// func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }?
 
 // GasPrices returns the gas prices set for the transaction, if any.
-func (bldr TxBuilder) GasPrices() sdk.Coins { return bldr.gasPrices }
+func (bldr TxBuilder) GasPrice() uint64 { return bldr.gasPrice }
 
 // WithTxEncoder returns a copy of the context with an updated codec.
 func (bldr TxBuilder) WithTxEncoder(txEncoder sdk.TxEncoder) TxBuilder {
@@ -140,13 +137,8 @@ func (bldr TxBuilder) WithGasWanted(gasWanted uint64) TxBuilder {
 // }
 
 // WithGasPrices returns a copy of the context with updated gas prices.
-func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
-	parsedGasPrices, err := sdk.ParseCoins(gasPrices) // junying-todo, 2019-09-10, ParseDecCoins to ParseCoins, due to be replaced
-	if err != nil {
-		panic(err)
-	}
-
-	bldr.gasPrices = parsedGasPrices
+func (bldr TxBuilder) WithGasPrices(gasPrice uint64) TxBuilder {
+	bldr.gasPrice = gasPrice
 	return bldr
 }
 
@@ -196,7 +188,7 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 		Sequence:      bldr.sequence,
 		Memo:          bldr.memo,
 		Msgs:          msgs,
-		Fee:           auth.NewStdFee(bldr.gasWanted, bldr.gasPrices), // junying-todo, 2019-11-07
+		Fee:           auth.NewStdFee(bldr.gasWanted, bldr.gasPrice), // junying-todo, 2019-11-07
 	}, nil
 }
 

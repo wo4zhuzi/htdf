@@ -44,7 +44,7 @@ func NewFeePreprocessHandler(fk FeeCollectionKeeper) types.FeePreprocessHandler 
 		fa := fk.GetFeeAuth(ctx)
 		feeParams := Params{}
 
-		totalNativeFee := fa.getNativeFeeToken(ctx, stdTx.Fee.Amount)
+		totalNativeFee := fa.getNativeFeeToken(ctx, stdTx.Fee.Amount())
 
 		return fa.feePreprocess(ctx, feeParams, sdk.Coins{totalNativeFee}, stdTx.Fee.GasWanted)
 	}
@@ -70,7 +70,7 @@ func NewFeeRefundHandler(am AccountKeeper, fk FeeCollectionKeeper) types.FeeRefu
 		ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 
 		fm := fk.GetFeeAuth(ctx)
-		totalNativeFee := fm.getNativeFeeToken(ctx, stdTx.Fee.Amount)
+		totalNativeFee := fm.getNativeFeeToken(ctx, stdTx.Fee.Amount())
 
 		//If all gas has been consumed, then there is no necessary to run fee refund process
 		if txResult.GasWanted <= txResult.GasUsed {

@@ -3,12 +3,12 @@ package config
 import (
 	"fmt"
 
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
 //
 const (
-	DefaultMinGasPrices     = "20satoshi"
 	ValueSecurityLevel_High = "high"
 	ValueSecurityLevel_Low  = "low"
 
@@ -32,7 +32,7 @@ func init() {
 type BaseConfig struct {
 	// The minimum gas prices a validator is willing to accept for processing a
 	// transaction. A transaction's fees must meet the minimum of any denomination
-	// specified in this config (e.g. 0.01photino;0.0001stake).
+	// specified in this config (e.g. 1photino;1stake).
 	MinGasPrices string `mapstructure:"minimum-gas-prices"`
 }
 
@@ -61,7 +61,7 @@ func (c *Config) GetMinGasPrices() sdk.DecCoins {
 func DefaultConfig() *Config {
 	return &Config{
 		BaseConfig{
-			MinGasPrices: DefaultMinGasPrices,
+			MinGasPrices: params.DefaultMinGasPriceStr,
 		},
 	}
 }

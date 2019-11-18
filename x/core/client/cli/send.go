@@ -54,14 +54,13 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			if len(txBldr.GasPrices()) == 0 {
+			if txBldr.GasPrice() == 0 {
 				return sdk.ErrTxDecode("no gasprice")
 			}
-			gasprice := txBldr.GasPrices()[0].Amount
 
 			gas := txBldr.GasWanted()
-			fmt.Println("GetCmdSend:txBldr.GasPrices()[0].Amount:", gasprice.Uint64())
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, gasprice.Uint64(), gas)
+			fmt.Println("GetCmdSend:txBldr.GasPrices():", txBldr.GasPrice())
+			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins, txBldr.GasPrice(), gas)
 
 			cliCtx.PrintResponse = true
 

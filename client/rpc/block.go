@@ -365,7 +365,7 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 
 		switch currTx := txResp.Tx.(type) {
 		case auth.StdTx:
-			getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Fee.Amount)
+			// getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Fee.Amount())
 			getTxResponse.Tx.Fee.GasWanted = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Fee.GasWanted, 10))
 			getTxResponse.Tx.Signatures = currTx.Signatures
 			getTxResponse.Tx.Memo = currTx.Memo

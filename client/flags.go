@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/orientwalt/htdf/server/config"
+	"github.com/orientwalt/htdf/params"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -42,7 +42,7 @@ const (
 	FlagMemo          = "memo"
 	// FlagFees               = "fees"
 	FlagGasWanted          = "gas-wanted" // added by junying, 2019-11-07
-	FlagGasPrices          = "gas-prices"
+	FlagGasPrices          = "gas-price"
 	FlagBroadcastMode      = "broadcast-mode"
 	FlagPrintResponse      = "print-response"
 	FlagDryRun             = "dry-run"
@@ -88,7 +88,7 @@ func PostCommands(cmds ...*cobra.Command) []*cobra.Command {
 		c.Flags().String(FlagMemo, "", "Memo to send along with transaction")
 		// c.Flags().String(FlagFees, "", "Fees to pay along with transaction; eg: 10satoshi")
 		c.Flags().Uint64P(FlagGasWanted, "g", DefaultGasLimit, "Gas to determine the transaction fee eg: 10satoshi") // added by junying, 2019-11-07
-		c.Flags().String(FlagGasPrices, config.DefaultMinGasPrices, "Gas prices to determine the transaction fee (e.g. 10satoshi)")
+		c.Flags().String(FlagGasPrices, params.DefaultMinGasPriceStr, "Gas prices to determine the transaction fee (e.g. 10satoshi)")
 		c.Flags().String(FlagNode, "tcp://localhost:26657", "<host>:<port> to tendermint rpc interface for this chain")
 		c.Flags().Bool(FlagUseLedger, false, "Use a connected Ledger device")
 		c.Flags().Float64(FlagGasAdjustment, DefaultGasAdjustment, "adjustment factor to be multiplied against the estimate returned by the tx simulation; if the gas limit is set manually this flag is ignored ")
@@ -162,6 +162,15 @@ func ParseGas(gasStr string) (simulateAndExecute bool, gas uint64, err error) {
 			err = fmt.Errorf("gas must be either integer or %q", GasFlagAuto)
 			return
 		}
+	}
+	return
+}
+
+//
+func ParseGasPrice(gasPriceStr string) (gasprice uint64, err error) {
+	gasprice, err = strconv.ParseUint(gasPriceStr, 10, 64)
+	if err != nil {
+		err = fmt.Errorf("gas must be either integer or %q", GasFlagAuto)
 	}
 	return
 }

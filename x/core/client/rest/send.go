@@ -55,8 +55,7 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		req.BaseReq.ChainID = mreq.BaseReq.ChainID
 		req.BaseReq.AccountNumber = mreq.BaseReq.AccountNumber
 		req.BaseReq.Sequence = mreq.BaseReq.Sequence
-		// req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
-		req.BaseReq.GasPrices = mreq.BaseReq.GasPrices
+		req.BaseReq.GasPrice = mreq.BaseReq.GasPrice
 		req.BaseReq.GasWanted = mreq.BaseReq.GasWanted
 		req.BaseReq.GasAdjustment = mreq.BaseReq.GasAdjustment
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
@@ -136,10 +135,17 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 		return
 	}
 
+	var gasPrice uint64
+	gasPrice, err = client.ParseGasPrice(baseReq.GasPrice)
+	if err != nil {
+		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	txBldr := authtxb.NewTxBuilder(
 		utils.GetTxEncoder(cdc), baseReq.AccountNumber,
 		baseReq.Sequence, gasWanted, gasAdj, baseReq.Simulate,
-		baseReq.ChainID, baseReq.Memo, baseReq.GasPrices,
+		baseReq.ChainID, baseReq.Memo, gasPrice,
 	)
 
 	// get fromaddr

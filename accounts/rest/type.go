@@ -36,12 +36,11 @@ type SendDataBaseReq struct {
 	ChainID       string `json:"chain_id"`
 	AccountNumber uint64 `json:"account_number"`
 	Sequence      uint64 `json:"sequence"`
-	// Fees          []sdk.BigCoin `json:"fees"`
-	GasPrices     sdk.Coins `json:"gas_prices"`
-	GasWanted     string    `json:"gas_wanted"`
-	GasAdjustment string    `json:"gas_adjustment"`
-	GenerateOnly  bool      `json:"generate_only"`
-	Simulate      bool      `json:"simulate"`
+	GasPrice      string `json:"gas_price"`
+	GasWanted     string `json:"gas_wanted"`
+	GasAdjustment string `json:"gas_adjustment"`
+	GenerateOnly  bool   `json:"generate_only"`
+	Simulate      bool   `json:"simulate"`
 }
 
 //create

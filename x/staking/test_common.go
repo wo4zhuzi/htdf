@@ -18,10 +18,7 @@ var (
 	priv4 = secp256k1.GenPrivKey()
 	addr4 = sdk.AccAddress(priv4.PubKey().Address())
 	coins = sdk.Coins{sdk.NewCoin("foocoin", sdk.NewInt(10))}
-	fee   = auth.NewStdFee(
-		100000,
-		sdk.Coins{sdk.NewCoin("foocoin", sdk.NewInt(0))},
-	)
+	fee   = auth.NewStdFee(100000, 0)
 
 	commissionMsg = NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec())
 )

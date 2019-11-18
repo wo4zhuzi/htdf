@@ -11,3 +11,8 @@ const (
 	TxStakingDefaultGas      uint64 = 60000
 	TxStakingDefaultGasPrice uint64 = 1
 )
+
+const (
+	DefaultMinGasPriceStr  = "20satoshi"
+	DefaultMinGasPriceUint = 20
+)

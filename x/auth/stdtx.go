@@ -9,8 +9,6 @@ import (
 
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/params"
-	"github.com/orientwalt/htdf/server/config"
-	"github.com/orientwalt/htdf/types"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -49,19 +47,14 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	if tx.Fee.GasWanted > maxGasWanted {
 		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.GasWanted, maxGasWanted))
 	}
-	if tx.Fee.Amount.IsAnyNegative() {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
+	if tx.Fee.Amount().IsAnyNegative() {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount()))
 	}
 
 	// junying-todo, 2019-11-13
 	// MinGasPrice Checking
-	var gasprice = tx.Fee.GasPrice
-	minGasPrices, err := types.ParseCoins(config.DefaultMinGasPrices)
-	if err != nil {
-		return sdk.ErrTxDecode("DefaultMinGasPrices decode error")
-	}
-	if !gasprice.IsAllGTE(minGasPrices) {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice must be greater than %s", config.DefaultMinGasPrices))
+	if tx.Fee.GasPrice < params.DefaultMinGasPriceUint {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice must be greater than %s", params.DefaultMinGasPriceStr))
 	}
 
 	// junying-todo, 2019-11-13
@@ -159,26 +152,20 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // gas to be used by the transaction. The ratio yields an effective "gasprice",
 // which must be above some miminum to be accepted into the mempool.
 type StdFee struct {
-	Amount    sdk.Coins `json:"amount"`
-	GasWanted uint64    `json:"gas_wanted"`
-	GasPrice  sdk.Coins `json:"gas_price"`
+	GasWanted uint64 `json:"gas_wanted"`
+	GasPrice  uint64 `json:"gas_price"`
 }
 
 // junying-todo, 2019-11-07
 // fee = gas * gasprice
-func CalcFees(gaswanted uint64, gasprices sdk.Coins) sdk.Coins {
-	Fees := make(sdk.Coins, len(gasprices))
-	gaslimit := sdk.NewInt(int64(gaswanted))
-	for i, gp := range gasprices {
-		fee := gp.Amount.Mul(gaslimit)
-		Fees[i] = sdk.NewCoin(gp.Denom, fee)
-	}
-	return Fees
+func CalcFees(gaswanted uint64, gasprice uint64) sdk.Coins {
+	// if gasprice * gaswanted > overflow
+	// if gasprice or gaswanted is zero
+	return sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewInt(int64(gaswanted*gasprice)))}
 }
 
-func NewStdFee(gasWanted uint64, gasPrice sdk.Coins) StdFee {
+func NewStdFee(gasWanted uint64, gasPrice uint64) StdFee {
 	return StdFee{
-		Amount:    CalcFees(gasWanted, gasPrice),
 		GasWanted: gasWanted,
 		GasPrice:  gasPrice,
 	}
@@ -190,9 +177,6 @@ func (fee StdFee) Bytes() []byte {
 	// this is a sign of something ugly
 	// (in the lcd_test, client side its null,
 	// server side its [])
-	if len(fee.Amount) == 0 {
-		fee.Amount = sdk.NewCoins()
-	}
 	bz, err := msgCdc.MarshalJSON(fee) // TODO
 	if err != nil {
 		panic(err)
@@ -205,16 +189,13 @@ func (fee StdFee) Bytes() []byte {
 // NOTE: The gas prices returned are not the true gas prices that were
 // originally part of the submitted transaction because the fee is computed
 // as fee = ceil(gasWanted * gasPrices).
-func (fee StdFee) GetGasPrices() uint64 {
-	if len(fee.GasPrice) == 0 {
-		return 0
-	}
-	return fee.GasPrice[0].Amount.Uint64()
+func (fee StdFee) GasPriceCoin() sdk.Coin {
+	return sdk.NewCoin(sdk.DefaultDenom, sdk.NewInt(int64(fee.GasPrice)))
 }
 
 // junying-todo, 2019-11-07
-func (fee StdFee) GetAmount() sdk.Coins {
-	return fee.Amount
+func (fee StdFee) Amount() sdk.Coins {
+	return CalcFees(fee.GasWanted, fee.GasPrice)
 }
 
 //__________________________________________________________
