@@ -6,16 +6,22 @@
     hscli config chain-id [chain-id]
 ### 如果代表地址里面没钱的话，转账一笔
     hscli query accounts [delegator-addr]
-    hscli tx send [fromaddr] [delegator-addr] [samount] --gas-prices=0.00001satoshi
+    hscli tx send [fromaddr] [delegator-addr] [samount] --gas-price=20
 ### [stake-抵押，解绑](https://github.com/orientwalt/htdf/blob/master/x/staking/client/cli/tx.go)   
     [抵押]
-    hscli tx staking delegate [delegator-addr] [validator-addr] [amount] --gas-adjustment=1.5 --gas-prices=0.00001satoshi
+    hscli tx staking delegate [delegator-addr] [validator-addr] [amount] --gas-price=20
     
     [解绑]
-    hscli tx staking unbond [delegator-addr] [validator-addr] [amount] --gas-adjustment 1.5 --gas-prices=0.00001satoshi
+    hscli tx staking unbond [delegator-addr] [validator-addr] [amount]  --gas-price=20
 ### [奖励-查询，回收](https://github.com/orientwalt/htdf/blob/master/x/distribution/client/cli/tx.go)
     [查询]
     hscli query distr rewards [delegator-addr]
 
     [回收]
-    hscli tx distr withdraw-rewards [delegator-addr] [validator-addr] --gas-adjustment 1.5 --gas-prices=0.00001satoshi
+    hscli tx distr withdraw-rewards [delegator-addr] [validator-addr]  --gas-price=20
+### [管理者，设置delegator解绑状态]
+    [查询]
+    delegation [delegator-addr] [validator-addr]
+
+    [许可]
+    hscli tx staking upgrade [delegator-addr] --delegator-manager [validator-addr] --delegator-status true --gas-price=20
