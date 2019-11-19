@@ -150,16 +150,16 @@ func (v *GasSetting) String() string {
 }
 
 // ParseGas parses the value of the gas option.
-func ParseGas(gasStr string) (simulateAndExecute bool, gas uint64, err error) {
+func ParseGas(gasStr string) (simulateAndExecute bool, gasWanted uint64, err error) {
 	switch gasStr {
 	case "":
-		gas = DefaultGasLimit
+		gasWanted = DefaultGasLimit
 	case GasFlagAuto:
 		simulateAndExecute = true
 	default:
-		gas, err = strconv.ParseUint(gasStr, 10, 64)
+		gasWanted, err = strconv.ParseUint(gasStr, 10, 64)
 		if err != nil {
-			err = fmt.Errorf("gas must be either integer or %q", GasFlagAuto)
+			err = fmt.Errorf("gas_wanted must be either integer or %q", GasFlagAuto)
 			return
 		}
 	}

@@ -11,8 +11,8 @@ curl --location --request POST "http://127.0.0.1:1317/hs/send" \
                             \"memo\": \"\",
                             \"password\": \"12345678\", 
                             \"chain_id\": \"testchain\", 
-                            \"account_number\": \"0\", 
-                            \"sequence\": \"0\", 
+                            \"account_number\": \"3\", 
+                            \"sequence\": \"1\", 
                             \"gas_wanted\": \"200000\", 
                             \"gas_price\": \"20\", 
                             \"simulate\": false

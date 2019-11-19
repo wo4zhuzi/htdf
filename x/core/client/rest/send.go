@@ -3,7 +3,6 @@ package rest
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/orientwalt/htdf/accounts"
 	"github.com/orientwalt/htdf/accounts/keystore"
@@ -25,12 +24,12 @@ import (
 
 // SendReq defines the properties of a send request's body.
 type SendReq struct {
-	BaseReq   rest.BaseReq `json:"base_req"`
-	To        string       `json:"to"`
-	Amount    sdk.Coins    `json:"amount"`
-	Data      string       `json:"data"`
-	GasPrice  string       `json:"gas_price"`  // uint: HTDF/gallon
-	GasWanted string       `json:"gas_wanted"` // unit: gallon
+	BaseReq rest.BaseReq `json:"base_req"`
+	To      string       `json:"to"`
+	Amount  sdk.Coins    `json:"amount"`
+	Data    string       `json:"data"`
+	// GasPrice  string       `json:"gas_price"`  // uint: HTDF/gallon
+	// GasWanted string       `json:"gas_wanted"` // unit: gallon
 }
 
 var msgCdc = codec.New()
@@ -61,8 +60,8 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
 		req.To = mreq.To
 		req.Data = mreq.Data
-		req.GasPrice = mreq.GasPrice
-		req.GasWanted = mreq.GasWanted
+		// req.GasPrice = mreq.GasPrice
+		// req.GasWanted = mreq.GasWanted
 
 		req.BaseReq = req.BaseReq.Sanitize()
 		if !req.BaseReq.ValidateBasic(w) {
@@ -83,29 +82,30 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			return
 		}
 
-		gas, err := strconv.ParseUint(req.BaseReq.GasWanted, 10, 64)
+		_, gasWanted, err := client.ParseGas(req.BaseReq.GasWanted)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		var gasPrice uint64
+		gasPrice, err = client.ParseGasPrice(req.BaseReq.GasPrice)
 		// when access smart contract, extract gas field
-		var gasPrice, gasWanted uint64
-		if len(req.Data) > 0 {
-			gasPrice, err = strconv.ParseUint(unit_convert.BigAmountToDefaultAmount(req.GasPrice), 10, 64)
-			if err != nil {
-				rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-				return
-			}
+		// var gasPrice, gasWanted uint64
+		// if len(req.Data) > 0 {
+		// 	gasPrice, err = strconv.ParseUint(unit_convert.BigAmountToDefaultAmount(req.GasPrice), 10, 64)
+		// 	if err != nil {
+		// 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		// 		return
+		// 	}
 
-			gasWanted, err = strconv.ParseUint(req.GasWanted, 10, 64)
-			if err != nil {
-				rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-				return
-			}
-		}
+		// 	gasWanted, err = strconv.ParseUint(req.GasWanted, 10, 64)
+		// 	if err != nil {
+		// 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		// 		return
+		// 	}
+		// }
 
-		fmt.Printf("gas=%d|gasPrice=%d|gasWanted=%d\n", gas, gasPrice, gasWanted)
+		fmt.Printf("gasPrice=%d|gasWanted=%d\n", gasPrice, gasWanted)
 
 		msg := htdfservice.NewMsgSendFromForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gasPrice, gasWanted)
 		CompleteAndBroadcastTxREST(w, cliCtx, req.BaseReq, mreq.BaseReq.Password, []sdk.Msg{msg}, cdc)
