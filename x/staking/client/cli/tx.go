@@ -19,6 +19,7 @@ import (
 
 const (
 	flagDelegatorStatus = "delegator-status"
+	flagManager         = "delegator-manager"
 )
 
 // GetCmdCreateValidator implements the create validator command handler.
@@ -237,10 +238,12 @@ func GetCmdUpgradeDelStatus(storeName string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upgrade [delegator-addr] [validator-addr]",
 		Short: "upgarde delegator status",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		Long: strings.TrimSpace(`Upgrade delegator status from a validator:
-$ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
-						  htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc \
+$ hscli tx staking unbond 
+						  htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz 
+						  htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc 
+						  --delegator-manager htdf10ygcr3yhwd4w3sy08t0nk9jnpwgznj0tefmr2n
 						  --delegator-status true
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -251,17 +254,22 @@ $ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 			if err != nil {
 				return err
 			}
-			valAddr, err := sdk.ValAddressFromBech32(args[1])
+
+			manager := viper.GetString(flagManager)
+			valAddr, err := sdk.ValAddressFromBech32(manager)
 			if err != nil {
 				return err
 			}
+			manaAddr := sdk.AccAddress(sdk.AccAddress(valAddr))
 
 			delegatorStatus := viper.GetBool(flagDelegatorStatus)
+
 			msg := staking.NewMsgSetUndelegateStatus(delAddr, valAddr, delegatorStatus)
-			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, delAddr)
+			return hscorecli.CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, manaAddr)
 		},
 	}
 
+	cmd.Flags().String(flagManager, "", "Manager address")
 	cmd.Flags().Bool(flagDelegatorStatus, false, "Upgarde delegator status")
 	return cmd
 }
