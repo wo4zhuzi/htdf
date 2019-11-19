@@ -35,7 +35,7 @@ func checkInvalidTx(t *testing.T, anteHandler sdk.AnteHandler, ctx sdk.Context, 
 		stdTx, ok := tx.(StdTx)
 		require.True(t, ok, "tx must be in form auth.StdTx")
 		// GasWanted set correctly
-		require.Equal(t, stdTx.Fee.Gas, result.GasWanted, "Gas wanted not set correctly")
+		require.Equal(t, stdTx.Fee.GasWanted, result.GasWanted, "Gas wanted not set correctly")
 		require.True(t, result.GasUsed > result.GasWanted, "GasUsed not greated than GasWanted")
 		// Check that context is set correctly
 		require.Equal(t, result.GasUsed, newCtx.GasMeter().GasConsumed(), "Context not updated correctly")
@@ -86,7 +86,7 @@ func TestAnteHandlerSigErrors(t *testing.T) {
 
 	// save the first account, but second is still unrecognized
 	acc1 := input.ak.NewAccountWithAddress(ctx, addr1)
-	acc1.SetCoins(fee.Amount)
+	acc1.SetCoins(fee.Amount())
 	input.ak.SetAccount(ctx, acc1)
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeUnknownAddress)
 }
@@ -333,24 +333,24 @@ func TestAnteHandlerMemoGas(t *testing.T) {
 	var tx sdk.Tx
 	msg := newTestMsg(addr1)
 	privs, accnums, seqs := []crypto.PrivKey{priv1}, []uint64{0}, []uint64{0}
-	fee := NewStdFee(0, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
+	fee := NewStdFee(0, 0)
 
 	// tx does not have enough gas
 	tx = newTestTx(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee)
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeOutOfGas)
 
 	// tx with memo doesn't have enough gas
-	fee = NewStdFee(801, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
+	fee = NewStdFee(801, 0)
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, "abcininasidniandsinasindiansdiansdinaisndiasndiadninsd")
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeOutOfGas)
 
 	// memo too large
-	fee = NewStdFee(9000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
+	fee = NewStdFee(9000, 0)
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, strings.Repeat("01234567890", 500))
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeMemoTooLarge)
 
 	// tx with memo has enough gas
-	fee = NewStdFee(9000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("atom", 0))))
+	fee = NewStdFee(9000, 0)
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, strings.Repeat("0123456789", 10))
 	checkValidTx(t, anteHandler, ctx, tx, false)
 }
@@ -425,9 +425,7 @@ func TestAnteHandlerBadSignBytes(t *testing.T) {
 	msgs := []sdk.Msg{msg}
 	fee := newStdFee()
 	fee2 := newStdFee()
-	fee2.Gas += 100
-	fee3 := newStdFee()
-	fee3.Amount[0].Amount = fee3.Amount[0].Amount.AddRaw(100)
+	fee2.GasWanted += 100
 
 	// test good tx and signBytes
 	privs, accnums, seqs := []crypto.PrivKey{priv1}, []uint64{0}, []uint64{0}
@@ -451,7 +449,6 @@ func TestAnteHandlerBadSignBytes(t *testing.T) {
 		{chainID, 1, 1, fee, msgs, codeUnauth},                         // test wrong accnum
 		{chainID, 0, 1, fee, []sdk.Msg{newTestMsg(addr2)}, codeUnauth}, // test wrong msg
 		{chainID, 0, 1, fee2, msgs, codeUnauth},                        // test wrong fee
-		{chainID, 0, 1, fee3, msgs, codeUnauth},                        // test wrong fee
 	}
 
 	privs, seqs = []crypto.PrivKey{priv1}, []uint64{1}
@@ -711,9 +708,9 @@ func TestEnsureSufficientMempoolFees(t *testing.T) {
 	// setup
 	input := setupTestInput()
 	ctx := input.ctx.WithMinGasPrices(
-		sdk.DecCoins{
-			sdk.NewDecCoinFromDec("photino", sdk.NewDecWithPrec(50000000000000, sdk.Precision)), // 0.0001photino
-			sdk.NewDecCoinFromDec("stake", sdk.NewDecWithPrec(10000000000000, sdk.Precision)),   // 0.000001stake
+		sdk.Coins{
+			sdk.NewInt64Coin("photino", 1000), // 1000photino
+			sdk.NewInt64Coin("stake", 1000),   // 1000stake
 		},
 	)
 
@@ -721,29 +718,18 @@ func TestEnsureSufficientMempoolFees(t *testing.T) {
 		input      StdFee
 		expectedOK bool
 	}{
-		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("photino", 5)))), false},
-		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("stake", 1)))), false},
-		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("stake", 2)))), true},
-		{NewStdFee(200000, sdk.NewDecCoins(sdk.NewCoins(sdk.NewInt64Coin("photino", 10)))), true},
+		{NewStdFee(200000, 5), false},
+		{NewStdFee(200000, 1), false},
+		{NewStdFee(200000, 2), true},
+		{NewStdFee(200000, 10), true},
 		{
-			NewStdFee(
-				200000,
-				sdk.NewDecCoins(sdk.NewCoins(
-					sdk.NewInt64Coin("photino", 10),
-					sdk.NewInt64Coin("stake", 2),
-				)),
-			),
+			NewStdFee(200000, 10),
 			true,
 		},
 		{
 			NewStdFee(
 				200000,
-				sdk.NewDecCoins(sdk.NewCoins(
-					sdk.NewInt64Coin("atom", 5),
-					sdk.NewInt64Coin("photino", 10),
-					sdk.NewInt64Coin("stake", 2),
-				)),
-			),
+				20),
 			true,
 		},
 	}

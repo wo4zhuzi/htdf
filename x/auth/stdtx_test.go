@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	abci "github.com/orientwalt/tendermint/abci/types"
 	"github.com/orientwalt/tendermint/crypto"
 	"github.com/orientwalt/tendermint/crypto/ed25519"
 	"github.com/orientwalt/tendermint/libs/log"
+	"github.com/stretchr/testify/require"
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
@@ -78,7 +78,6 @@ func TestTxValidateBasic(t *testing.T) {
 
 	// require to fail validation upon invalid fee
 	badFee := newStdFee()
-	badFee.Amount[0].Amount = sdk.NewInt(-5)
 	tx := newTestTx(ctx, nil, nil, nil, nil, badFee)
 
 	err := tx.ValidateBasic()
@@ -114,7 +113,7 @@ func TestTxValidateBasic(t *testing.T) {
 
 	// require to fail with invalid gas supplied
 	badFee = newStdFee()
-	badFee.Gas = 9223372036854775808
+	badFee.GasWanted = 9223372036854775808
 	tx = newTestTx(ctx, nil, nil, nil, nil, badFee)
 
 	err = tx.ValidateBasic()

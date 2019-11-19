@@ -89,11 +89,7 @@ hscli version
 #### Run REST Server
     hscli rest-server
     hscli rest-server --chain-id=testchain --trust-node=true
-    hscli rest-server --chain-id=testchain \
-                      --laddr=tcp://localhost:1317 \
-                      --node tcp://localhost:26657 \
-                      --trust-node=false \
-                      --ssl-certfile=mycert.pem --ssl-keyfile=mykey.key
+    hscli rest-server --chain-id=testchain --trust-node=true --laddr=tcp://0.0.0.0:1317
                       
 #### CLI TEST
     [newaccount]
