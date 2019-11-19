@@ -13,9 +13,9 @@ require (
 	github.com/cosmos/ledger-cosmos-go v0.11.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deckarep/golang-set v1.7.1
-	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/emicklei/proto v1.8.0
 	github.com/ethereum/go-ethereum v1.8.27
+	github.com/go-interpreter/wagon v0.6.0
 	github.com/go-kit/kit v0.9.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.2
@@ -41,8 +41,6 @@ require (
 	github.com/tendermint/tendermint v0.31.5
 	github.com/tendermint/tmlibs v0.9.0
 	golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
-	gopkg.in/fatih/set.v0 v0.1.0 // indirect
-	gopkg.in/karalabe/cookiejar.v2 v2.0.0-20150724131613-8dcd6a7f4951 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/resty.v1 v1.12.0
 )
