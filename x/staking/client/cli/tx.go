@@ -236,14 +236,13 @@ $ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 // GetCmdUnbond implements the unbond validator command.
 func GetCmdUpgradeDelStatus(storeName string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "upgrade [delegator-addr] [validator-addr]",
+		Use:   "uds [delegator-addr]",
 		Short: "upgarde delegator status",
 		Args:  cobra.ExactArgs(1),
 		Long: strings.TrimSpace(`Upgrade delegator status from a validator:
-$ hscli tx staking unbond 
+$ hscli tx staking uds 
 						  htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz 
-						  htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc 
-						  --delegator-manager htdf10ygcr3yhwd4w3sy08t0nk9jnpwgznj0tefmr2n
+						  --delegator-manager htdfvaloper1ya5pe6maaxaw830h7y8crl63qm3v5j987ugnhc
 						  --delegator-status true
 `),
 		RunE: func(cmd *cobra.Command, args []string) error {
