@@ -18,5 +18,6 @@ var (
 		EIP155Block:    big.NewInt(4),
 		EIP158Block:    big.NewInt(5),
 		ByzantiumBlock: big.NewInt(6),
+		EWASMBlock:     big.NewInt(0),
 	}
 )

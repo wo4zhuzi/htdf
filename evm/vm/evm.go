@@ -17,6 +17,7 @@
 package vm
 
 import (
+	"fmt"
 	"math/big"
 	"sync/atomic"
 	"time"
@@ -42,6 +43,7 @@ type (
 
 // run runs the given contract and takes care of running precompiles with a fallback to the byte code interpreter.
 func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, error) {
+	fmt.Printf("run________________|inputSize=%d\n", len(input))
 	//if contract.CodeAddr != nil {
 	//	precompiles := PrecompiledContractsHomestead
 	//	if evm.ChainConfig().IsByzantium(evm.BlockNumber) {
@@ -51,8 +53,10 @@ func run(evm *EVM, contract *Contract, input []byte, readOnly bool) ([]byte, err
 	//		return RunPrecompiledContract(p, input, contract)
 	//	}
 	//}
-	for _, interpreter := range evm.interpreters {
+	fmt.Printf("range interpreters|rangSize=%d\n", len(evm.interpreters))
+	for i, interpreter := range evm.interpreters {
 		if interpreter.CanRun(contract.Code) {
+			fmt.Printf("interpreter canRun|i=%d\n", i)
 			if evm.interpreter != interpreter {
 				// Ensure that the interpreter pointer is set back
 				// to its current value upon return.
@@ -150,15 +154,16 @@ func NewEVM(ctx Context, statedb StateDB, chainConfig *params.ChainConfig, vmCon
 		//  }
 		//  evm.interpreters = append(evm.interpreters, NewEVMVCInterpreter(evm, vmConfig, options))
 		// } else {
-		// 	evm.interpreters = append(evm.interpreters, NewEWASMInterpreter(evm, vmConfig))
+		evm.interpreters = append(evm.interpreters, NewEWASMInterpreter(evm, vmConfig))
 		// }
-		panic("No supported ewasm interpreter yet.")
 	}
 
 	// vmConfig.EVMInterpreter will be used by EVM-C, it won't be checked here
 	// as we always want to have the built-in EVM as the failover option.
 	evm.interpreters = append(evm.interpreters, NewEVMInterpreter(evm, vmConfig))
-	evm.interpreter = evm.interpreters[0]
+	evm.interpreter = evm.interpreters[len(evm.interpreters)-1]
+
+	fmt.Printf("interpreters|size=%d\n", len(evm.interpreters))
 
 	return evm
 }
@@ -179,6 +184,8 @@ func (evm *EVM) Interpreter() Interpreter {
 // the necessary steps to create accounts and reverses the state in case of an
 // execution error or failed value transfer.
 func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas uint64, value *big.Int) (ret []byte, leftOverGas uint64, err error) {
+	fmt.Printf("EVM,Call|\n")
+
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
 		return nil, gas, nil
 	}
@@ -399,6 +406,15 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	// EVM. The contract is a scoped environment for this execution context
 	// only.
 	contract := NewContract(caller, AccountRef(address), value, gas)
+	for _, interpreter := range evm.interpreters {
+		if interpreter.CanRun(codeAndHash.code) {
+			var err error
+			codeAndHash.code, err = interpreter.PreContractCreation(codeAndHash.code, contract)
+			if err != nil {
+				return nil, address, gas, nil
+			}
+		}
+	}
 	contract.SetCodeOptionalHash(&address, codeAndHash)
 
 	if evm.vmConfig.NoRecursion && evm.depth > 0 {
@@ -409,8 +425,19 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		evm.vmConfig.Tracer.CaptureStart(caller.Address(), address, true, codeAndHash.code, gas, value)
 	}
 	start := time.Now()
-
 	ret, err := run(evm, contract, nil, false)
+
+	fmt.Printf("run|ret=%v\n", ret)
+
+	/* The new contract needs to be metered after it has executed the constructor */
+	if err == nil {
+		for _, interpreter := range evm.interpreters {
+			if interpreter.CanRun(contract.Code) {
+				ret, err = interpreter.PostContractCreation(ret)
+				break
+			}
+		}
+	}
 
 	// check whether the max code size has been exceeded
 	maxCodeSizeExceeded := evm.ChainConfig().IsEIP158(evm.BlockNumber) && len(ret) > params.MaxCodeSize
@@ -418,9 +445,11 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	// calculate the gas required to store the code. If the code could not
 	// be stored due to not enough gas set an error and let it be handled
 	// by the error checking condition below.
+	fmt.Printf("11111111111111111111|err=%v|maxCodeSizeExceeded=%v\n", err, maxCodeSizeExceeded)
 	if err == nil && !maxCodeSizeExceeded {
 		createDataGas := uint64(len(ret)) * params.CreateDataGas
 		if contract.UseGas(createDataGas) {
+			fmt.Printf("setcode|ret=%v\n", ret)
 			evm.StateDB.SetCode(address, ret)
 		} else {
 			err = ErrCodeStoreOutOfGas
@@ -449,6 +478,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 
 // Create creates a new contract using code as deployment code.
 func (evm *EVM) Create(caller ContractRef, code []byte, gas uint64, value *big.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error) {
+	fmt.Printf("EVM,Create|\n")
 	contractAddr = crypto.CreateAddress(caller.Address(), evm.StateDB.GetNonce(caller.Address()))
 	return evm.create(caller, &codeAndHash{code: code}, gas, value, contractAddr)
 }
