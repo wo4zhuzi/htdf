@@ -178,7 +178,11 @@ $ hscli query staking delegation htdf1u329vz5ysu9dud0q6cuyhy9dmzmvntw00s00e2 htd
 				return err
 			}
 
-			return cliCtx.PrintOutput(delegation)
+			err = cliCtx.PrintOutput(delegation)
+			if err == nil {
+				println("  Status:   ", delegation.Status)
+			}
+			return err
 		},
 	}
 }
