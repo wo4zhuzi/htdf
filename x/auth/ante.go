@@ -39,7 +39,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		fmt.Println("NewAnteHandler:tx", tx)
 		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
 		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
-		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount)
+		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount())
 		fmt.Println("NewAnteHandler:stdTx.Fee.GasWanted", stdTx.Fee.GasWanted)
 		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrice)
 		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
@@ -390,7 +390,7 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 		if !stdFee.Amount().IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(
-					"insufficient fees; got: %q required: %q", stdFee.Amount, requiredFees,
+					"insufficient fees; got: %q required: %q", stdFee.Amount(), requiredFees,
 				),
 			).Result()
 		}
