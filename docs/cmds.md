@@ -30,10 +30,10 @@
     amount: 100000stake
     
     [unbound]
-    hscli tx staking unbond [delegator-addr] [validator-addr] [amount] --gas-adjustment 1.5 --gas-prices=0.00001stake
+    hscli tx staking unbond [delegator-addr] [validator-addr] [amount] --gas-adjustment 1.5 --gas-price=20
 
     [delegate]
-    hscli tx staking delegate [delegator-addr] [validator-addr] [amount] --gas-adjustment=1.5 --gas-prices=0.00001stake
+    hscli tx staking delegate [delegator-addr] [validator-addr] [amount] --gas-adjustment=1.5 --gas-price=20
 ### [rewards](https://github.com/orientwalt/htdf/blob/master/x/distribution/client/cli/tx.go)
     [query]
     hscli query distr rewards [delegator-addr]
@@ -42,5 +42,5 @@
     hscli query distr community-pool
 
     [withdraw]
-    hscli tx distr withdraw-rewards [delegator-addr] [validator-addr] --gas-adjustment 1.5 --gas-prices=0.00001stake
-    hscli tx distr withdraw-rewards [delegator-addr] [validator-addr] --commission --gas-adjustment 1.5 --gas-prices=0.00001stake 
+    hscli tx distr withdraw-rewards [delegator-addr] [validator-addr] --gas-adjustment 1.5 --gas-price=20
+    hscli tx distr withdraw-rewards [delegator-addr] [validator-addr] --commission --gas-adjustment 1.5 --gas-price=20

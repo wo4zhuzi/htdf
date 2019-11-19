@@ -12,6 +12,7 @@ import (
 	"github.com/orientwalt/tendermint/crypto/secp256k1"
 
 	"github.com/orientwalt/htdf/codec"
+	txparam "github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -25,6 +26,21 @@ func init() {
 	// This decodes a valid hex string into a sepc256k1Pubkey for use in transaction simulation
 	bz, _ := hex.DecodeString("035AD6810A47F073553FF30D2FCC7E0D3B1C0B74B61A1AAA2582344037151E143A")
 	copy(simSecp256k1Pubkey[:], bz)
+}
+
+// Check if EVM Tx exists
+func ExistsMsgSendFrom(tx sdk.Tx) bool {
+	for _, msg := range tx.GetMsgs() {
+		if msg.Route() == "htdfservice" {
+			return true
+		}
+	}
+	return false
+}
+
+// Estimate RealFee by calculating real gas consumption
+func EstimateFee(tx StdTx) StdFee {
+	return NewStdFee(txparam.TxGas*uint64(len(tx.Msgs)), tx.Fee.GasPrice)
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -52,8 +68,6 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 
 		// junying-todo, 2019-10-24
 		// this is for non-htdfservice txs
-		var msgs = tx.GetMsgs()
-		var route = msgs[0].Route()
 
 		params := ak.GetParams(ctx)
 
@@ -110,8 +124,9 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// this is enabled again in order to handle non-htdfservice txs.
 		// junying-todo, 2019-11-13
 		// GasMetering Disabled, Now Constant Gas used for Staking Txs
-		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
-		newCtx.GasMeter().UseGas(sdk.Gas(stdTx.Fee.GasWanted), "AnteHandler")
+		if !ExistsMsgSendFrom(tx) {
+			newCtx.GasMeter().UseGas(sdk.Gas(txparam.TxGas*uint64(len(stdTx.Msgs))), "AnteHandler")
+		}
 
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
@@ -129,15 +144,15 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			return newCtx, res, true
 		}
 
-		// junying-todo, 2019-08-27
-		// conventional deducting fee module doesn't needed anymore.
-		// evm will replace it.
-		if !stdTx.Fee.Amount().IsZero() && route != "htdfservice" {
-			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
+		// junying-todo, 2019-11-19
+		// Deduct(TxGas * len(Msgs)) for non-htdfservice msgs
+		if !stdTx.Fee.Amount().IsZero() && !ExistsMsgSendFrom(tx) {
+			estimatedFee := EstimateFee(stdTx)
+			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], estimatedFee)
 			if !res.IsOK() {
 				return newCtx, res, true
 			}
-			fck.AddCollectedFees(newCtx, stdTx.Fee.Amount())
+			fck.AddCollectedFees(newCtx, estimatedFee.Amount())
 		}
 
 		// stdSigs contains the sequence number, account number, and signatures.
@@ -164,7 +179,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 
 		// TODO: tx tags (?)
 		fmt.Println("NewAnteHandler:----------FINISHED")
-		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted, GasUsed: newCtx.GasMeter().GasConsumed()}, false // continue...
+		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted}, false //, GasUsed: newCtx.GasMeter().GasConsumed()}, false // continue...
 	}
 }
 

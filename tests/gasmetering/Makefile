@@ -25,7 +25,7 @@ test.normal:
 	 hscli query account $$acc2 > ${TMP_PATH};\
 	 orgn2=$$(findkey amount ${TMP_PATH});\
 	 read -p "GasWanted:" GasWanted;\
-	 hscli tx send $$acc1 $$acc2 ${TX_AMOUNT}${UNIT} --gas-wanted=$$GasWanted --gas-prices=${GAS_PRICE}${UNIT} > ${TMP_PATH};\
+	 hscli tx send $$acc1 $$acc2 ${TX_AMOUNT}${UNIT} --gas-wanted=$$GasWanted --gas-price=${GAS_PRICE} > ${TMP_PATH};\
 	 txhash=$$(findstr txhash ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 sleep ${BLK_TIME};\
 	 hscli query tx $$txhash > ${TMP_PATH};\
@@ -105,20 +105,18 @@ test.staking.unbond:
 	 python -c "result='passed!' if $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee else 'failed!'; print result";\
 	 echo $$curr - $$orgn == $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee?;
 
+# 1. create a new account
+# 2. delegate with the account
 DELEGATE_AMOUNT = 100000
-
+PASSWORD = 12345678
 test.staking.delegate:
-	@acc=$$(hscli accounts list|row 2);\
+	@acc=$$(hscli accounts new ${PASSWORD});\
+	 hscli tx send $$(hscli accounts list|row 1) $$acc 10000000${UNIT} --gas-price=${GAS_PRICE};\
+	 sleep ${BLK_TIME};\
 	 hscli query account $$acc > ${TMP_PATH};\
 	 orgn=$$(findkey amount ${TMP_PATH});\
-	 hscli query staking validators > ${TMP_PATH};\
-	 tokens=$$(findkey tokens ${TMP_PATH});\
 	 echo balance:$$orgn;\
-	 echo tokens:$$tokens;\
 	 val_addr=$$(findkey validator_address ${GENESIS_JSON_PATH});\
-	 hscli query distr rewards $$acc > ${TMP_PATH};\
-	 rewards=$$(findstr amount ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
-	 echo rewards:$$rewards;\
 	 hscli tx staking delegate $$acc $$val_addr ${DELEGATE_AMOUNT}${UNIT} --gas-adjustment 1.0 --gas-price=${GAS_PRICE} > ${TMP_PATH};\
 	 txhash=$$(findstr txhash ${TMP_PATH}|fromstr ": "|extractstr '"' '"');\
 	 echo txhash:$$txhash;\
@@ -133,7 +131,7 @@ test.staking.delegate:
 	 echo gas_used:$$gas_used;\
 	 hscli query account $$acc > ${TMP_PATH};\
 	 curr=$$(findkey amount ${TMP_PATH});\
-	 margin=$$(python -c "print $$curr-$$orgn");\
-	 fee=$$(python -c "print int($$gas_used*${GAS_PRICE})+1");\
-	 python -c "result='passed!' if $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee else 'failed!'; print result";\
-	 echo $$curr - $$orgn == $$margin == $$rewards+${UNBOND_AMOUNT}-$$fee?;
+	 margin=$$(python -c "print $$orgn-$$curr");\
+	 fee=$$(python -c "print int($$gas_used*${GAS_PRICE})");\
+	 python -c "result='passed!' if $$margin == ${DELEGATE_AMOUNT}+$$fee else 'failed!'; print result";\
+	 echo $$curr - $$orgn == $$margin == ${DELEGATE_AMOUNT}+$$gas_used*${GAS_PRICE}?;
