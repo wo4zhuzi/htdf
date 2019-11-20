@@ -17,7 +17,6 @@ import (
 	"github.com/orientwalt/htdf/types/rest"
 	"github.com/orientwalt/htdf/utils/unit_convert"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	"github.com/orientwalt/htdf/x/bank"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 )
@@ -32,11 +31,11 @@ type SendReq struct {
 	// GasWanted string       `json:"gas_wanted"` // unit: gallon
 }
 
-var msgCdc = codec.New()
+// var msgCdc = codec.New()
 
-func init() {
-	bank.RegisterCodec(msgCdc)
-}
+// func init() {
+// 	bank.RegisterCodec(msgCdc)
+// }
 
 // SendTxRequestHandlerFn - http request handler to send coins to a address.
 func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {

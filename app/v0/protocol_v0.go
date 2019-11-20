@@ -119,7 +119,7 @@ func MakeLatestCodec() *codec.Codec {
 	htdfservice.RegisterCodec(cdc)
 	params.RegisterCodec(cdc) // only used by querier
 	mint.RegisterCodec(cdc)   // only used by querier
-	bank.RegisterCodec(cdc)
+	// bank.RegisterCodec(cdc)
 	stake.RegisterCodec(cdc)
 	distr.RegisterCodec(cdc)
 	slashing.RegisterCodec(cdc)
@@ -290,7 +290,7 @@ func (p *ProtocolV0) configRouters() {
 
 	p.router.
 		AddRoute(RouterKey, htdfservice.NewHandler(p.accountMapper, p.feeCollectionKeeper, protocol.KeyStorage, protocol.KeyCode)).
-		AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
+		// AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
 		AddRoute(protocol.StakeRoute, stake.NewHandler(p.StakeKeeper)).
 		AddRoute(protocol.SlashingRoute, slashing.NewHandler(p.slashingKeeper)).
 		AddRoute(protocol.DistrRoute, distr.NewHandler(p.distrKeeper)).
