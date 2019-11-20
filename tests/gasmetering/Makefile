@@ -7,7 +7,7 @@
 # 2.non-contract tx
 
 TMP_PATH = /tmp/result.json
-BLK_TIME = 5
+BLK_TIME = 6
 # htdfservice tx
 ## non-contract tx
 ### test cases
@@ -134,4 +134,4 @@ test.staking.delegate:
 	 margin=$$(python -c "print $$orgn-$$curr");\
 	 fee=$$(python -c "print int($$gas_used*${GAS_PRICE})");\
 	 python -c "result='passed!' if $$margin == ${DELEGATE_AMOUNT}+$$fee else 'failed!'; print result";\
-	 echo $$curr - $$orgn == $$margin == ${DELEGATE_AMOUNT}+$$gas_used*${GAS_PRICE}?;
+	 echo  $$orgn - $$curr == $$margin == ${DELEGATE_AMOUNT}+$$gas_used*${GAS_PRICE}?;

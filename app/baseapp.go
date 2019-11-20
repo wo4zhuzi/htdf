@@ -825,6 +825,35 @@ func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
 	return ctx.WithMultiStore(msCache), msCache
 }
 
+// Validate Tx
+func (app *BaseApp) ValidateTx(ctx sdk.Context, txBytes []byte, tx sdk.Tx) sdk.Error {
+	// TxByteSize Check
+	var msgs = tx.GetMsgs()
+	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msgs); err != nil {
+		return err
+	}
+
+	// ValidateBasic
+	if err := ValidateBasic(ctx, tx); err != nil {
+		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
+		return err
+	}
+	// Msgs Check
+	// All htdfservice Msgs: OK
+	// All non-htdfservice Msgs: OK
+	var count = 0
+	for _, msg := range msgs {
+		if msg.Route() == "htdfservice" {
+			count = count + 1
+		}
+	}
+	if count > 0 && len(msgs) != count {
+		return sdk.ErrInternal("mixed type of htdfservice msgs & non-htdfservice msgs can't be used")
+	}
+
+	return nil
+}
+
 // runTx processes a transaction. The transactions is proccessed via an
 // anteHandler. The provided txBytes may be nil in some cases, eg. in tests. For
 // further details on transaction execution, reference the BaseApp SDK
@@ -840,21 +869,10 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 	// only run the tx if there is block gas remaining
 	if mode == runTxModeDeliver && ctx.BlockGasMeter().IsOutOfGas() {
-		result = sdk.ErrOutOfGas("no block gas left to run tx").Result()
-		return
+		return sdk.ErrOutOfGas("no block gas left to run tx").Result()
 	}
 
-	var msgs = tx.GetMsgs()
-
-	// TxByteSize Check
-	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msgs); err != nil {
-		result = err.Result()
-		return
-	}
-
-	// ValidateBasic
-	if err := ValidateBasic(ctx, tx); err != nil {
-		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
+	if err := app.ValidateTx(ctx, txBytes, tx); err != nil {
 		return err.Result()
 	}
 
@@ -990,9 +1008,9 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
-	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", msgs, mode)
-	result = app.runMsgs(runMsgCtx, msgs, mode)
-	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", msgs)
+	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs(), mode)
+	result = app.runMsgs(runMsgCtx, tx.GetMsgs(), mode)
+	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs())
 	result.GasWanted = gasWanted
 
 	if mode == runTxModeSimulate {
