@@ -54,7 +54,7 @@ func newTestMsg(addrs ...sdk.AccAddress) *sdk.TestMsg {
 }
 
 func newStdFee() StdFee {
-	return NewStdFee(50000, 150)
+	return NewStdFee(1000000, 20)
 }
 
 // coins to more than cover the fee
