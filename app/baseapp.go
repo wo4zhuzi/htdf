@@ -682,22 +682,22 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 	}
 }
 
-// junying-todo, 2019-11-13
-// ValidateBasic executes basic validator calls for all messages
-// and checking minimum for ?
-func ValidateBasic(ctx sdk.Context, tx sdk.Tx) sdk.Error {
-	stdtx, ok := tx.(auth.StdTx)
-	if !ok {
-		return sdk.ErrInternal("tx must be StdTx")
-	}
-	// skip gentxs
-	fmt.Println("Current BlockHeight:", ctx.BlockHeight())
-	if ctx.BlockHeight() < 1 {
-		return nil
-	}
-	// Validate Tx
-	return stdtx.ValidateBasic()
-}
+// // junying-todo, 2019-11-13
+// // ValidateBasic executes basic validator calls for all messages
+// // and checking minimum for ?
+// func ValidateBasic(ctx sdk.Context, tx sdk.Tx) sdk.Error {
+// 	stdtx, ok := tx.(auth.StdTx)
+// 	if !ok {
+// 		return sdk.ErrInternal("tx must be StdTx")
+// 	}
+// 	// skip gentxs
+// 	fmt.Println("Current BlockHeight:", ctx.BlockHeight())
+// 	if ctx.BlockHeight() < 1 {
+// 		return nil
+// 	}
+// 	// Validate Tx
+// 	return stdtx.ValidateBasic()
+// }
 
 // retrieve the context for the tx w/ txBytes and other memoized values.
 func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Context) {
@@ -833,11 +833,12 @@ func (app *BaseApp) ValidateTx(ctx sdk.Context, txBytes []byte, tx sdk.Tx) sdk.E
 		return err
 	}
 
-	// ValidateBasic
-	if err := ValidateBasic(ctx, tx); err != nil {
-		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
-		return err
-	}
+	// // ValidateBasic
+	// if err := ValidateBasic(ctx, tx); err != nil {
+	// 	fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
+	// 	return err
+	// }
+
 	// Msgs Check
 	// All htdfservice Msgs: OK
 	// All non-htdfservice Msgs: OK

@@ -26,10 +26,6 @@ type Msg interface {
 	// CONTRACT: All signatures must be present to be valid.
 	// CONTRACT: Returns addrs in some deterministic order.
 	GetSigners() []AccAddress
-
-	// junying-todo, 2019-11-06
-	// the purpose is to in process msg.Data(htdfservice) in AnteHandler
-	// GetData() string
 }
 
 //__________________________________________________________
@@ -80,7 +76,4 @@ func (msg *TestMsg) GetSignBytes() []byte {
 func (msg *TestMsg) ValidateBasic() Error { return nil }
 func (msg *TestMsg) GetSigners() []AccAddress {
 	return msg.signers
-}
-func (msg *TestMsg) GetData() (data string) {
-	return
 }

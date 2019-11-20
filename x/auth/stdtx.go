@@ -54,7 +54,7 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	// junying-todo, 2019-11-13
 	// MinGasPrice Checking
 	if tx.Fee.GasPrice < params.DefaultMinGasPriceUint {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("gasprice must be greater than %s", params.DefaultMinGasPriceStr))
+		return sdk.ErrGasPriceTooLow(fmt.Sprintf("gasprice must be greater than %s", params.DefaultMinGasPriceStr))
 	}
 
 	// junying-todo, 2019-11-13
@@ -64,22 +64,33 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	if msgs == nil || len(msgs) == 0 {
 		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
 	}
+	count := 0
 	for _, msg := range msgs {
 		// Validate the Msg.
 		err := msg.ValidateBasic()
 		if err != nil {
 			return err
 		}
-		// Checking minimum gasprice condition for staking transactions
-		if msg.Route() != "htdfservice" {
-			if tx.Fee.GasWanted < params.TxStakingDefaultGas {
-				return sdk.ErrInternal(fmt.Sprintf("%s/%s gaswanted must be greater than %d", msg.Route(), msg.Type(), params.TxStakingDefaultGas))
-			}
+		if msg.Route() == "htdfservice" {
+			count = count + 1
 		}
+	}
+	// only MsgSendFroms or only OtherTypes in a Tx
+	if count > 0 && count != len(msgs) {
+		return sdk.ErrUnknownRequest("can't mix htdfservice msg with other-type msgs in a Tx")
+	}
+	// // one MsgSendFrom in one Tx
+	// if count > 1 {
+	// 	return sdk.ErrUnknownRequest("can't include more than one htdfservice msgs in a Tx")
+	// }
+
+	// Checking minimum gaswanted condition for transactions
+	minTxGasWanted := uint64(len(msgs)) * params.TxGas
+	if tx.Fee.GasWanted < minTxGasWanted {
+		return sdk.ErrInvalidGas(fmt.Sprintf("Tx[count(msgs)=%d] gaswanted must be greater than %d", len(msgs), minTxGasWanted))
 	}
 
 	// added & commented by junying, 2019-11-07
-
 	if len(stdSigs) == 0 {
 		return sdk.ErrNoSignatures("no signers")
 	}

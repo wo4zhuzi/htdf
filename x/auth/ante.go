@@ -66,9 +66,6 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
 		}
 
-		// junying-todo, 2019-10-24
-		// this is for non-htdfservice txs
-
 		params := ak.GetParams(ctx)
 
 		// Ensure that the provided fees meet a minimum threshold for the validator,
@@ -112,10 +109,10 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			}
 		}()
 
-		// moved to baseapp.ValidateTx by junying, 2019-11-13
-		// if err := tx.ValidateBasic(); err != nil {
-		// 	return newCtx, err.Result(), true
-		// }
+		// planed to be moved to baseapp.ValidateTx by junying, 2019-11-13
+		if err := tx.ValidateBasic(); err != nil {
+			return newCtx, err.Result(), true
+		}
 
 		// junying-todo, 2019-08-27
 		// conventional gas consuming isn't necessary anymore
