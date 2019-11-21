@@ -10,7 +10,7 @@ import (
 	"github.com/orientwalt/tendermint/crypto"
 	"github.com/stretchr/testify/require"
 
-	"github.com/orientwalt/htdf/mock/baseapp"
+	"github.com/orientwalt/htdf/x/mock/baseapp"
 )
 
 // BigInterval is a representation of the interval [lo, hi), where

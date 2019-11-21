@@ -9,8 +9,9 @@ import (
 	"github.com/orientwalt/tendermint/libs/log"
 	"github.com/stretchr/testify/require"
 
-	"github.com/orientwalt/htdf/app/v0"
+	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/codec"
+	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/crisis"
 	distr "github.com/orientwalt/htdf/x/distribution"
@@ -23,6 +24,7 @@ import (
 	"github.com/orientwalt/htdf/x/upgrade"
 
 	abci "github.com/orientwalt/tendermint/abci/types"
+	"github.com/orientwalt/tendermint/crypto/secp256k1"
 )
 
 func setGenesis(happ *HtdfServiceApp, accs ...*auth.BaseAccount) error {
@@ -58,13 +60,19 @@ func setGenesis(happ *HtdfServiceApp, accs ...*auth.BaseAccount) error {
 	return nil
 }
 
-func TestGaiadExport(t *testing.T) {
+func TestHsdExport(t *testing.T) {
 	db := db.NewMemDB()
 
 	happ := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), config.TestInstrumentationConfig(), db, nil, true, 0)
-	setGenesis(happ)
+	// accs added by junying, 2019-11-20
+	key := secp256k1.GenPrivKey()
+	pub := key.PubKey()
+	addr := sdk.AccAddress(pub.Address())
+	acc := auth.NewBaseAccountWithAddress(addr)
+	setGenesis(happ, &acc)
 
 	// Making a new app object with the db, so that initchain hasn't been called
+	//
 	newGapp := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), config.TestInstrumentationConfig(), db, nil, true, 0)
 	_, _, err := newGapp.ExportAppStateAndValidators(false)
 	require.NoError(t, err, "ExportAppStateAndValidators should not have an error")

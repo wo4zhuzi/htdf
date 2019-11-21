@@ -386,7 +386,6 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 		evmacc := newevmtypes.NewAccount(acc) // junying-todo, 2019-08-26
 		p.accountMapper.SetGenesisAccount(ctx, evmacc)
 	}
-
 	// initialize distribution (must happen before staking)
 	distr.InitGenesis(ctx, p.distrKeeper, genesisState.DistrData)
 

@@ -7,10 +7,10 @@ import (
 	"fmt"
 
 	"github.com/orientwalt/htdf/codec"
-	bam "github.com/orientwalt/htdf/mock/baseapp"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"
+	bam "github.com/orientwalt/htdf/x/mock/baseapp"
 	"github.com/orientwalt/htdf/x/params"
 	abci "github.com/orientwalt/tendermint/abci/types"
 	"github.com/orientwalt/tendermint/crypto"

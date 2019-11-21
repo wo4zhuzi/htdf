@@ -11,11 +11,11 @@ import (
 	abci "github.com/orientwalt/tendermint/abci/types"
 	"github.com/orientwalt/tendermint/crypto"
 
-	"github.com/orientwalt/htdf/mock"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"
 	"github.com/orientwalt/htdf/x/guardian"
+	"github.com/orientwalt/htdf/x/mock"
 	"github.com/orientwalt/htdf/x/staking"
 	stakekeeper "github.com/orientwalt/htdf/x/staking/keeper"
 )
