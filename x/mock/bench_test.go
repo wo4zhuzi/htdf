@@ -5,7 +5,6 @@ import (
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	"github.com/orientwalt/htdf/x/bank"
 	abci "github.com/orientwalt/tendermint/abci/types"
 )
 
@@ -14,9 +13,9 @@ import (
 func getBenchmarkMockApp() (*App, error) {
 	mapp := NewApp()
 
-	bank.RegisterCodec(mapp.Cdc)
-	bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper)
-	mapp.Router().AddRoute("bank", []*sdk.KVStoreKey{mapp.KeyAccount}, bank.NewHandler(bankKeeper))
+	// bank.RegisterCodec(mapp.Cdc)
+	// bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper)
+	// mapp.Router().AddRoute("bank", []*sdk.KVStoreKey{mapp.KeyAccount}, bank.NewHandler(bankKeeper))
 
 	err := mapp.CompleteSetup()
 	return mapp, err

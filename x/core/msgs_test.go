@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/orientwalt/htdf/types"
-	bank "github.com/orientwalt/htdf/x/bank"
 )
 
 func TestMsgSendRoute(t *testing.T) {
@@ -17,7 +16,7 @@ func TestMsgSendRoute(t *testing.T) {
 	var msg = NewMsgSendDefault(addr1, addr2, coins)
 
 	require.Equal(t, msg.Route(), "htdfservice")
-	require.Equal(t, msg.Type(), "sendfrom")
+	require.Equal(t, msg.Type(), "send")
 }
 
 func TestMsgSendValidation(t *testing.T) {
@@ -57,10 +56,9 @@ func TestMsgSendGetSignBytes(t *testing.T) {
 	addr2 := sdk.AccAddress([]byte("output"))
 	coins := sdk.NewCoins(sdk.NewInt64Coin("atom", 10))
 	var msg = NewMsgSendDefault(addr1, addr2, coins)
-	res := msg.GetSignBytes()
-
-	expected := `{"type":"cosmos-sdk/MsgSend","value":{"amount":[{"amount":"10","denom":"atom"}],"from_address":"cosmos1d9h8qat57ljhcm","to_address":"cosmos1da6hgur4wsmpnjyg"}}`
-	require.Equal(t, expected, string(res))
+	res := string(msg.GetSignBytes())
+	expected := `{"Amount":[{"amount":"10","denom":"atom"}],"Data":"","From":"htdf1d9h8qat5gn84g8","GasPrice":20,"GasWanted":30000,"To":"htdf1da6hgur4wsj5g5jq"}`
+	require.Equal(t, expected, res)
 }
 
 func TestMsgSendGetSigners(t *testing.T) {
@@ -68,82 +66,6 @@ func TestMsgSendGetSigners(t *testing.T) {
 	res := msg.GetSigners()
 	// TODO: fix this !
 	require.Equal(t, fmt.Sprintf("%v", res), "[696E70757431]")
-}
-
-func TestInputValidation(t *testing.T) {
-	addr1 := sdk.AccAddress([]byte{1, 2})
-	addr2 := sdk.AccAddress([]byte{7, 8})
-	someCoins := sdk.NewCoins(sdk.NewInt64Coin("atom", 123))
-	multiCoins := sdk.NewCoins(sdk.NewInt64Coin("atom", 123), sdk.NewInt64Coin("eth", 20))
-
-	var emptyAddr sdk.AccAddress
-	emptyCoins := sdk.NewCoins()
-	emptyCoins2 := sdk.NewCoins(sdk.NewInt64Coin("eth", 0))
-	someEmptyCoins := sdk.Coins{sdk.NewInt64Coin("eth", 10), sdk.NewInt64Coin("atom", 0)}
-	unsortedCoins := sdk.Coins{sdk.NewInt64Coin("eth", 1), sdk.NewInt64Coin("atom", 1)}
-
-	cases := []struct {
-		valid bool
-		txIn  bank.Input
-	}{
-		// auth works with different apps
-		{true, bank.NewInput(addr1, someCoins)},
-		{true, bank.NewInput(addr2, someCoins)},
-		{true, bank.NewInput(addr2, multiCoins)},
-
-		{false, bank.NewInput(emptyAddr, someCoins)},  // empty address
-		{false, bank.NewInput(addr1, emptyCoins)},     // invalid coins
-		{false, bank.NewInput(addr1, emptyCoins2)},    // invalid coins
-		{false, bank.NewInput(addr1, someEmptyCoins)}, // invalid coins
-		{false, bank.NewInput(addr1, unsortedCoins)},  // unsorted coins
-	}
-
-	for i, tc := range cases {
-		err := tc.txIn.ValidateBasic()
-		if tc.valid {
-			require.Nil(t, err, "%d: %+v", i, err)
-		} else {
-			require.NotNil(t, err, "%d", i)
-		}
-	}
-}
-
-func TestOutputValidation(t *testing.T) {
-	addr1 := sdk.AccAddress([]byte{1, 2})
-	addr2 := sdk.AccAddress([]byte{7, 8})
-	someCoins := sdk.NewCoins(sdk.NewInt64Coin("atom", 123))
-	multiCoins := sdk.NewCoins(sdk.NewInt64Coin("atom", 123), sdk.NewInt64Coin("eth", 20))
-
-	var emptyAddr sdk.AccAddress
-	emptyCoins := sdk.NewCoins()
-	emptyCoins2 := sdk.NewCoins(sdk.NewInt64Coin("eth", 0))
-	someEmptyCoins := sdk.Coins{sdk.NewInt64Coin("eth", 10), sdk.NewInt64Coin("atom", 0)}
-	unsortedCoins := sdk.Coins{sdk.NewInt64Coin("eth", 1), sdk.NewInt64Coin("atom", 1)}
-
-	cases := []struct {
-		valid bool
-		txOut bank.Output
-	}{
-		// auth works with different apps
-		{true, bank.NewOutput(addr1, someCoins)},
-		{true, bank.NewOutput(addr2, someCoins)},
-		{true, bank.NewOutput(addr2, multiCoins)},
-
-		{false, bank.NewOutput(emptyAddr, someCoins)},  // empty address
-		{false, bank.NewOutput(addr1, emptyCoins)},     // invalid coins
-		{false, bank.NewOutput(addr1, emptyCoins2)},    // invalid coins
-		{false, bank.NewOutput(addr1, someEmptyCoins)}, // invalid coins
-		{false, bank.NewOutput(addr1, unsortedCoins)},  // unsorted coins
-	}
-
-	for i, tc := range cases {
-		err := tc.txOut.ValidateBasic()
-		if tc.valid {
-			require.Nil(t, err, "%d: %+v", i, err)
-		} else {
-			require.NotNil(t, err, "%d", i)
-		}
-	}
 }
 
 /*

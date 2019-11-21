@@ -47,7 +47,7 @@
         "tags": [
           {
             "key": "action",
-            "value": "sendfrom"
+            "value": "send"
           },
           {
             "key": "sender",
@@ -79,7 +79,7 @@
         "tags": [
           {
             "key": "action",
-            "value": "sendfrom"
+            "value": "send"
           },
           {
             "key": "sender",
@@ -319,7 +319,7 @@
        "tags": [
          {
            "key": "action",
-           "value": "sendfrom"
+           "value": "send"
          },
          {
            "key": "sender",

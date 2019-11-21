@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	"github.com/orientwalt/htdf/x/bank"
+	hscore "github.com/orientwalt/htdf/x/core"
 	abci "github.com/orientwalt/tendermint/abci/types"
 	"github.com/orientwalt/tendermint/crypto"
 	"github.com/orientwalt/tendermint/crypto/ed25519"
@@ -43,43 +43,8 @@ var (
 	manyCoins = sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 1), sdk.NewInt64Coin("barcoin", 1)}
 	freeFee   = auth.NewStdFee(100000, 0)
 
-	sendMsg1 = bank.MsgSend{
-		Inputs:  []bank.Input{bank.NewInput(addr1, coins)},
-		Outputs: []bank.Output{bank.NewOutput(addr2, coins)},
-	}
-	sendMsg2 = bank.MsgSend{
-		Inputs: []bank.Input{bank.NewInput(addr1, coins)},
-		Outputs: []bank.Output{
-			bank.NewOutput(addr2, halfCoins),
-			bank.NewOutput(addr3, halfCoins),
-		},
-	}
-	sendMsg3 = bank.MsgSend{
-		Inputs: []bank.Input{
-			bank.NewInput(addr1, coins),
-			bank.NewInput(addr4, coins),
-		},
-		Outputs: []bank.Output{
-			bank.NewOutput(addr2, coins),
-			bank.NewOutput(addr3, coins),
-		},
-	}
-	sendMsg4 = bank.MsgSend{
-		Inputs: []bank.Input{
-			bank.NewInput(addr2, coins),
-		},
-		Outputs: []bank.Output{
-			bank.NewOutput(addr1, coins),
-		},
-	}
-	sendMsg5 = bank.MsgSend{
-		Inputs: []bank.Input{
-			bank.NewInput(addr1, manyCoins),
-		},
-		Outputs: []bank.Output{
-			bank.NewOutput(addr2, manyCoins),
-		},
-	}
+	sendMsg1 = hscore.NewMsgSendDefault(addr1, addr2, coins)
+	sendMsg2 = hscore.NewMsgSendDefault(addr1, addr2, manyCoins)
 )
 
 // initialize the mock application for this module
@@ -139,7 +104,7 @@ func TestMsgSendWithAccounts(t *testing.T) {
 	mapp.BeginBlock(abci.RequestBeginBlock{})
 
 	tx := GenTx([]sdk.Msg{sendMsg1}, []uint64{0}, []uint64{0}, priv1)
-	tx.Signatures[0].Sequence = 1
+	// tx.Signatures[0].Sequence = 1
 
 	res := mapp.Deliver(tx)
 	require.Equal(t, sdk.CodeUnauthorized, res.Code, res.Log)
@@ -208,7 +173,7 @@ func TestSengMsgMultipleInOut(t *testing.T) {
 
 	testCases := []appTestCase{
 		{
-			msgs:       []sdk.Msg{sendMsg3},
+			msgs:       []sdk.Msg{sendMsg1},
 			accNums:    []uint64{0, 0},
 			accSeqs:    []uint64{0, 0},
 			expSimPass: true,
@@ -256,7 +221,7 @@ func TestMsgSendDependent(t *testing.T) {
 			},
 		},
 		{
-			msgs:       []sdk.Msg{sendMsg4},
+			msgs:       []sdk.Msg{sendMsg2},
 			accNums:    []uint64{0},
 			accSeqs:    []uint64{0},
 			expSimPass: true,

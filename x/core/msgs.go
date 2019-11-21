@@ -107,7 +107,7 @@ func NewMsgSendForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sd
 func (msg MsgSend) Route() string { return "htdfservice" }
 
 // Type should return the action
-func (msg MsgSend) Type() string { return "sendfrom" }
+func (msg MsgSend) Type() string { return "send" }
 
 // ValidateBasic runs stateless checks on the message
 func (msg MsgSend) ValidateBasic() sdk.Error {
