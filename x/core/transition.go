@@ -15,7 +15,7 @@ import (
 //
 type StateTransition struct {
 	gpGasWanted *ethcore.GasPool
-	msg         MsgSendFrom
+	msg         MsgSend
 	gas         uint64   //unit: gallon
 	gasPrice    *big.Int //unit: satoshi/gallon
 	initialGas  uint64
@@ -25,7 +25,7 @@ type StateTransition struct {
 	evm         *vm.EVM
 }
 
-func NewStateTransition(evm *vm.EVM, msg MsgSendFrom, stateDB *evmstate.CommitStateDB) *StateTransition {
+func NewStateTransition(evm *vm.EVM, msg MsgSend, stateDB *evmstate.CommitStateDB) *StateTransition {
 	return &StateTransition{
 		gpGasWanted: new(ethcore.GasPool).AddGas(msg.GasWanted),
 		evm:         evm,

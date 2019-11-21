@@ -106,7 +106,7 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 
 		fmt.Printf("gasPrice=%d|gasWanted=%d\n", gasPrice, gasWanted)
 
-		msg := htdfservice.NewMsgSendFromForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gasPrice, gasWanted)
+		msg := htdfservice.NewMsgSendForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gasPrice, gasWanted)
 		CompleteAndBroadcastTxREST(w, cliCtx, req.BaseReq, mreq.BaseReq.Password, []sdk.Msg{msg}, cdc)
 
 	}
@@ -148,7 +148,7 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 	)
 
 	// get fromaddr
-	fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetSigners()[0]
+	fromaddr := msgs[0].(htdfservice.MsgSend).GetSigners()[0]
 
 	txBldr, err = hscorecli.PrepareTxBuilder(txBldr, cliCtx, fromaddr)
 	if err != nil {

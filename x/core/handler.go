@@ -31,7 +31,7 @@ func (rsp SendTxResp) String() string {
 
 // New HTDF Message Handler
 // connected to handler.go
-// HandleMsgSendFrom, HandleMsgAdd upgraded to EVM version
+// HandleMsgSend, HandleMsgAdd upgraded to EVM version
 // commented by junying, 2019-08-21
 func NewHandler(accountKeeper auth.AccountKeeper,
 	feeCollectionKeeper auth.FeeCollectionKeeper,
@@ -40,8 +40,8 @@ func NewHandler(accountKeeper auth.AccountKeeper,
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 
 		switch msg := msg.(type) {
-		case MsgSendFrom:
-			return HandleMsgSendFrom(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
+		case MsgSend:
+			return HandleMsgSend(ctx, accountKeeper, feeCollectionKeeper, keyStorage, keyCode, msg)
 		default:
 			return HandleUnknownMsg(msg)
 		}
@@ -58,12 +58,12 @@ func HandleUnknownMsg(msg sdk.Msg) sdk.Result {
 }
 
 // junying-todo, 2019-08-26
-func HandleMsgSendFrom(ctx sdk.Context,
+func HandleMsgSend(ctx sdk.Context,
 	accountKeeper auth.AccountKeeper,
 	feeCollectionKeeper auth.FeeCollectionKeeper,
 	keyStorage *sdk.KVStoreKey,
 	keyCode *sdk.KVStoreKey,
-	msg MsgSendFrom) sdk.Result {
+	msg MsgSend) sdk.Result {
 	// initialize
 	var sendTxResp SendTxResp
 	var gasUsed uint64
@@ -107,9 +107,9 @@ func HandleOpenContract(ctx sdk.Context,
 	feeCollectionKeeper auth.FeeCollectionKeeper,
 	keyStorage *sdk.KVStoreKey,
 	keyCode *sdk.KVStoreKey,
-	msg MsgSendFrom) (evmOutput string, gasUsed uint64, err error) {
+	msg MsgSend) (evmOutput string, gasUsed uint64, err error) {
 
-	fmt.Printf("Handling MsgSendFrom with No Contract.\n")
+	fmt.Printf("Handling MsgSend with No Contract.\n")
 	fmt.Println(" HandleOpenContract0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
@@ -203,7 +203,7 @@ func HandleCreateContract(ctx sdk.Context,
 	feeCollectionKeeper auth.FeeCollectionKeeper,
 	keyStorage *sdk.KVStoreKey,
 	keyCode *sdk.KVStoreKey,
-	msg MsgSendFrom) (evmOutput string, gasUsed uint64, err error) {
+	msg MsgSend) (evmOutput string, gasUsed uint64, err error) {
 
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {

@@ -262,7 +262,7 @@ func GetBlockDetailFn(cliCtx context.CLIContext, cdc *codec.Codec) http.HandlerF
 				for _, msg := range currTx.GetMsgs() {
 					//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
 					switch msg := msg.(type) {
-					case htdfservice.MsgSendFrom:
+					case htdfservice.MsgSend:
 
 						displayTx.From = msg.From
 						displayTx.To = msg.To
@@ -374,7 +374,7 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 			for _, msg := range currTx.GetMsgs() {
 				//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
 				switch msg := msg.(type) {
-				case htdfservice.MsgSendFrom:
+				case htdfservice.MsgSend:
 					displayTx.From = msg.From
 					displayTx.To = msg.To
 					displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)

@@ -713,8 +713,8 @@ func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Con
 	return
 }
 
-// Check if the msg is MsgSendFrom
-func IsMsgSendFrom(msg sdk.Msg) bool {
+// Check if the msg is MsgSend
+func IsMsgSend(msg sdk.Msg) bool {
 	if msg.Route() == "htdfservice" {
 		return true
 	}
@@ -761,7 +761,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		idxLog := sdk.ABCIMessageLog{MsgIndex: msgIdx, Log: msgResult.Log}
 
 		// junying-todo, 2019-11-05
-		if IsMsgSendFrom(msg) {
+		if IsMsgSend(msg) {
 			ctx.GasMeter().UseGas(sdk.Gas(msgResult.GasUsed), msgRoute)
 		}
 

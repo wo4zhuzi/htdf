@@ -68,7 +68,7 @@ func CreateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		msg := htdfservice.NewMsgSendFromDefault(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount))
+		msg := htdfservice.NewMsgSendDefault(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount))
 		WriteGenerateStdTxResponse(w, cdc, cliCtx, BaseReq, []sdk.Msg{msg}, req.Encode)
 
 		return

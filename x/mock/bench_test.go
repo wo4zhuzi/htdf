@@ -6,7 +6,6 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"
-	stakeTypes "github.com/orientwalt/htdf/x/staking/types"
 	abci "github.com/orientwalt/tendermint/abci/types"
 )
 
@@ -30,7 +29,7 @@ func BenchmarkOneBankSendTxPerBlock(b *testing.B) {
 	acc := &auth.BaseAccount{
 		Address: addr1,
 		// Some value conceivably higher than the benchmarks would ever go
-		Coins: sdk.Coins{sdk.NewInt64Coin(stakeTypes.StakeDenom, 100000000000)},
+		Coins: sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 100000000000)},
 	}
 	accs := []auth.Account{acc}
 

@@ -75,11 +75,11 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 			count = count + 1
 		}
 	}
-	// only MsgSendFroms or only OtherTypes in a Tx
+	// only MsgSends or only OtherTypes in a Tx
 	if count > 0 && count != len(msgs) {
 		return sdk.ErrUnknownRequest("can't mix htdfservice msg with other-type msgs in a Tx")
 	}
-	// // one MsgSendFrom in one Tx
+	// // one MsgSend in one Tx
 	// if count > 1 {
 	// 	return sdk.ErrUnknownRequest("can't include more than one htdfservice msgs in a Tx")
 	// }

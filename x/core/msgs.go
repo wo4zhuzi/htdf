@@ -53,9 +53,9 @@ func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MsgSendFrom defines a SendFrom message /////////////////////////////////////////////////////////////////////
+// MsgSend defines a SendFrom message /////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-type MsgSendFrom struct {
+type MsgSend struct {
 	From      sdk.AccAddress
 	To        sdk.AccAddress
 	Amount    sdk.Coins
@@ -64,13 +64,13 @@ type MsgSendFrom struct {
 	GasWanted uint64 //unit,  gallon
 }
 
-var _ sdk.Msg = MsgSendFrom{}
+var _ sdk.Msg = MsgSend{}
 
 // NewMsgSend is a constructor function for MsgSend
 // Normal Transaction
 // Default GasWanted, Default GasPrice
-func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
-	return MsgSendFrom{
+func NewMsgSendDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSend {
+	return MsgSend{
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
@@ -81,8 +81,8 @@ func NewMsgSendFromDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amoun
 
 // Normal Transaction
 // Default GasWanted, Customized GasPrice
-func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, GasWanted uint64) MsgSendFrom {
-	return MsgSendFrom{
+func NewMsgSend(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, GasWanted uint64) MsgSend {
+	return MsgSend{
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
@@ -92,8 +92,8 @@ func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.C
 }
 
 // Contract Transaction
-func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, GasWanted uint64) MsgSendFrom {
-	return MsgSendFrom{
+func NewMsgSendForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, GasWanted uint64) MsgSend {
+	return MsgSend{
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
@@ -104,13 +104,13 @@ func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amoun
 }
 
 // Route should return the name of the module
-func (msg MsgSendFrom) Route() string { return "htdfservice" }
+func (msg MsgSend) Route() string { return "htdfservice" }
 
 // Type should return the action
-func (msg MsgSendFrom) Type() string { return "sendfrom" }
+func (msg MsgSend) Type() string { return "sendfrom" }
 
 // ValidateBasic runs stateless checks on the message
-func (msg MsgSendFrom) ValidateBasic() sdk.Error {
+func (msg MsgSend) ValidateBasic() sdk.Error {
 	if msg.From.Empty() {
 		return sdk.ErrInvalidAddress(msg.From.String())
 	}
@@ -154,7 +154,7 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 }
 
 // GetSignBytes encodes the message for signing
-func (msg MsgSendFrom) GetSignBytes() []byte {
+func (msg MsgSend) GetSignBytes() []byte {
 	b, err := json.Marshal(msg)
 	if err != nil {
 		panic(err)
@@ -163,22 +163,22 @@ func (msg MsgSendFrom) GetSignBytes() []byte {
 }
 
 // GetSigners defines whose signature is required
-func (msg MsgSendFrom) GetSigners() []sdk.AccAddress {
+func (msg MsgSend) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.From}
 }
 
 // GetStringAddr defines whose fromaddr is required
-// func (msg MsgSendFrom) GetFromAddrStr() string {
+// func (msg MsgSend) GetFromAddrStr() string {
 // 	return sdk.AccAddress.String(msg.From)
 // }
 
 //
-func (msg MsgSendFrom) FromAddress() common.Address {
+func (msg MsgSend) FromAddress() common.Address {
 	return types.ToEthAddress(msg.From)
 }
 
 // junying-todo, 2019-11-06
-func (msg MsgSendFrom) GetData() string {
+func (msg MsgSend) GetData() string {
 	return msg.Data
 }
 
