@@ -14,7 +14,7 @@ import (
 type mockResponseWriter struct{}
 
 func TestBaseReqValidateBasic(t *testing.T) {
-	fromAddr := "cosmos1cq0sxam6x4l0sv9yz3a2vlqhdhvt2k6jtgcse0"
+	fromAddr := "htdf1lmyv4ars9j0glk6n0d23njlcjnrxuwxpxxqymd"
 	gasWanted := "200000"
 	gasPrice := "100"
 	req1 := NewBaseReq(
@@ -45,9 +45,9 @@ func TestBaseReqValidateBasic(t *testing.T) {
 		{"ok", req1, httptest.NewRecorder(), true},
 		{"empty from", req2, httptest.NewRecorder(), false},
 		{"empty chain-id", req3, httptest.NewRecorder(), false},
-		{"gasPrice not provided", req4, httptest.NewRecorder(), false},
-		{"gasWanted not provided", req5, httptest.NewRecorder(), false},
-		{"neither fees nor gasprices provided", req6, httptest.NewRecorder(), true},
+		{"gasPrice not provided", req4, httptest.NewRecorder(), true},
+		{"gasWanted not provided", req5, httptest.NewRecorder(), true},
+		{"neither gasPrice nor gasWanted provided", req6, httptest.NewRecorder(), true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
