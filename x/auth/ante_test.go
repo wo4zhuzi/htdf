@@ -336,18 +336,18 @@ func TestAnteHandlerMemoGas(t *testing.T) {
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeGasPriceTooLow)
 
 	// tx with memo doesn't have enough gas
-	fee = NewStdFee(0, 20)
+	fee = NewStdFee(0, 100)
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, "abcininasidniandsinasindiansdiansdinaisndiasndiadninsd")
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeInvalidGas)
 
 	// memo too large
-	fee = NewStdFee(30000, 20)
+	fee = NewStdFee(30000, 100)
 	tx = newTestTxWithMemo(ctx, []sdk.Msg{msg}, privs, accnums, seqs, fee, strings.Repeat("01234567890", 500))
 	checkInvalidTx(t, anteHandler, ctx, tx, false, sdk.CodeMemoTooLarge)
 
 	// tx with memo has enough gas
 	// set the accounts
-	fee = NewStdFee(30000, 20)
+	fee = NewStdFee(30000, 100)
 	acc1 := input.ak.NewAccountWithAddress(ctx, addr1)
 	acc1.SetCoins(fee.Amount())
 	input.ak.SetAccount(ctx, acc1)

@@ -39,22 +39,12 @@ func NewStdTx(msgs []sdk.Msg, fee StdFee, sigs []StdSignature, memo string) StdT
 // GetMsgs returns the all the transaction's messages.
 func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
 
-// ValidateBasic does a simple and lightweight validation check that doesn't
-// require access to any other information.
-func (tx StdTx) ValidateBasic() sdk.Error {
-	stdSigs := tx.GetSignatures()
-
-	if tx.Fee.GasWanted > maxGasWanted {
-		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.GasWanted, maxGasWanted))
-	}
-	if tx.Fee.Amount().IsAnyNegative() {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount()))
-	}
-
+// junying-todo, 2019-11-22
+func (tx StdTx) ValidateFee() sdk.Error {
 	// junying-todo, 2019-11-13
 	// MinGasPrice Checking
-	if tx.Fee.GasPrice < params.DefaultMinGasPriceUint {
-		return sdk.ErrGasPriceTooLow(fmt.Sprintf("gasprice must be greater than %s", params.DefaultMinGasPriceStr))
+	if tx.Fee.GasPrice < params.DefaultMinGasPrice {
+		return sdk.ErrGasPriceTooLow(fmt.Sprintf("gasprice must be greater than %d%s", params.DefaultMinGasPrice, sdk.DefaultDenom))
 	}
 
 	// junying-todo, 2019-11-13
@@ -79,18 +69,31 @@ func (tx StdTx) ValidateBasic() sdk.Error {
 	if count > 0 && count != len(msgs) {
 		return sdk.ErrUnknownRequest("can't mix htdfservice msg with other-type msgs in a Tx")
 	}
-	// // one MsgSend in one Tx
-	// if count > 1 {
-	// 	return sdk.ErrUnknownRequest("can't include more than one htdfservice msgs in a Tx")
-	// }
+	// one MsgSend in one Tx
+	if count > 1 {
+		return sdk.ErrUnknownRequest("can't include more than one htdfservice msgs in a Tx")
+	}
 
 	// Checking minimum gaswanted condition for transactions
 	minTxGasWanted := uint64(len(msgs)) * params.TxGas
 	if tx.Fee.GasWanted < minTxGasWanted {
 		return sdk.ErrInvalidGas(fmt.Sprintf("Tx[count(msgs)=%d] gaswanted must be greater than %d", len(msgs), minTxGasWanted))
 	}
+	return nil
+}
 
-	// added & commented by junying, 2019-11-07
+// ValidateBasic does a simple and lightweight validation check that doesn't
+// require access to any other information.
+func (tx StdTx) ValidateBasic() sdk.Error {
+	stdSigs := tx.GetSignatures()
+
+	if tx.Fee.GasWanted > maxGasWanted {
+		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.GasWanted, maxGasWanted))
+	}
+	if tx.Fee.Amount().IsAnyNegative() {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount()))
+	}
+
 	if len(stdSigs) == 0 {
 		return sdk.ErrNoSignatures("no signers")
 	}

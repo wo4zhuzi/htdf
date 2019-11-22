@@ -61,7 +61,7 @@ func (c *Config) GetMinGasPrices() sdk.Coins {
 func DefaultConfig() *Config {
 	return &Config{
 		BaseConfig{
-			MinGasPrices: params.DefaultMinGasPriceStr,
+			MinGasPrices: fmt.Sprintf("%d%s", params.DefaultMinGasPrice, sdk.DefaultDenom),
 		},
 	}
 }

@@ -72,7 +72,7 @@ func NewMsgSendDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sd
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
-		GasPrice:  params.DefaultMinGasPriceUint,
+		GasPrice:  params.DefaultMinGasPrice,
 		GasWanted: params.TxGas,
 	}
 }

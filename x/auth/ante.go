@@ -109,12 +109,15 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			}
 		}()
 
-		// planed to be moved to baseapp.ValidateTx by junying, 2019-11-13
-		// now skip validating for genesis block, because stdtx.validating can't go with zero gasprice or zero gas
-		if ctx.BlockHeight() > 0 {
-			if err := tx.ValidateBasic(); err != nil {
-				return newCtx, err.Result(), true
-			}
+		// junying-todo, 2019-11-13
+		// planed to be moved to baseapp.ValidateTx by
+		if err := tx.ValidateBasic(); err != nil {
+			return newCtx, err.Result(), true
+		}
+		// junying-todo, 2019-11-13
+		// check gas,gasprice for non-genesis block
+		if err := stdTx.ValidateFee(); err != nil && ctx.BlockHeight() != 0 {
+			return newCtx, err.Result(), true
 		}
 
 		// junying-todo, 2019-08-27
