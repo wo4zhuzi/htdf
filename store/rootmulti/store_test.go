@@ -3,10 +3,10 @@ package rootmulti
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	abci "github.com/orientwalt/tendermint/abci/types"
 	"github.com/orientwalt/tendermint/crypto/merkle"
 	dbm "github.com/orientwalt/tendermint/libs/db"
+	"github.com/stretchr/testify/require"
 
 	"github.com/orientwalt/htdf/store/errors"
 	"github.com/orientwalt/htdf/store/types"
@@ -81,7 +81,7 @@ func TestMultistoreCommitLoad(t *testing.T) {
 	// Load an older multistore and check version.
 	ver := nCommits - 1
 	store = newMultiStoreWithMounts(db)
-	err = store.LoadVersion(ver)
+	err = store.LoadVersion(ver, false)
 	require.Nil(t, err)
 	commitID = getExpectedCommitID(store, ver)
 	checkStore(t, store, commitID, commitID)

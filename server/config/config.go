@@ -42,14 +42,14 @@ type Config struct {
 }
 
 // SetMinGasPrices sets the validator's minimum gas prices.
-func (c *Config) SetMinGasPrices(gasPrices sdk.DecCoins) {
+func (c *Config) SetMinGasPrices(gasPrices sdk.Coins) {
 	c.MinGasPrices = gasPrices.String()
 }
 
 // GetMinGasPrices returns the validator's minimum gas prices based on the set
 // configuration.
-func (c *Config) GetMinGasPrices() sdk.DecCoins {
-	gasPrices, err := sdk.ParseDecCoins(c.MinGasPrices)
+func (c *Config) GetMinGasPrices() sdk.Coins {
+	gasPrices, err := sdk.ParseCoins(c.MinGasPrices)
 	if err != nil {
 		panic(fmt.Sprintf("invalid minimum gas prices: %v", err))
 	}

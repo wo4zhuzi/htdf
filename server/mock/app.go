@@ -11,7 +11,7 @@ import (
 	dbm "github.com/orientwalt/tendermint/libs/db"
 	"github.com/orientwalt/tendermint/libs/log"
 
-	bam "github.com/orientwalt/htdf/baseapp"
+	bam "github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 )

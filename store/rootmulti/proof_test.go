@@ -14,7 +14,7 @@ import (
 func TestVerifyIAVLStoreQueryProof(t *testing.T) {
 	// Create main tree for testing.
 	db := dbm.NewMemDB()
-	iStore, err := iavl.LoadStore(db, types.CommitID{}, types.PruneNothing)
+	iStore, err := iavl.LoadStore(db, types.CommitID{}, types.PruneNothing, false)
 	store := iStore.(*iavl.Store)
 	require.Nil(t, err)
 	store.Set([]byte("MYKEY"), []byte("MYVALUE"))
@@ -61,7 +61,7 @@ func TestVerifyMultiStoreQueryProof(t *testing.T) {
 	iavlStoreKey := types.NewKVStoreKey("iavlStoreKey")
 
 	store.MountStoreWithDB(iavlStoreKey, types.StoreTypeIAVL, nil)
-	store.LoadVersion(0)
+	store.LoadVersion(0, false)
 
 	iavlStore := store.GetCommitStore(iavlStoreKey).(*iavl.Store)
 	iavlStore.Set([]byte("MYKEY"), []byte("MYVALUE"))
@@ -116,7 +116,7 @@ func TestVerifyMultiStoreQueryProofEmptyStore(t *testing.T) {
 	iavlStoreKey := types.NewKVStoreKey("iavlStoreKey")
 
 	store.MountStoreWithDB(iavlStoreKey, types.StoreTypeIAVL, nil)
-	store.LoadVersion(0)
+	store.LoadVersion(0, false)
 	cid := store.Commit() // Commit with empty iavl store.
 
 	// Get Proof
@@ -145,7 +145,7 @@ func TestVerifyMultiStoreQueryProofAbsence(t *testing.T) {
 	iavlStoreKey := types.NewKVStoreKey("iavlStoreKey")
 
 	store.MountStoreWithDB(iavlStoreKey, types.StoreTypeIAVL, nil)
-	store.LoadVersion(0)
+	store.LoadVersion(0, false)
 
 	iavlStore := store.GetCommitStore(iavlStoreKey).(*iavl.Store)
 	iavlStore.Set([]byte("MYKEY"), []byte("MYVALUE"))

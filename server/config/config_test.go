@@ -12,11 +12,11 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	cfg := DefaultConfig()
 	fmt.Printf("minGasPrices=%v\n", cfg.GetMinGasPrices())
-	require.True(t, cfg.GetMinGasPrices().IsZero())
+	require.True(t, !cfg.GetMinGasPrices().IsZero())
 }
 
 func TestSetMinimumFees(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.SetMinGasPrices(sdk.DecCoins{sdk.NewInt64DecCoin("foo", 5)})
-	require.Equal(t, "5.000000000000000000foo", cfg.MinGasPrices)
+	cfg.SetMinGasPrices(sdk.Coins{sdk.NewInt64Coin("foo", 5)})
+	require.Equal(t, "5foo", cfg.MinGasPrices)
 }
