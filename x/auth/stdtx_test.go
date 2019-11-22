@@ -48,7 +48,7 @@ func TestStdSignBytes(t *testing.T) {
 	}{
 		{
 			args{"1234", 3, 6, defaultFee, []sdk.Msg{sdk.NewTestMsg(addr)}, "memo"},
-			fmt.Sprintf("{\"account_number\":\"3\",\"chain_id\":\"1234\",\"fee\":{\"gas_price\":\"20\",\"gas_wanted\":\"1000000\"},\"memo\":\"memo\",\"msgs\":[[\"%s\"]],\"sequence\":\"6\"}", addr),
+			fmt.Sprintf("{\"account_number\":\"3\",\"chain_id\":\"1234\",\"fee\":{\"gas_price\":\"100\",\"gas_wanted\":\"2000000\"},\"memo\":\"memo\",\"msgs\":[[\"%s\"]],\"sequence\":\"6\"}", addr),
 		},
 	}
 	for i, tc := range tests {
@@ -73,22 +73,13 @@ func TestTxValidateBasic(t *testing.T) {
 	// msg and signatures
 	msg1 := newTestMsg(addr1, addr2)
 	fee := NewStdFee(30000, 100)
-
 	msgs := []sdk.Msg{msg1}
-
-	// require to fail validation upon gasprice too low
-	badFee := NewStdFee(1000000, 10)
-	tx := newTestTx(ctx, nil, nil, nil, nil, badFee)
-
-	err := tx.ValidateBasic()
-	require.Error(t, err)
-	require.Equal(t, sdk.CodeGasPriceTooLow, err.Result().Code)
 
 	// require to fail validation when no signatures exist
 	privs, accNums, seqs := []crypto.PrivKey{}, []uint64{}, []uint64{}
-	tx = newTestTx(ctx, msgs, privs, accNums, seqs, fee)
+	tx := newTestTx(ctx, msgs, privs, accNums, seqs, fee)
 
-	err = tx.ValidateBasic()
+	err := tx.ValidateBasic()
 	require.Error(t, err)
 	require.Equal(t, sdk.CodeNoSignatures, err.Result().Code)
 
@@ -112,21 +103,12 @@ func TestTxValidateBasic(t *testing.T) {
 	require.Equal(t, sdk.CodeTooManySignatures, err.Result().Code)
 
 	// require to fail with invalid gas supplied
-	badFee = NewStdFee(9223372036854775808, 100)
+	badFee := NewStdFee(9223372036854775808, 100)
 	tx = newTestTx(ctx, nil, nil, nil, nil, badFee)
 
 	err = tx.ValidateBasic()
 	require.Error(t, err)
 	require.Equal(t, sdk.CodeGasOverflow, err.Result().Code)
-
-	// added by junying, 2019-11-22
-	// require to fail with gas below TxGas(30000)
-	badFee = NewStdFee(2000, 100)
-	tx = newTestTx(ctx, msgs, nil, nil, nil, badFee)
-
-	err = tx.ValidateBasic()
-	require.Error(t, err)
-	require.Equal(t, sdk.CodeInvalidGas, err.Result().Code)
 
 	// require to pass when above criteria are matched
 	privs, accNums, seqs = []crypto.PrivKey{priv1, priv2}, []uint64{0, 1}, []uint64{0, 0}
@@ -134,6 +116,39 @@ func TestTxValidateBasic(t *testing.T) {
 
 	err = tx.ValidateBasic()
 	require.NoError(t, err)
+}
+
+// junying-todo, 2019-11-22
+func TestTxValidateFee(t *testing.T) {
+	ctx := sdk.NewContext(nil, abci.Header{ChainID: "mychainid"}, false, log.NewNopLogger())
+
+	// keys and addresses
+	priv1, _, addr1 := keyPubAddr()
+	priv2, _, addr2 := keyPubAddr()
+
+	// msg and signatures
+	msg1 := newTestMsg(addr1, addr2)
+	// fee := NewStdFee(30000, 100)
+
+	msgs := []sdk.Msg{msg1}
+	privs := []crypto.PrivKey{priv1, priv2}
+	accNums := []uint64{0, 1}
+	seqs := []uint64{0, 0}
+	// require to fail validation upon gasprice too low
+	badFee := NewStdFee(30000, 10)
+	tx := newTestTx(ctx, msgs, privs, accNums, seqs, badFee)
+	stdtx := tx.(StdTx)
+	err := stdtx.ValidateFee()
+	require.Error(t, err)
+	require.Equal(t, sdk.CodeGasPriceTooLow, err.Result().Code)
+	// added by junying, 2019-11-22
+	// require to fail with gas below TxGas(30000)
+	badFee = NewStdFee(2000, 100)
+	tx = newTestTx(ctx, msgs, privs, accNums, seqs, badFee)
+	stdtx = tx.(StdTx)
+	err = stdtx.ValidateFee()
+	require.Error(t, err)
+	require.Equal(t, sdk.CodeInvalidGas, err.Result().Code)
 }
 
 func TestDefaultTxEncoder(t *testing.T) {
