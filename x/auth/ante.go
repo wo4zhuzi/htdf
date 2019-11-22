@@ -110,8 +110,11 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}()
 
 		// planed to be moved to baseapp.ValidateTx by junying, 2019-11-13
-		if err := tx.ValidateBasic(); err != nil {
-			return newCtx, err.Result(), true
+		// now skip validating for genesis block, because stdtx.validating can't go with zero gasprice or zero gas
+		if ctx.BlockHeight() > 0 {
+			if err := tx.ValidateBasic(); err != nil {
+				return newCtx, err.Result(), true
+			}
 		}
 
 		// junying-todo, 2019-08-27
