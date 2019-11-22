@@ -15,8 +15,6 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 )
 
-const DefaultMinGasPrice = 20
-
 // junying-todo, 2019-11-06
 // from x/core/transition.go
 // IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
@@ -74,7 +72,7 @@ func NewMsgSendDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sd
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
-		GasPrice:  DefaultMinGasPrice,
+		GasPrice:  params.DefaultMinGasPriceUint,
 		GasWanted: params.TxGas,
 	}
 }
