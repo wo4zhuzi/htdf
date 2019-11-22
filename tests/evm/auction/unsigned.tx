@@ -3,7 +3,7 @@
     "value": {
         "fee": {
             "gas_wanted": "200000",
-            "gas_price": "20"
+            "gas_price": "100"
         }, 
         "memo": "contract test", 
         "msg": [
@@ -19,7 +19,7 @@
                     "Data": "38af3eed", 
                     "From": "htdf1hu64tcnuq7h4ypzmdtd0xhg6ccfzhqgfql9srj", 
                     "GasWanted": "200000", 
-                    "GasPrice": "20", 
+                    "GasPrice": "100", 
                     "To": "htdf1szm7u5ewf4726kdwm29373najm7j8u2a3s0knr"
                 }
             }

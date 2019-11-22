@@ -16,7 +16,7 @@ BLK_TIME = 6
 TX_AMOUNT = 1000000
 UNIT = satoshi
 TxGas = 30000
-GAS_PRICE = 20
+GAS_PRICE = 100
 test.normal:
 	@acc1=$$(hscli accounts list|row 1);\
 	 acc2=$$(hscli accounts list|row 2);\

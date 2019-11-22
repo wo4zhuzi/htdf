@@ -35,7 +35,7 @@ FIRST_ROW_INDEX = 2
 # constants
 ## chain
 CHAIN_ID = testchain
-MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
+MINIMUM_GAS_PRICES = 100satoshi
 ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3
 # STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8
 DEFAULT_PORT = 26656

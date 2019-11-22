@@ -37,7 +37,7 @@
 
 ### transaction rest
     [send transaction]
-    curl -X POST "http://localhost:1317/hs/send" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"htdf103x7taejyqwxrvyadu2yxd7u04wdqs5stq5a40\", \"memo\": \"Sent via Cosmos Voyager \",\"password\": \"12345678\", \"chain_id\": \"testchain\", \"account_number\": \"3\", \"sequence\": \"2\", \"gas_wanted\": \"200000\", \"gas_price\": \"20\", \"simulate\": false }, \"amount\": [ { \"denom\": \"htdf\", \"amount\": \"0.1\" } ],\"to\": \"htdf1ec5yff9km0tlaemmuz6lk5zftkjv44hztjtfnc\"}"
+    curl -X POST "http://localhost:1317/hs/send" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"htdf103x7taejyqwxrvyadu2yxd7u04wdqs5stq5a40\", \"memo\": \"Sent via Cosmos Voyager \",\"password\": \"12345678\", \"chain_id\": \"testchain\", \"account_number\": \"3\", \"sequence\": \"2\", \"gas_wanted\": \"200000\", \"gas_price\": \"100\", \"simulate\": false }, \"amount\": [ { \"denom\": \"htdf\", \"amount\": \"0.1\" } ],\"to\": \"htdf1ec5yff9km0tlaemmuz6lk5zftkjv44hztjtfnc\"}"
     > {
         "height": "119",
         "txhash": "02A61744D89A14E9C01C9B08B74EFADD6FE9DB9A625EBF0D4D936D1D765B7684",
@@ -61,7 +61,7 @@
       }
 
     [create raw transaction]
-    curl -X POST "http://localhost:1317/hs/create" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"htdf103x7taejyqwxrvyadu2yxd7u04wdqs5stq5a40\", \"memo\": \"Sent via Cosmos Voyager \",\"password\": \"12345678\", \"chain_id\": \"testchain\", \"account_number\": \"3\", \"sequence\": \"3\", \"gas_wanted\": \"200000\", \"gas_price\": \"20\", \"gas_adjustment\": \"1.2\", \"simulate\": false }, \"amount\": [ { \"denom\": \"htdf\", \"amount\": \"0.1\" } ],\"to\": \"htdf1ec5yff9km0tlaemmuz6lk5zftkjv44hztjtfnc\",\"encode\":true}"
+    curl -X POST "http://localhost:1317/hs/create" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"htdf103x7taejyqwxrvyadu2yxd7u04wdqs5stq5a40\", \"memo\": \"Sent via Cosmos Voyager \",\"password\": \"12345678\", \"chain_id\": \"testchain\", \"account_number\": \"3\", \"sequence\": \"3\", \"gas_wanted\": \"200000\", \"gas_price\": \"100\", \"gas_adjustment\": \"1.2\", \"simulate\": false }, \"amount\": [ { \"denom\": \"htdf\", \"amount\": \"0.1\" } ],\"to\": \"htdf1ec5yff9km0tlaemmuz6lk5zftkjv44hztjtfnc\",\"encode\":true}"
     > 7b2274797065223a22617574682f5374645478222c2276616c7565223a7b226d7367223a5b7b2274797065223a2268746466736572766963652f73656e64222c2276616c7565223a7b2246726f6d223a22757364703134797a3330713766716b766b6b7333776e6d646d3373786b6166756767756576756c34346761222c22546f223a2275736470316832393066366b666a776a657875647174703768756a6d35326338366d663871357675736835222c22416d6f756e74223a5b7b2264656e6f6d223a2268746466222c22616d6f756e74223a223130227d5d7d7d5d2c22666565223a7b22616d6f756e74223a5b7b2264656e6f6d223a2268746466222c22616d6f756e74223a223130227d5d2c22676173223a22323030303030227d2c227369676e617475726573223a6e756c6c2c226d656d6f223a2253656e742076696120436f736d6f7320566f7961676572227d7d
 
     [sign raw transaction]
