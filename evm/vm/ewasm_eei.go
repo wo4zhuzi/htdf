@@ -163,6 +163,7 @@ func getDebugFuncs(in *InterpreterEWASM) []wasm.Function {
 }
 
 func printMemHex(p *exec.Process, in *InterpreterEWASM, offset, length int32) {
+	fmt.Printf("printMemHex:\n")
 	data := readSize(p, offset, int(length))
 	for _, v := range data {
 		fmt.Printf("%02x", v)
@@ -171,6 +172,7 @@ func printMemHex(p *exec.Process, in *InterpreterEWASM, offset, length int32) {
 }
 
 func printStorageHex(p *exec.Process, in *InterpreterEWASM, pathOffset int32) {
+	fmt.Printf("printStorageHex:\n")
 
 	path := common.BytesToHash(readSize(p, pathOffset, common.HashLength))
 	val := in.StateDB.GetState(in.contract.Address(), path)
