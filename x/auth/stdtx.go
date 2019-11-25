@@ -75,7 +75,7 @@ func (tx StdTx) ValidateFee() sdk.Error {
 	}
 
 	// Checking minimum gaswanted condition for transactions
-	minTxGasWanted := uint64(len(msgs)) * params.TxGas
+	minTxGasWanted := uint64(len(msgs)) * params.DefaultMsgGas
 	if tx.Fee.GasWanted < minTxGasWanted {
 		return sdk.ErrInvalidGas(fmt.Sprintf("Tx[count(msgs)=%d] gaswanted must be greater than %d", len(msgs), minTxGasWanted))
 	}

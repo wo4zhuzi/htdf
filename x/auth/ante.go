@@ -40,7 +40,7 @@ func ExistsMsgSend(tx sdk.Tx) bool {
 
 // Estimate RealFee by calculating real gas consumption
 func EstimateFee(tx StdTx) StdFee {
-	return NewStdFee(txparam.TxGas*uint64(len(tx.Msgs)), tx.Fee.GasPrice)
+	return NewStdFee(txparam.DefaultMsgGas*uint64(len(tx.Msgs)), tx.Fee.GasPrice)
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -128,7 +128,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// junying-todo, 2019-11-13
 		// GasMetering Disabled, Now Constant Gas used for Staking Txs
 		if !ExistsMsgSend(tx) {
-			newCtx.GasMeter().UseGas(sdk.Gas(txparam.TxGas*uint64(len(stdTx.Msgs))), "AnteHandler")
+			newCtx.GasMeter().UseGas(sdk.Gas(txparam.DefaultMsgGas*uint64(len(stdTx.Msgs))), "AnteHandler")
 		}
 
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
@@ -148,7 +148,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// junying-todo, 2019-11-19
-		// Deduct(TxGas * len(Msgs)) for non-htdfservice msgs
+		// Deduct(DefaultMsgGas * len(Msgs)) for non-htdfservice msgs
 		if !stdTx.Fee.Amount().IsZero() && !ExistsMsgSend(tx) {
 			estimatedFee := EstimateFee(stdTx)
 			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], estimatedFee)

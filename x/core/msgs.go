@@ -22,9 +22,9 @@ func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
 	// Set the starting gas for the raw transaction
 	var gas uint64
 	if len(data) > 0 && homestead {
-		gas = params.TxGasContractCreation // 53000 -> 60000
+		gas = params.DefaultMsgGasContractCreation // 53000 -> 60000
 	} else {
-		gas = params.TxGas // 21000 -> 30000
+		gas = params.DefaultMsgGas // 21000 -> 30000
 	}
 	// Bump the required gas by the amount of transactional data
 	if len(data) > 0 {
@@ -73,31 +73,31 @@ func NewMsgSendDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sd
 		To:        toaddr,
 		Amount:    amount,
 		GasPrice:  params.DefaultMinGasPrice,
-		GasWanted: params.TxGas,
+		GasWanted: params.DefaultMsgGas,
 	}
 }
 
 // Normal Transaction
 // Default GasWanted, Customized GasPrice
-func NewMsgSend(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, GasWanted uint64) MsgSend {
+func NewMsgSend(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, gasWanted uint64) MsgSend {
 	return MsgSend{
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
 		GasPrice:  gasPrice,
-		GasWanted: GasWanted,
+		GasWanted: gasWanted,
 	}
 }
 
 // Contract Transaction
-func NewMsgSendForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, GasWanted uint64) MsgSend {
+func NewMsgSendForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, gasWanted uint64) MsgSend {
 	return MsgSend{
 		From:      fromaddr,
 		To:        toaddr,
 		Amount:    amount,
 		Data:      data,
 		GasPrice:  gasPrice,
-		GasWanted: GasWanted,
+		GasWanted: gasWanted,
 	}
 }
 
@@ -127,8 +127,8 @@ func (msg MsgSend) ValidateBasic() sdk.Error {
 		}
 
 		// junying-todo, 2019-11-12
-		if msg.GasWanted < params.TxGas {
-			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d", params.TxGas))
+		if msg.GasWanted < params.DefaultMsgGas {
+			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d", params.DefaultMsgGas))
 		}
 
 	} else {

@@ -39,6 +39,8 @@ func TestMsgSendValidation(t *testing.T) {
 		{false, NewMsgSendDefault(addr1, addr2, atom123eth0)},  // non positive coin in multicoins
 		{false, NewMsgSendDefault(emptyAddr, addr2, atom123)},  // empty from addr
 		{false, NewMsgSendDefault(addr1, emptyAddr, atom123)},  // empty to addr
+		{true, NewMsgSend(addr1, addr2, atom123, 0, 30000)},    // gas below MinGasPrice(100)
+		{false, NewMsgSend(addr1, addr2, atom123, 100, 10000)}, // gas below MinGas(30000)
 	}
 
 	for _, tc := range cases {
@@ -57,7 +59,7 @@ func TestMsgSendGetSignBytes(t *testing.T) {
 	coins := sdk.NewCoins(sdk.NewInt64Coin("atom", 10))
 	var msg = NewMsgSendDefault(addr1, addr2, coins)
 	res := string(msg.GetSignBytes())
-	expected := `{"Amount":[{"amount":"10","denom":"atom"}],"Data":"","From":"htdf1d9h8qat5gn84g8","GasPrice":20,"GasWanted":30000,"To":"htdf1da6hgur4wsj5g5jq"}`
+	expected := `{"Amount":[{"amount":"10","denom":"atom"}],"Data":"","From":"htdf1d9h8qat5gn84g8","GasPrice":100,"GasWanted":30000,"To":"htdf1da6hgur4wsj5g5jq"}`
 	require.Equal(t, expected, res)
 }
 
