@@ -17,10 +17,10 @@ import (
 
 	bip39 "github.com/cosmos/go-bip39"
 
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
-	cryptoAmino "github.com/orientwalt/tendermint/crypto/encoding/amino"
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+	dbm "github.com/tendermint/tendermint/libs/db"
 )
 
 var _ Keybase = dbKeybase{}

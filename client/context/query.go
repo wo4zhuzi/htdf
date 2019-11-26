@@ -10,13 +10,13 @@ import (
 
 	"strings"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/merkle"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	tmliteErr "github.com/orientwalt/tendermint/lite/errors"
-	tmliteProxy "github.com/orientwalt/tendermint/lite/proxy"
-	rpcclient "github.com/orientwalt/tendermint/rpc/client"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/merkle"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	tmliteErr "github.com/tendermint/tendermint/lite/errors"
+	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/orientwalt/htdf/store/rootmulti"
 )

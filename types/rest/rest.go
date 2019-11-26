@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/orientwalt/tendermint/types"
+	"github.com/tendermint/tendermint/types"
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"

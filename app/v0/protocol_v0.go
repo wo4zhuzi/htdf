@@ -21,9 +21,9 @@ import (
 	"github.com/orientwalt/htdf/x/slashing"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cfg "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 	"github.com/orientwalt/htdf/crypto/keys"
 	"github.com/orientwalt/htdf/crypto/keys/mintkey"
 	"github.com/stretchr/testify/require"
-	cryptoAmino "github.com/orientwalt/tendermint/crypto/encoding/amino"
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 func TestArmorUnarmorPrivKey(t *testing.T) {

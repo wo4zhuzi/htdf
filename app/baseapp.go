@@ -12,10 +12,10 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/tmhash"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/tmhash"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/orientwalt/htdf/app/protocol"
 	"github.com/orientwalt/htdf/codec"
@@ -23,7 +23,7 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/version"
 	"github.com/orientwalt/htdf/x/auth"
-	tmstate "github.com/orientwalt/tendermint/state"
+	tmstate "github.com/tendermint/tendermint/state"
 )
 
 // Key to store the consensus params in the main store.

@@ -7,7 +7,7 @@ import (
 
 	sdk "github.com/orientwalt/htdf/types"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func TestNewQuerier(t *testing.T) {

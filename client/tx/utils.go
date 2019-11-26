@@ -11,7 +11,7 @@ import (
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	ctypes "github.com/orientwalt/tendermint/rpc/core/types"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 // SearchTxs performs a search for transactions for a given set of tags via

@@ -14,12 +14,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	tcmd "github.com/orientwalt/tendermint/cmd/tendermint/commands"
-	cfg "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/libs/cli"
-	tmflags "github.com/orientwalt/tendermint/libs/cli/flags"
-	"github.com/orientwalt/tendermint/libs/log"
-	pvm "github.com/orientwalt/tendermint/privval"
+	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/cli"
+	tmflags "github.com/tendermint/tendermint/libs/cli/flags"
+	"github.com/tendermint/tendermint/libs/log"
+	pvm "github.com/tendermint/tendermint/privval"
 
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/codec"

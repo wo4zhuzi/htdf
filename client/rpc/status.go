@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	ctypes "github.com/orientwalt/tendermint/rpc/core/types"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"

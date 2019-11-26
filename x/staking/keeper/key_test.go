@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/staking/types"

@@ -13,9 +13,9 @@ import (
 	"github.com/orientwalt/htdf/mock"
 	bam "github.com/orientwalt/htdf/mock/baseapp"
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

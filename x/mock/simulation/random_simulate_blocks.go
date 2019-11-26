@@ -14,9 +14,9 @@ import (
 	"time"
 
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	bam "github.com/orientwalt/htdf/mock/baseapp"
 )

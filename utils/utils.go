@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/types"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/types"
 	"github.com/tendermint/go-amino"
 
 	"github.com/orientwalt/htdf/accounts"

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	dbm "github.com/tendermint/tendermint/libs/db"
 )
 
 type Store interface { //nolint

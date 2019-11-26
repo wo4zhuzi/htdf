@@ -23,7 +23,7 @@ import (
 	"github.com/orientwalt/htdf/x/staking"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 //

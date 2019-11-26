@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	amino "github.com/tendermint/go-amino"
-	tmclient "github.com/orientwalt/tendermint/rpc/client"
-	ctypes "github.com/orientwalt/tendermint/rpc/core/types"
-	rpcclient "github.com/orientwalt/tendermint/rpc/lib/client"
+	tmclient "github.com/tendermint/tendermint/rpc/client"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	rpcclient "github.com/tendermint/tendermint/rpc/lib/client"
 )
 
 // Wait for the next tendermint block from the Tendermint RPC

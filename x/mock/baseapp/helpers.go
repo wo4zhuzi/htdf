@@ -3,9 +3,9 @@ package baseapp
 import (
 	hserver "github.com/orientwalt/htdf/server"
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/tendermint/abci/server"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	"github.com/tendermint/tendermint/abci/server"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // nolint - Mostly for testing

@@ -17,9 +17,9 @@ import (
 	"github.com/orientwalt/htdf/utils/unit_convert"
 	"github.com/orientwalt/htdf/x/auth"
 	htdfservice "github.com/orientwalt/htdf/x/core"
-	tmliteProxy "github.com/orientwalt/tendermint/lite/proxy"
-	ctypes "github.com/orientwalt/tendermint/rpc/core/types"
-	tmTypes "github.com/orientwalt/tendermint/types"
+	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmTypes "github.com/tendermint/tendermint/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

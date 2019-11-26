@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // Type synonym for convenience

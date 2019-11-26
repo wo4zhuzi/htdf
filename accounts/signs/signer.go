@@ -6,7 +6,7 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
 
 func sign(privKey tmcrypto.PrivKey, msg []byte) (sig []byte, pub tmcrypto.PubKey, err error) {

@@ -23,10 +23,10 @@ import (
 	"github.com/orientwalt/htdf/x/params"
 
 	//tendermint
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
-	tmlog "github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	//evm
 	newevmtypes "github.com/orientwalt/htdf/evm/types"

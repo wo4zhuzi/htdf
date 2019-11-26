@@ -2,7 +2,7 @@ package keys
 
 import (
 	amino "github.com/tendermint/go-amino"
-	cryptoAmino "github.com/orientwalt/tendermint/crypto/encoding/amino"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 
 	"github.com/orientwalt/htdf/crypto/keys/hd"
 )

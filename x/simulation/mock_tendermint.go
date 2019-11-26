@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 type mockValidator struct {

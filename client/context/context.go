@@ -17,11 +17,11 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/libs/log"
-	tmlite "github.com/orientwalt/tendermint/lite"
-	tmliteProxy "github.com/orientwalt/tendermint/lite/proxy"
-	rpcclient "github.com/orientwalt/tendermint/rpc/client"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/log"
+	tmlite "github.com/tendermint/tendermint/lite"
+	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
 
 	sdk "github.com/orientwalt/htdf/types"
 )

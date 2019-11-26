@@ -3,9 +3,9 @@ package simulation
 import (
 	"math/rand"
 
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	sdk "github.com/orientwalt/htdf/types"
 )

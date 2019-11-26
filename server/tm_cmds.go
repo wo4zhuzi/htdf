@@ -8,11 +8,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	tcmd "github.com/orientwalt/tendermint/cmd/tendermint/commands"
-	"github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/p2p"
-	pvm "github.com/orientwalt/tendermint/privval"
-	tversion "github.com/orientwalt/tendermint/version"
+	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/p2p"
+	pvm "github.com/tendermint/tendermint/privval"
+	tversion "github.com/tendermint/tendermint/version"
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"

@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cfg "github.com/orientwalt/tendermint/config"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cfg "github.com/tendermint/tendermint/config"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 type (

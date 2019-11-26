@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
 	"github.com/stretchr/testify/require"
 
 	"github.com/orientwalt/htdf/x/mock/baseapp"

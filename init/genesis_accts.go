@@ -3,8 +3,8 @@ package init
 import (
 	"fmt"
 
-	"github.com/orientwalt/tendermint/libs/cli"
-	"github.com/orientwalt/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

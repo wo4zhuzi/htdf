@@ -12,8 +12,8 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/orientwalt/tendermint/libs/cli"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	"github.com/tendermint/tendermint/libs/cli"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/orientwalt/htdf/codec"
 )
