@@ -238,8 +238,8 @@ github.com/onsi/gomega v1.7.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1Cpa
 github.com/openconfig/gnmi v0.0.0-20190823184014-89b2bf29312c/go.mod h1:t+O9It+LKzfOAhKTT5O0ehDix+MTqbtT0T9t+7zzOvc=
 github.com/openconfig/reference v0.0.0-20190727015836-8dfd928c9696/go.mod h1:ym2A+zigScwkSEb/cVQB0/ZMpU3rqiH6X7WRRsxgOGw=
 github.com/openzipkin/zipkin-go v0.1.6/go.mod h1:QgAqvLzwWbR/WpD4A3cGpPtJrZXNIiJc5AZX7/PBEpw=
-github.com/orientwalt/tendermint v90.0.6+incompatible h1:MOzGWkMTG8p8GzIiApdkr0pTyGrp7OCKpPsy/coPj74=
-github.com/orientwalt/tendermint v90.0.6+incompatible/go.mod h1:AsH/N3sXz9F/N61H5uyaXYhxgX6r+Jqch/zK/ubKShI=
+github.com/orientwalt/tendermint v90.0.7+incompatible h1:aaDAAP7ExgPZnKpHgOqOpqW7ENaNAl7VyfyvOEWIYd0=
+github.com/orientwalt/tendermint v90.0.7+incompatible/go.mod h1:AsH/N3sXz9F/N61H5uyaXYhxgX6r+Jqch/zK/ubKShI=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=

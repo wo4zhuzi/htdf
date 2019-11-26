@@ -48,6 +48,6 @@ require (
 
 replace (
 	github.com/tendermint/iavl v0.12.4 => github.com/orientwalt/iavl v0.12.4
-	github.com/tendermint/tendermint v0.31.5 => github.com/orientwalt/tendermint v90.0.6+incompatible
+	github.com/tendermint/tendermint v0.31.5 => github.com/orientwalt/tendermint v90.0.7+incompatible
 	golang.org/x/crypto => github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15
 )
