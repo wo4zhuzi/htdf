@@ -1,4 +1,4 @@
-// Copyright 2014 The go-ethereum Authors
+// Copyright 2017 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -14,17 +14,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package vm
+// +build gofuzz
 
-import "errors"
+package runtime
 
-// List execution errors
-var (
-	ErrOutOfGas                 = errors.New("out of gas")
-	ErrCodeStoreOutOfGas        = errors.New("contract creation code storage out of gas")
-	ErrDepth                    = errors.New("max call depth exceeded")
-	ErrTraceLimitReached        = errors.New("the number of logs reached the specified limit")
-	ErrInsufficientBalance      = errors.New("insufficient balance for transfer")
-	ErrContractAddressCollision = errors.New("contract address collision")
-	ErrNoCompatibleInterpreter  = errors.New("no compatible interpreter")
-)
+// Fuzz is the basic entry point for the go-fuzz tool
+//
+// This returns 1 for valid parsable/runable code, 0
+// for invalid opcode.
+func Fuzz(input []byte) int {
+	_, _, err := Execute(input, input, &Config{
+		GasLimit: 3000000,
+	})
+
+	// invalid opcode
+	if err != nil && len(err.Error()) > 6 && string(err.Error()[:7]) == "invalid" {
+		return 0
+	}
+
+	return 1
+}

@@ -2,11 +2,12 @@ package state
 
 import (
 	"fmt"
+	"github.com/magiconair/properties/assert"
 	"github.com/orientwalt/htdf/store"
 	sdk "github.com/orientwalt/htdf/types"
+	"github.com/orientwalt/htdf/utils"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/params"
-	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -18,8 +19,6 @@ import (
 	"github.com/orientwalt/htdf/codec"
 
 	tmlog "github.com/tendermint/tendermint/libs/log"
-
-	"github.com/ethereum/go-ethereum/common"
 
 	"math/big"
 	"testing"
@@ -35,9 +34,9 @@ var (
 	storageKey = sdk.NewKVStoreKey("storage")
 	codeKey    = sdk.NewKVStoreKey("code")
 
-	testHash    = common.StringToHash("zhoushx")
-	fromAddress = common.StringToAddress("UserA")
-	toAddress   = common.StringToAddress("UserB")
+	testHash    = utils.StringToHash("zhoushx")
+	fromAddress = utils.StringToAddress("UserA")
+	toAddress   = utils.StringToAddress("UserB")
 	amount      = big.NewInt(0)
 	nonce       = uint64(0)
 	gasLimit    = big.NewInt(100000)

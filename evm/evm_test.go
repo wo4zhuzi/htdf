@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/magiconair/properties/assert"
+	"github.com/orientwalt/htdf/utils"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"math/big"
 	"os"
-
-	"github.com/magiconair/properties/assert"
-	"github.com/stretchr/testify/require"
 
 	ec "github.com/orientwalt/htdf/evm/core"
 	"github.com/orientwalt/htdf/evm/vm"
@@ -55,9 +55,9 @@ var (
 	storageKey = sdk.NewKVStoreKey("storage")
 	codeKey    = sdk.NewKVStoreKey("code")
 
-	testHash    = common.StringToHash("zhoushx")
-	fromAddress = common.StringToAddress("UserA")
-	toAddress   = common.StringToAddress("UserB")
+	testHash    = utils.StringToHash("zhoushx")
+	fromAddress = utils.StringToAddress("UserA")
+	toAddress   = utils.StringToAddress("UserB")
 	amount      = big.NewInt(0)
 	nonce       = uint64(0)
 	gasLimit    = big.NewInt(100000)
@@ -460,7 +460,7 @@ func (cc ChainContext) GetHeader(hash common.Hash, number uint64) *ethtypes.Head
 		Number:     big.NewInt(1),
 		GasLimit:   1000000,
 		GasUsed:    0,
-		Time:       big.NewInt(time.Now().Unix()),
+		Time:       big.NewInt(time.Now().Unix()).Uint64(),
 		Extra:      nil,
 	}
 }
