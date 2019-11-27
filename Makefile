@@ -46,7 +46,7 @@ update:
 	@rm -rf .vendor-new
 	@dep ensure -v -update
 
-build: 
+build: unittest
 	echo BUILD_FLAGS=$(BUILD_FLAGS)
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hsd ./cmd/hsd
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hscli ./cmd/hscli
