@@ -23,8 +23,8 @@ import (
 //	when this evm package is stable ,need to update to new version, like  V1.8.23
 
 func TestGballetGoEthEvm(t *testing.T) {
-	abiFileName := "./testdata/coin_sol_Coin.abi"
-	binFileName := "./testdata/coin_sol_Coin.bin"
+	abiFileName := "../tests/evm/coin/coin_sol_Coin.abi"
+	binFileName := "../tests/evm/coin//coin_sol_Coin.bin"
 	data := infra.LoadBin(binFileName)
 
 	//dataPath := "/tmp/htdfTmpTestData_gballet-eth-evm"
@@ -35,7 +35,7 @@ func TestGballetGoEthEvm(t *testing.T) {
 
 	//db := state.NewDatabase(mdb)
 	//root := common.Hash{}
-	db  := ethdb.NewMemDatabase()
+	db := ethdb.NewMemDatabase()
 	//infra.Must(err)
 
 	statedb, err := state.New(common.Hash{}, state.NewDatabase(db))

@@ -24,7 +24,7 @@ import (
 func TestGballetGoEthWasm(t *testing.T) {
 	//abiFileName := "./testdata/coin_sol_Coin.abi"
 	//binFileName := "./testdata/test.wasm"
-	binFileName := "./testdata/add-ex-main.wasm"
+	binFileName := "../tests/evm/wasm/add-ex-main.wasm"
 	//binFileName := "./testdata/add.wasm"
 	data := infra.LoadRaw(binFileName)
 
