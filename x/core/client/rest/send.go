@@ -3,8 +3,11 @@ package rest
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
+	"github.com/orientwalt/htdf/accounts"
+	"github.com/orientwalt/htdf/accounts/keystore"
+	htdfRest "github.com/orientwalt/htdf/accounts/rest"
+	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
@@ -12,32 +15,27 @@ import (
 	"github.com/orientwalt/htdf/crypto/keys/keyerror"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/types/rest"
-	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	"github.com/orientwalt/htdf/x/bank"
-	"github.com/orientwalt/htdf/accounts"
-	"github.com/orientwalt/htdf/accounts/keystore"
-	htdfRest "github.com/orientwalt/htdf/accounts/rest"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/utils/unit_convert"
-	"github.com/orientwalt/htdf/x/core"
+	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
+	htdfservice "github.com/orientwalt/htdf/x/core"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 )
 
 // SendReq defines the properties of a send request's body.
 type SendReq struct {
-	BaseReq  rest.BaseReq `json:"base_req"`
-	To       string       `json:"to"`
-	Amount   sdk.Coins    `json:"amount"`
-	Data     string       `json:"data"`
-	GasPrice string       `json:"gas_price"` // uint: HTDF/gallon
-	GasLimit string       `json:"gas_limit"` // unit: gallon
+	BaseReq rest.BaseReq `json:"base_req"`
+	To      string       `json:"to"`
+	Amount  sdk.Coins    `json:"amount"`
+	Data    string       `json:"data"`
+	// GasPrice  string       `json:"gas_price"`  // uint: HTDF/gallon
+	// GasWanted string       `json:"gas_wanted"` // unit: gallon
 }
 
-var msgCdc = codec.New()
+// var msgCdc = codec.New()
 
-func init() {
-	bank.RegisterCodec(msgCdc)
-}
+// func init() {
+// 	bank.RegisterCodec(msgCdc)
+// }
 
 // SendTxRequestHandlerFn - http request handler to send coins to a address.
 func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -55,16 +53,14 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		req.BaseReq.ChainID = mreq.BaseReq.ChainID
 		req.BaseReq.AccountNumber = mreq.BaseReq.AccountNumber
 		req.BaseReq.Sequence = mreq.BaseReq.Sequence
-		req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
-		req.BaseReq.GasPrices = mreq.BaseReq.GasPrices
-		req.BaseReq.Gas = mreq.BaseReq.Gas
+		req.BaseReq.GasPrice = mreq.BaseReq.GasPrice
+		req.BaseReq.GasWanted = mreq.BaseReq.GasWanted
 		req.BaseReq.GasAdjustment = mreq.BaseReq.GasAdjustment
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
 		req.To = mreq.To
 		req.Data = mreq.Data
-		req.GasPrice = mreq.GasPrice
-		req.GasLimit = mreq.GasLimit
-		fmt.Printf("req.BaseReq.Fees=%v\n", req.BaseReq.Fees)
+		// req.GasPrice = mreq.GasPrice
+		// req.GasWanted = mreq.GasWanted
 
 		req.BaseReq = req.BaseReq.Sanitize()
 		if !req.BaseReq.ValidateBasic(w) {
@@ -85,31 +81,32 @@ func SendTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			return
 		}
 
-		gas, err := strconv.ParseUint(req.BaseReq.Gas, 10, 64)
+		_, gasWanted, err := client.ParseGas(req.BaseReq.GasWanted)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
+		var gasPrice uint64
+		gasPrice, err = client.ParseGasPrice(req.BaseReq.GasPrice)
 		// when access smart contract, extract gas field
-		var gasPrice, gasLimit uint64
-		if len(req.Data) > 0 {
-			gasPrice, err = strconv.ParseUint(unit_convert.BigAmountToDefaultAmount(req.GasPrice), 10, 64)
-			if err != nil {
-				rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-				return
-			}
+		// var gasPrice, gasWanted uint64
+		// if len(req.Data) > 0 {
+		// 	gasPrice, err = strconv.ParseUint(unit_convert.BigAmountToDefaultAmount(req.GasPrice), 10, 64)
+		// 	if err != nil {
+		// 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		// 		return
+		// 	}
 
-			gasLimit, err = strconv.ParseUint(req.GasLimit, 10, 64)
-			if err != nil {
-				rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-				return
-			}
-		}
+		// 	gasWanted, err = strconv.ParseUint(req.GasWanted, 10, 64)
+		// 	if err != nil {
+		// 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		// 		return
+		// 	}
+		// }
 
-		fmt.Printf("gas=%d|gasPrice=%d|gasLmint=%d\n", gas, gasPrice, gasLimit)
+		fmt.Printf("gasPrice=%d|gasWanted=%d\n", gasPrice, gasWanted)
 
-		msg := htdfservice.NewMsgSendFromForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gas, gasPrice, gasLimit)
+		msg := htdfservice.NewMsgSendForData(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount), req.Data, gasPrice, gasWanted)
 		CompleteAndBroadcastTxREST(w, cliCtx, req.BaseReq, mreq.BaseReq.Password, []sdk.Msg{msg}, cdc)
 
 	}
@@ -131,7 +128,14 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 		return
 	}
 
-	simAndExec, gas, err := client.ParseGas(baseReq.Gas)
+	simAndExec, gasWanted, err := client.ParseGas(baseReq.GasWanted)
+	if err != nil {
+		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var gasPrice uint64
+	gasPrice, err = client.ParseGasPrice(baseReq.GasPrice)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -139,12 +143,12 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 
 	txBldr := authtxb.NewTxBuilder(
 		utils.GetTxEncoder(cdc), baseReq.AccountNumber,
-		baseReq.Sequence, gas, gasAdj, baseReq.Simulate,
-		baseReq.ChainID, baseReq.Memo, baseReq.Fees, baseReq.GasPrices,
+		baseReq.Sequence, gasWanted, gasAdj, baseReq.Simulate,
+		baseReq.ChainID, baseReq.Memo, gasPrice,
 	)
 
 	// get fromaddr
-	fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetFromAddr()
+	fromaddr := msgs[0].(htdfservice.MsgSend).GetSigners()[0]
 
 	txBldr, err = hscorecli.PrepareTxBuilder(txBldr, cliCtx, fromaddr)
 	if err != nil {
@@ -165,7 +169,7 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 		}
 
 		if baseReq.Simulate {
-			rest.WriteSimulationResponse(w, cdc, txBldr.Gas())
+			rest.WriteSimulationResponse(w, cdc, txBldr.GasWanted())
 			return
 		}
 	}

@@ -7,7 +7,7 @@
 
 # blockchain configuration
 CHAINID = mainchain
-MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
+MINIMUM_GAS_PRICES = 100satoshi
 ISSUER_ADDRESS = usdp176faqc8q7znv0xk6mzmds0wtkhhuj3ztay78xa
 DEFAULT_VAL_COUNT = 4
 DEFAULT_SENTRY_PUB_COUNT = ${DEFAULT_VAL_COUNT}

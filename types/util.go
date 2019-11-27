@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	dbm "github.com/tendermint/tendermint/libs/db"
 )
 
 func ToAppAddress(ethAddr common.Address) AccAddress {

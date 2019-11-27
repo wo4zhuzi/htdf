@@ -1,7 +1,7 @@
 package distribution
 
 import (
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/distribution/keeper"

@@ -3,9 +3,9 @@ package staking
 import (
 	"time"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/libs/common"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/common"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/staking/keeper"
@@ -27,6 +27,8 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return handleMsgBeginRedelegate(ctx, msg, k)
 		case types.MsgUndelegate:
 			return handleMsgUndelegate(ctx, msg, k)
+		case types.MsgSetUndelegateStatus:
+			return handleMsgSetDelegatorStatus(ctx, msg, k)
 		default:
 			return sdk.ErrTxDecode("invalid message parse in staking module").Result()
 		}
@@ -275,4 +277,29 @@ func handleMsgBeginRedelegate(ctx sdk.Context, msg types.MsgBeginRedelegate, k k
 	)
 
 	return sdk.Result{Data: finishTime, Tags: resTags}
+}
+
+func handleMsgSetDelegatorStatus(ctx sdk.Context, msg types.MsgSetUndelegateStatus, k keeper.Keeper) sdk.Result {
+	// validator must already be registered
+	_, found := k.GetValidator(ctx, msg.ValidatorAddress)
+	if !found {
+		return ErrNoValidatorFound(k.Codespace()).Result()
+	}
+
+	del, found := k.GetDelegation(ctx, msg.DelegatorAddress, msg.ValidatorAddress)
+	if !found {
+		return types.ErrNoDelegation(k.Codespace()).Result()
+	}
+
+	//upgarede delegator status
+	del.Status = true
+	k.UpgradeDelegation(ctx, del)
+
+	tags := sdk.NewTags(
+		tags.Delegator, msg.DelegatorAddress.String(),
+		tags.SrcValidator, msg.ValidatorAddress.String(),
+		tags.ActionCompleteAuthorization, "true",
+	)
+
+	return sdk.Result{Tags: tags}
 }

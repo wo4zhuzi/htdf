@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/orientwalt/htdf/app/protocol"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
@@ -16,8 +17,7 @@ import (
 	"github.com/orientwalt/htdf/x/slashing"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
-	"github.com/orientwalt/htdf/app/protocol"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 // export the state of iris for a genesis file

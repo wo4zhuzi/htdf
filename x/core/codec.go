@@ -6,6 +6,6 @@ import (
 
 // RegisterCodec registers concrete types on the Amino codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgSendFrom{}, "htdfservice/send", nil)
-	cdc.RegisterConcrete(MsgAdd{}, "htdfservice/add", nil)
+	cdc.RegisterConcrete(MsgSend{}, "htdfservice/send", nil)
+	// cdc.RegisterConcrete(MsgAdd{}, "htdfservice/add", nil)
 }

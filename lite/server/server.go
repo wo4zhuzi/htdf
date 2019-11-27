@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/viper"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	"github.com/orientwalt/tendermint/libs/log"
-	"github.com/orientwalt/tendermint/lite/proxy"
-	rpcclient "github.com/orientwalt/tendermint/rpc/client"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/log"
+	"github.com/tendermint/tendermint/lite/proxy"
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	"github.com/tendermint/tmlibs/cli"
 )
 

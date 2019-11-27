@@ -11,8 +11,8 @@ import (
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/codec"
 
+	"github.com/tendermint/tendermint/libs/common"
 	amino "github.com/tendermint/go-amino"
-	"github.com/orientwalt/tendermint/libs/common"
 
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/keys"
@@ -57,7 +57,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 			return err
 		}
 
-		gasEst := GasEstimateResponse{GasEstimate: txBldr.Gas()}
+		gasEst := GasEstimateResponse{GasEstimate: txBldr.GasWanted()}
 		fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
 	}
 
@@ -118,7 +118,7 @@ func EnrichWithGas(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msgs []s
 	if err != nil {
 		return txBldr, err
 	}
-	return txBldr.WithGas(adjusted), nil
+	return txBldr.WithGasWanted(adjusted), nil
 }
 
 // CalculateGas simulates the execution of a transaction and returns
@@ -344,7 +344,7 @@ func buildUnsignedStdTxOffline(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 			return
 		}
 
-		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.Gas())
+		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.GasWanted())
 	}
 
 	stdSignMsg, err := txBldr.BuildSignMsg(msgs)

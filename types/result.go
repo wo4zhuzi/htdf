@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	ctypes "github.com/orientwalt/tendermint/rpc/core/types"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 // Result is the union of ResponseFormat and ResponseCheckTx.

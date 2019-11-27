@@ -3,11 +3,12 @@ package config
 import (
 	"fmt"
 
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
+//
 const (
-	defaultMinGasPrices     = "0.000001satoshi,0.000001stake"
 	ValueSecurityLevel_High = "high"
 	ValueSecurityLevel_Low  = "low"
 
@@ -31,7 +32,7 @@ func init() {
 type BaseConfig struct {
 	// The minimum gas prices a validator is willing to accept for processing a
 	// transaction. A transaction's fees must meet the minimum of any denomination
-	// specified in this config (e.g. 0.01photino;0.0001stake).
+	// specified in this config (e.g. 1photino;1stake).
 	MinGasPrices string `mapstructure:"minimum-gas-prices"`
 }
 
@@ -41,14 +42,14 @@ type Config struct {
 }
 
 // SetMinGasPrices sets the validator's minimum gas prices.
-func (c *Config) SetMinGasPrices(gasPrices sdk.DecCoins) {
+func (c *Config) SetMinGasPrices(gasPrices sdk.Coins) {
 	c.MinGasPrices = gasPrices.String()
 }
 
 // GetMinGasPrices returns the validator's minimum gas prices based on the set
 // configuration.
-func (c *Config) GetMinGasPrices() sdk.DecCoins {
-	gasPrices, err := sdk.ParseDecCoins(c.MinGasPrices)
+func (c *Config) GetMinGasPrices() sdk.Coins {
+	gasPrices, err := sdk.ParseCoins(c.MinGasPrices)
 	if err != nil {
 		panic(fmt.Sprintf("invalid minimum gas prices: %v", err))
 	}
@@ -60,7 +61,7 @@ func (c *Config) GetMinGasPrices() sdk.DecCoins {
 func DefaultConfig() *Config {
 	return &Config{
 		BaseConfig{
-			MinGasPrices: defaultMinGasPrices,
+			MinGasPrices: fmt.Sprintf("%d%s", params.DefaultMinGasPrice, sdk.DefaultDenom),
 		},
 	}
 }

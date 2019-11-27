@@ -12,8 +12,8 @@ import (
 	iris "github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/spf13/cobra"
 )
 

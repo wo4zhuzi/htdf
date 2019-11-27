@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
-	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	hsutils "github.com/orientwalt/htdf/utils"
+	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	"github.com/spf13/cobra"
 )
@@ -26,14 +26,18 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "send [fromaddr] [toaddr] [amount]",
 		Short: "create & send transaction",
-		Long: `hscli tx send cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 \
-								cosmos1yqgv2rhxcgrf5jqrxlg80at5szzlarlcy254re \
-								5satoshi`,
+		Long: `hscli tx send htdf1qn38r8re3lwlf5t6zgrdycrerd5w0 \
+							 htdf1yujjc5yptpphtt665u2u6zp6gl04enlg55fajp \
+							 5satoshi \
+							 --gas=30000 \
+							 --gas-prices=1.0satoshi`,
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+
+			fmt.Println("GetCmdSend:txBldr.GasWanted()", txBldr.GasWanted())
 
 			fromaddr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
@@ -50,9 +54,16 @@ func GetCmdSend(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins)
+			if txBldr.GasPrice() == 0 {
+				return sdk.ErrTxDecode("no gasprice")
+			}
+
+			gas := txBldr.GasWanted()
+			fmt.Println("GetCmdSend:txBldr.GasPrices():", txBldr.GasPrice())
+			msg := htdfservice.NewMsgSend(fromaddr, toaddr, coins, txBldr.GasPrice(), gas)
+
 			cliCtx.PrintResponse = true
-			fmt.Println("aaaaaaaaaaaaa", msg.Type())
+
 			return CompleteAndBroadcastTxCLI(txBldr, cliCtx, []sdk.Msg{msg}, fromaddr) //not completed yet, need account name
 		},
 	}
@@ -92,8 +103,6 @@ func PrepareTxBuilder(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, froma
 //
 // NOTE: Also see CompleteAndBroadcastTxREST.
 func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg, fromaddr sdk.AccAddress) error {
-	// get fromaddr
-	// fromaddr := msgs[0].(htdfservice.MsgSendFrom).GetFromAddr()
 	//
 	txBldr, err := PrepareTxBuilder(txBldr, cliCtx, fromaddr)
 	if err != nil {
@@ -106,7 +115,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 			return err
 		}
 
-		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.Gas()}
+		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.GasWanted()}
 		fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
 	}
 	fmt.Println("1--------------------")

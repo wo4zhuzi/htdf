@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/orientwalt/htdf/types"
 )
@@ -16,6 +16,7 @@ var (
 	_ sdk.Msg = &MsgDelegate{}
 	_ sdk.Msg = &MsgUndelegate{}
 	_ sdk.Msg = &MsgBeginRedelegate{}
+	_ sdk.Msg = &MsgSetUndelegateStatus{}
 )
 
 //______________________________________________________________________
@@ -337,6 +338,48 @@ func (msg MsgUndelegate) ValidateBasic() sdk.Error {
 	}
 	if msg.Amount.Amount.LTE(sdk.ZeroInt()) {
 		return ErrBadSharesAmount(DefaultCodespace)
+	}
+	return nil
+}
+
+// MsgSetUndelegateStatus - struct for set unbonding transactions status
+type MsgSetUndelegateStatus struct {
+	DelegatorAddress sdk.AccAddress `json:"delegator_address"`
+	ValidatorAddress sdk.ValAddress `json:"validator_address"`
+	Status           bool
+}
+
+func NewMsgSetUndelegateStatus(delAddr sdk.AccAddress, valAddr sdk.ValAddress, sts bool) MsgSetUndelegateStatus {
+	return MsgSetUndelegateStatus{
+		DelegatorAddress: delAddr,
+		ValidatorAddress: valAddr,
+		Status:           sts,
+	}
+}
+
+//nolint
+func (msg MsgSetUndelegateStatus) Route() string { return RouterKey }
+func (msg MsgSetUndelegateStatus) Type() string  { return "upgrade_delegator_unbond_status" }
+func (msg MsgSetUndelegateStatus) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.ValidatorAddress)}
+}
+
+// get the bytes for the message signer to sign on
+func (msg MsgSetUndelegateStatus) GetSignBytes() []byte {
+	bz := MsgCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// quick validity check
+func (msg MsgSetUndelegateStatus) ValidateBasic() sdk.Error {
+	if msg.DelegatorAddress.Empty() {
+		return ErrNilDelegatorAddr(DefaultCodespace)
+	}
+	if msg.ValidatorAddress.Empty() {
+		return ErrNilValidatorAddr(DefaultCodespace)
+	}
+	if !msg.Status {
+		return ErrUndelegate(DefaultCodespace)
 	}
 	return nil
 }

@@ -3,11 +3,11 @@ package mock
 import (
 	"testing"
 
-	"github.com/orientwalt/tendermint/types"
+	"github.com/tendermint/tendermint/types"
 
 	"github.com/stretchr/testify/require"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // TestInitApp makes sure we can initialize this thing without an error

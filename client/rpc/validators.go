@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	tmtypes "github.com/orientwalt/tendermint/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"

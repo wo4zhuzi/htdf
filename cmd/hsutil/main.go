@@ -13,7 +13,7 @@ import (
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	htdfservice "github.com/orientwalt/htdf/x/core"
-	"github.com/orientwalt/tendermint/libs/bech32"
+	"github.com/tendermint/tendermint/libs/bech32"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

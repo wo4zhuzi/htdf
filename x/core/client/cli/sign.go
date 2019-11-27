@@ -14,7 +14,7 @@ import (
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
 
 // junying-todo-20190327

@@ -6,7 +6,7 @@ import (
 
 	"github.com/orientwalt/htdf/client/utils"
 
-	bam "github.com/orientwalt/htdf/baseapp"
+	bam "github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/keys"
 	"github.com/orientwalt/htdf/codec"
@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/orientwalt/tendermint/libs/log"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 // flags

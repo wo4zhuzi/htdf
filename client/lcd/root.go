@@ -11,8 +11,8 @@ import (
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/orientwalt/tendermint/libs/log"
-	rpcserver "github.com/orientwalt/tendermint/rpc/lib/server"
+	"github.com/tendermint/tendermint/libs/log"
+	rpcserver "github.com/tendermint/tendermint/rpc/lib/server"
 
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"

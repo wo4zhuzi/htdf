@@ -7,7 +7,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/orientwalt/htdf/baseapp"
+	"github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -20,7 +20,7 @@ import (
 //
 // Operations can optionally provide a list of "FutureOperations" to run later
 // These will be ran at the beginning of the corresponding block.
-type Operation func(r *rand.Rand, app *baseapp.BaseApp,
+type Operation func(r *rand.Rand, app *app.BaseApp,
 	ctx sdk.Context, accounts []Account) (
 	OperationMsg OperationMsg, futureOps []FutureOperation, err error)
 

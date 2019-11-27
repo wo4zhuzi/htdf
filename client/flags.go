@@ -5,6 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/orientwalt/htdf/params"
+	sdk "github.com/orientwalt/htdf/types"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -15,7 +18,7 @@ const (
 	// failures due to state changes that might occur between the tx simulation
 	// and the actual run.
 	DefaultGasAdjustment = 1.0
-	DefaultGasLimit      = 200000
+	DefaultGasLimit      = 200000 // junying-todo, 2019-10-21, this is tx gas limit. tx size(gas consumption) could excess this limit.
 	GasFlagAuto          = "auto"
 
 	// BroadcastBlock defines a tx broadcasting mode where the client waits for
@@ -28,19 +31,20 @@ const (
 	// immediately.
 	BroadcastAsync = "async"
 
-	FlagUseLedger          = "ledger"
-	FlagChainID            = "chain-id"
-	FlagNode               = "node"
-	FlagHeight             = "height"
-	FlagGasAdjustment      = "gas-adjustment"
-	FlagTrustNode          = "trust-node"
-	FlagFrom               = "from"
-	FlagName               = "name"
-	FlagAccountNumber      = "account-number"
-	FlagSequence           = "sequence"
-	FlagMemo               = "memo"
-	FlagFees               = "fees"
-	FlagGasPrices          = "gas-prices"
+	FlagUseLedger     = "ledger"
+	FlagChainID       = "chain-id"
+	FlagNode          = "node"
+	FlagHeight        = "height"
+	FlagGasAdjustment = "gas-adjustment"
+	FlagTrustNode     = "trust-node"
+	FlagFrom          = "from"
+	FlagName          = "name"
+	FlagAccountNumber = "account-number"
+	FlagSequence      = "sequence"
+	FlagMemo          = "memo"
+	// FlagFees               = "fees"
+	FlagGasWanted          = "gas-wanted" // added by junying, 2019-11-07
+	FlagGasPrices          = "gas-price"
 	FlagBroadcastMode      = "broadcast-mode"
 	FlagPrintResponse      = "print-response"
 	FlagDryRun             = "dry-run"
@@ -84,8 +88,9 @@ func PostCommands(cmds ...*cobra.Command) []*cobra.Command {
 		c.Flags().Uint64P(FlagAccountNumber, "a", 0, "The account number of the signing account (offline mode only)")
 		c.Flags().Uint64P(FlagSequence, "s", 0, "The sequence number of the signing account (offline mode only)")
 		c.Flags().String(FlagMemo, "", "Memo to send along with transaction")
-		c.Flags().String(FlagFees, "", "Fees to pay along with transaction; eg: 10uatom")
-		c.Flags().String(FlagGasPrices, "", "Gas prices to determine the transaction fee (e.g. 10uatom)")
+		// c.Flags().String(FlagFees, "", "Fees to pay along with transaction; eg: 10satoshi")
+		c.Flags().Uint64P(FlagGasWanted, "g", DefaultGasLimit, "Gas to determine the transaction fee eg: 10satoshi") // added by junying, 2019-11-07
+		c.Flags().String(FlagGasPrices, fmt.Sprintf("%d%s", params.DefaultMinGasPrice, sdk.DefaultDenom), "Gas prices to determine the transaction fee (e.g. 10satoshi)")
 		c.Flags().String(FlagNode, "tcp://localhost:26657", "<host>:<port> to tendermint rpc interface for this chain")
 		c.Flags().Bool(FlagUseLedger, false, "Use a connected Ledger device")
 		c.Flags().Float64(FlagGasAdjustment, DefaultGasAdjustment, "adjustment factor to be multiplied against the estimate returned by the tx simulation; if the gas limit is set manually this flag is ignored ")
@@ -97,10 +102,11 @@ func PostCommands(cmds ...*cobra.Command) []*cobra.Command {
 		c.Flags().BoolP(FlagSkipConfirmation, "y", false, "Skip tx broadcasting prompt confirmation")
 
 		// --gas can accept integers and "simulate"
-		c.Flags().Var(&GasFlagVar, "gas", fmt.Sprintf(
-			"gas limit to set per-transaction; set to %q to calculate required gas automatically (default %d)",
-			GasFlagAuto, DefaultGasLimit,
-		))
+		// commented by junying, 2019-11-07
+		// c.Flags().Var(&GasFlagVar, "gas", fmt.Sprintf(
+		// 	"gas limit to set per-transaction; set to %q to calculate required gas automatically (default %d)",
+		// 	GasFlagAuto, DefaultGasLimit,
+		// ))
 
 		viper.BindPFlag(FlagTrustNode, c.Flags().Lookup(FlagTrustNode))
 		viper.BindPFlag(FlagUseLedger, c.Flags().Lookup(FlagUseLedger))
@@ -146,18 +152,27 @@ func (v *GasSetting) String() string {
 }
 
 // ParseGas parses the value of the gas option.
-func ParseGas(gasStr string) (simulateAndExecute bool, gas uint64, err error) {
+func ParseGas(gasStr string) (simulateAndExecute bool, gasWanted uint64, err error) {
 	switch gasStr {
 	case "":
-		gas = DefaultGasLimit
+		gasWanted = DefaultGasLimit
 	case GasFlagAuto:
 		simulateAndExecute = true
 	default:
-		gas, err = strconv.ParseUint(gasStr, 10, 64)
+		gasWanted, err = strconv.ParseUint(gasStr, 10, 64)
 		if err != nil {
-			err = fmt.Errorf("gas must be either integer or %q", GasFlagAuto)
+			err = fmt.Errorf("gas_wanted must be either integer or %q", GasFlagAuto)
 			return
 		}
+	}
+	return
+}
+
+//
+func ParseGasPrice(gasPriceStr string) (gasprice uint64, err error) {
+	gasprice, err = strconv.ParseUint(gasPriceStr, 10, 64)
+	if err != nil {
+		err = fmt.Errorf("gas must be either integer or %q", GasFlagAuto)
 	}
 	return
 }

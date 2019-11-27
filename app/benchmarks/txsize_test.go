@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	"github.com/orientwalt/htdf/cmd/gaia/app"
 	sdk "github.com/orientwalt/htdf/types"

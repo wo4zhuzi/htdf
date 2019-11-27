@@ -12,7 +12,7 @@ SENTRY_CONF_FILE = $(CONFIGDIR)/sentries.conf
 PEM_FILE = $(CONFIGDIR)/blockchain.pem
 
 CHAINID = mainchain
-MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
+MINIMUM_GAS_PRICES = 100satoshi
 ISSUER_ADDRESS = usdp176faqc8q7znv0xk6mzmds0wtkhhuj3ztay78xa
 
 VALS_INDEX = 0 1 2 3

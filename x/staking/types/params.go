@@ -17,7 +17,7 @@ const (
 	// DefaultUnbondingTime reflects three weeks in seconds as the default
 	// unbonding time.
 	// TODO: Justify our choice of default here.
-	DefaultUnbondingTime time.Duration = time.Second * 60 * 60 * 24 * 3
+	DefaultUnbondingTime time.Duration = time.Second * 60 * 60 * 24 * 14 // 3 to 7,junying-todo, 2019-11-20
 
 	// Default maximum number of bonded validators
 	DefaultMaxValidators uint16 = 100
@@ -124,16 +124,19 @@ func UnmarshalParams(cdc *codec.Codec, value []byte) (params Params, err error) 
 // 	return nil
 // }
 
+//
 func ValidateParams(p Params) error {
 	if err := validateUnbondingTime(p.UnbondingTime); err != nil {
 		return err
 	}
+
 	if err := validateMaxValidators(p.MaxValidators); err != nil {
 		return err
 	}
 	return nil
 }
 
+//
 func (p *Params) Validate(key string, value string) (interface{}, sdk.Error) {
 	switch key {
 	case string(KeyUnbondingTime):
@@ -177,6 +180,8 @@ func (p *Params) StringFromBytes(cdc *codec.Codec, key string, bytes []byte) (st
 }
 
 func validateUnbondingTime(v time.Duration) sdk.Error {
+	// planed to be modified by junying, 2019-11-20
+	// because two-week unbond time may be too long
 	if v < 2*sdk.Week {
 		return sdk.NewError(params.DefaultCodespace, params.CodeInvalidUnbondingTime, fmt.Sprintf("Invalid UnbondingTime [%s] should be greater than or equal to 2 weeks", v.String()))
 	}

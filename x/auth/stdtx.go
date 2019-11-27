@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/multisig"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/multisig"
 
 	"github.com/orientwalt/htdf/codec"
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -38,17 +39,61 @@ func NewStdTx(msgs []sdk.Msg, fee StdFee, sigs []StdSignature, memo string) StdT
 // GetMsgs returns the all the transaction's messages.
 func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
 
+// junying-todo, 2019-11-22
+func (tx StdTx) ValidateFee() sdk.Error {
+	// junying-todo, 2019-11-13
+	// MinGasPrice Checking
+	if tx.Fee.GasPrice < params.DefaultMinGasPrice {
+		return sdk.ErrGasPriceTooLow(fmt.Sprintf("gasprice must be greater than %d%s", params.DefaultMinGasPrice, sdk.DefaultDenom))
+	}
+
+	// junying-todo, 2019-11-13
+	// Validate Msgs &
+	// Check MinGas for staking txs
+	var msgs = tx.Msgs
+	if msgs == nil || len(msgs) == 0 {
+		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
+	}
+	count := 0
+	for _, msg := range msgs {
+		// Validate the Msg.
+		err := msg.ValidateBasic()
+		if err != nil {
+			return err
+		}
+		if msg.Route() == "htdfservice" {
+			count = count + 1
+		}
+	}
+	// only MsgSends or only OtherTypes in a Tx
+	if count > 0 && count != len(msgs) {
+		return sdk.ErrUnknownRequest("can't mix htdfservice msg with other-type msgs in a Tx")
+	}
+	// one MsgSend in one Tx
+	if count > 1 {
+		return sdk.ErrUnknownRequest("can't include more than one htdfservice msgs in a Tx")
+	}
+
+	// Checking minimum gaswanted condition for transactions
+	minTxGasWanted := uint64(len(msgs)) * params.DefaultMsgGas
+	if tx.Fee.GasWanted < minTxGasWanted {
+		return sdk.ErrInvalidGas(fmt.Sprintf("Tx[count(msgs)=%d] gaswanted must be greater than %d", len(msgs), minTxGasWanted))
+	}
+	return nil
+}
+
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.
 func (tx StdTx) ValidateBasic() sdk.Error {
 	stdSigs := tx.GetSignatures()
 
-	if tx.Fee.Gas > maxGasWanted {
-		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.Gas, maxGasWanted))
+	if tx.Fee.GasWanted > maxGasWanted {
+		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.GasWanted, maxGasWanted))
 	}
-	if tx.Fee.Amount.IsAnyNegative() {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
+	if tx.Fee.Amount().IsAnyNegative() {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount()))
 	}
+
 	if len(stdSigs) == 0 {
 		return sdk.ErrNoSignatures("no signers")
 	}
@@ -107,7 +152,6 @@ func (tx StdTx) GetSigners() []sdk.AccAddress {
 func (tx StdTx) GetMemo() string { return tx.Memo }
 
 // GetSignatures returns the signature of signers who signed the Msg.
-// GetSignatures returns the signature of signers who signed the Msg.
 // CONTRACT: Length returned is same as length of
 // pubkeys returned from MsgKeySigners, and the order
 // matches.
@@ -122,15 +166,22 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // gas to be used by the transaction. The ratio yields an effective "gasprice",
 // which must be above some miminum to be accepted into the mempool.
 type StdFee struct {
-	Amount sdk.Coins `json:"amount"`
-	Gas    uint64    `json:"gas"`
+	GasWanted uint64 `json:"gas_wanted"`
+	GasPrice  uint64 `json:"gas_price"`
 }
 
-// NewStdFee returns a new instance of StdFee
-func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
+// junying-todo, 2019-11-07
+// fee = gas * gasprice
+func CalcFees(gaswanted uint64, gasprice uint64) sdk.Coins {
+	// if gasprice * gaswanted > overflow
+	// if gasprice or gaswanted is zero
+	return sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewInt(int64(gaswanted*gasprice)))}
+}
+
+func NewStdFee(gasWanted uint64, gasPrice uint64) StdFee {
 	return StdFee{
-		Amount: amount,
-		Gas:    gas,
+		GasWanted: gasWanted,
+		GasPrice:  gasPrice,
 	}
 }
 
@@ -140,9 +191,6 @@ func (fee StdFee) Bytes() []byte {
 	// this is a sign of something ugly
 	// (in the lcd_test, client side its null,
 	// server side its [])
-	if len(fee.Amount) == 0 {
-		fee.Amount = sdk.NewCoins()
-	}
 	bz, err := msgCdc.MarshalJSON(fee) // TODO
 	if err != nil {
 		panic(err)
@@ -155,8 +203,13 @@ func (fee StdFee) Bytes() []byte {
 // NOTE: The gas prices returned are not the true gas prices that were
 // originally part of the submitted transaction because the fee is computed
 // as fee = ceil(gasWanted * gasPrices).
-func (fee StdFee) GasPrices() sdk.DecCoins {
-	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
+func (fee StdFee) GasPriceCoin() sdk.Coin {
+	return sdk.NewCoin(sdk.DefaultDenom, sdk.NewInt(int64(fee.GasPrice)))
+}
+
+// junying-todo, 2019-11-07
+func (fee StdFee) Amount() sdk.Coins {
+	return CalcFees(fee.GasWanted, fee.GasPrice)
 }
 
 //__________________________________________________________
@@ -216,7 +269,7 @@ func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 		if err != nil {
 			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
 		}
-
+		// fmt.Println("DefaultTxDecoder:tx", tx)
 		return tx, nil
 	}
 }

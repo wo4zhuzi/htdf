@@ -28,6 +28,10 @@ func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec
 		"/staking/delegators/{delegatorAddr}/redelegations",
 		postRedelegationsHandlerFn(cdc, kb, cliCtx),
 	).Methods("POST")
+	r.HandleFunc(
+		"/staking/delegators/{delegatorAddr}/upgrade_delegator_status",
+		postUpgradeDelegatorStauts(cdc, kb, cliCtx),
+	).Methods("POST")
 }
 
 type (
@@ -54,6 +58,13 @@ type (
 		DelegatorAddress sdk.AccAddress `json:"delegator_address"` // in bech32
 		ValidatorAddress sdk.ValAddress `json:"validator_address"` // in bech32
 		Amount           sdk.Coin       `json:"amount"`
+	}
+
+	UpgradeDelRequest struct {
+		BaseReq          rest.BaseReq   `json:"base_req"`
+		DelegatorAddress sdk.AccAddress `json:"delegator_address"` // in bech32
+		ValidatorAddress sdk.ValAddress `json:"validator_address"` // in bech32
+		Status           bool           `json:"status"`
 	}
 )
 
@@ -139,6 +150,40 @@ func postUnbondingDelegationsHandlerFn(cdc *codec.Codec, kb keys.Keybase, cliCtx
 		}
 
 		msg := staking.NewMsgUndelegate(req.DelegatorAddress, req.ValidatorAddress, req.Amount)
+		if err := msg.ValidateBasic(); err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		fromAddr, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if !bytes.Equal(fromAddr, req.DelegatorAddress) {
+			rest.WriteErrorResponse(w, http.StatusUnauthorized, "must use own delegator address")
+			return
+		}
+
+		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
+}
+
+func postUpgradeDelegatorStauts(cdc *codec.Codec, kb keys.Keybase, cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req UpgradeDelRequest
+
+		if !rest.ReadRESTReq(w, r, cdc, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		msg := staking.NewMsgSetUndelegateStatus(req.DelegatorAddress, req.ValidatorAddress, req.Status)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return

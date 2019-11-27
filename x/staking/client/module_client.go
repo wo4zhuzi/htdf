@@ -59,6 +59,7 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 		hstakingcli.GetCmdDelegate(mc.cdc),
 		hstakingcli.GetCmdRedelegate(mc.storeKey, mc.cdc),
 		hstakingcli.GetCmdUnbond(mc.storeKey, mc.cdc),
+		hstakingcli.GetCmdUpgradeDelStatus(mc.storeKey, mc.cdc),
 	)...)
 
 	return stakingTxCmd

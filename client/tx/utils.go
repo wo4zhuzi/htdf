@@ -11,7 +11,7 @@ import (
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	ctypes "github.com/orientwalt/tendermint/rpc/core/types"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 // SearchTxs performs a search for transactions for a given set of tags via
@@ -156,7 +156,7 @@ func queryTx(cdc *codec.Codec, cliCtx context.CLIContext, hashHexStr string) (sd
 	if err != nil {
 		return sdk.TxResponse{}, err
 	}
-	// fmt.Println("3	>>>>>>queryTx>>>>>>>>>", resTx.Height)
+	// fmt.Println("3	>>>>>>queryTx>>>>>>>>>", resTx.Height, resTx.Index, resTx.Tx, resTx.TxResult)
 	if !cliCtx.TrustNode {
 		if err = ValidateTxResult(cliCtx, resTx); err != nil {
 			return sdk.TxResponse{}, err

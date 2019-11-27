@@ -63,6 +63,27 @@ func NewInt64DecCoin(denom string, amount int64) DecCoin {
 	return NewDecCoin(denom, NewInt(amount))
 }
 
+// IsAllGTE returns false if for any denom in coinsB,
+// the denom is present at a smaller amount in coins;
+// else returns true.
+func (coins DecCoins) IsAllGTE(coinsB DecCoins) bool {
+	if len(coinsB) == 0 {
+		return true
+	}
+
+	if len(coins) == 0 {
+		return false
+	}
+
+	for _, coinB := range coinsB {
+		if coinB.Amount.GT(coins.AmountOf(coinB.Denom)) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // IsZero returns if the DecCoin amount is zero.
 func (coin DecCoin) IsZero() bool {
 	return coin.Amount.IsZero()

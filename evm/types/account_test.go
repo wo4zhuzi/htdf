@@ -2,13 +2,13 @@ package types
 
 import (
 	"fmt"
+
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
-	"github.com/orientwalt/htdf/params"
-	"github.com/orientwalt/htdf/utils/unit_convert"
+
+	"testing"
 
 	"github.com/magiconair/properties/assert"
-	"testing"
 )
 
 const (
@@ -19,9 +19,9 @@ func init() {
 
 	// set address prefix
 	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(params.Bech32PrefixAccAddr, params.Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(params.Bech32PrefixValAddr, params.Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(params.Bech32PrefixConsAddr, params.Bech32PrefixConsPub)
+	config.SetBech32PrefixForAccount(sdk.Bech32PrefixAccAddr, sdk.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(sdk.Bech32PrefixValAddr, sdk.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
 	config.Seal()
 }
 
@@ -31,7 +31,7 @@ func TestAccountUpdate(t *testing.T) {
 	assert.Equal(t, err, nil)
 
 	baseAccount := auth.NewBaseAccountWithAddress(accAddr)
-	coins := sdk.Coins{sdk.NewCoin(unit_convert.DefaultDenom, sdk.NewInt(12345678)), sdk.NewCoin("stake", sdk.NewInt(2345678))}
+	coins := sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewInt(12345678)), sdk.NewCoin("stake", sdk.NewInt(2345678))}
 	baseAccount.Coins = coins
 
 	fmt.Printf("baseAccount=%v\n", baseAccount)

@@ -13,9 +13,9 @@ import (
 	"github.com/orientwalt/htdf/tests"
 	"github.com/orientwalt/htdf/types"
 
-	"github.com/orientwalt/tendermint/crypto"
-	tmsecp256k1 "github.com/orientwalt/tendermint/crypto/secp256k1"
 	secp256k1 "github.com/tendermint/btcd/btcec"
+	"github.com/tendermint/tendermint/crypto"
+	tmsecp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 // If ledger support (build tag) has been enabled, which implies a CGO dependency,

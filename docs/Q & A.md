@@ -19,6 +19,11 @@ Delegators are Atom holders who cannot, or do not want to run a validator themse
 #### 2. addresses
        Q: What sorts of addresses? What are they?
        A: 
+### Transaction
+#### 1. TxHash
+       Q: Where & How Generated?
+       A:
+#### 2. 
 ### Voting
 #### 1. top 100~300 validators on cosmos hub
 #### 2. abnomality detection/penality system
@@ -48,3 +53,39 @@ Delegators are Atom holders who cannot, or do not want to run a validator themse
 #### [4. voting power](https://cosmos.network/docs/cosmos-hub/validators/validator-faq.html#general-concepts)
        Q: voting power? 
        A: It depends on stake amount. 1 voting power can be gained when 1000,000 stake is staked.
+### GasMetering
+#### 1. Context & GasMetering
+       Q: How Gas Consumed/Calculated?(How gasmetering works when every read,write,delete,has,iterator?)
+       A: KVStore->context.KVStore->GasKV.NewStore(GasMetering enabled)
+          Its own gasmeter is detached to every KVStore including stateDB's KVStores.
+          So consumed gas will be calculated for every database operations(Read, Write, Delete, Has,...)
+          Every operation includes consumeGas/consumeSeekGas. It will deduct the corresponding gas to every operation
+          folling the setting in GasConfig
+
+          keywords: ctx.KVStore
+       Q: Where to initialze (Tx)GasMeter & BlockGasMeter?
+       A: BlockGasMeter: baseapp.go/BeginBlock
+          (Tx)GasMeter:  ante.go/AnteHanlder/SetGasMeter
+#### 2. GasMeter vs. BlockGasMeter
+       Q: Difference between InfiniteGasMeter vs. BasicGasMeter
+       A: InfiniteGasMeter has no limit while BasicGasMeter has limit
+       Q: What is BlockGasLimit?
+       Q: How it works?
+          --BlockGasMeter--
+          * MaximumBlockGas From ConsensusParams's BlockParams(actually from genesis.json. default value is -1,that's,infiniteGasMeter)
+          * ref: baseapp.go
+          BeginBlock-->MaxGas Set
+          runTx------->ConsumeGas
+
+          --GasMeter
+          runTx,runMsgs---->ConsumeGas for every kvstore handling
+#### 3. cosmos vs. ethereum
+       Q: structure analysis
+       A:                 cosmos      ethereum
+          block size     infinite    1,500,000
+          avg tx limit  200,000      21,000, 53000+
+          calc metrics  db handling  contract data size+content(evm)
+### app vs. context
+### version in cosmos
+###  CheckTx vs. DeliverTx
+####

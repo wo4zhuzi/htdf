@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/accounts"
 	"github.com/orientwalt/htdf/crypto/keys/mintkey"
-	"github.com/orientwalt/tendermint/crypto"
+	sdk "github.com/orientwalt/htdf/types"
+	"github.com/tendermint/tendermint/crypto"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tmlibs/cli"
 )
@@ -62,21 +62,14 @@ func writeKeyFile(file string, content []byte) error {
 		return err
 	}
 
-	// path := getKeyPath()
-	// files := path + "/" + file
-	//return os.Rename(name, files)
 	return os.Rename(name, file)
 }
 
 func writeTemporaryKeyFile(file string, content []byte) (string, error) {
 	// Create the keystore directory with appropriate permissions
 	// in case it is not present yet.
-	//	defaultKeyStoreHome := getKeyPath()
 	const dirPerm = 0700 //0700-junying-todo-20190422
 
-	// if err := os.MkdirAll(defaultKeyStoreHome, dirPerm); err != nil {
-	// 	return "", err
-	// }
 	if err := os.MkdirAll(filepath.Dir(file), dirPerm); err != nil {
 		return "", err
 	}
@@ -126,12 +119,6 @@ func GetPrivKeyEx(accaddr sdk.AccAddress, passphrase string, rootDir string) (cr
 	bech32 := sdk.AccAddress.String(accaddr)
 	account := accounts.Account{Address: bech32}
 	return GetPrivKey(account, passphrase, rootDir)
-}
-
-func getKeyPath() string {
-	rootDir := viper.GetString(cli.HomeFlag)
-	defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
-	return defaultKeyStoreHome
 }
 
 func (ks keyStorePassphrase) JoinPath(filename string) string {

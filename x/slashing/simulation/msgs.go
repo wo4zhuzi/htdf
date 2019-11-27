@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/orientwalt/htdf/baseapp"
+	baseapp "github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/simulation"
 	"github.com/orientwalt/htdf/x/slashing"

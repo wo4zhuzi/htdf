@@ -7,7 +7,7 @@ import (
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/server"
-	"github.com/orientwalt/tendermint/types"
+	"github.com/tendermint/tendermint/types"
 	"github.com/spf13/cobra"
 )
 

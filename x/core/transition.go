@@ -3,36 +3,35 @@ package htdfservice
 import (
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 
 	ethcore "github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/params"
 	evmstate "github.com/orientwalt/htdf/evm/state"
 	"github.com/orientwalt/htdf/evm/vm"
 
 	apptypes "github.com/orientwalt/htdf/types"
 )
 
+//
 type StateTransition struct {
-	gpGasLimit *ethcore.GasPool
-	msg        MsgSendFrom
-	gas        uint64   //unit: gallon
-	gasPrice   *big.Int //unit: satoshi/gallon
-	initialGas uint64
-	value      *big.Int
-	data       []byte
-	stateDB    vm.StateDB
-	evm        *vm.EVM
+	gpGasWanted *ethcore.GasPool
+	msg         MsgSend
+	gas         uint64   //unit: gallon
+	gasPrice    *big.Int //unit: satoshi/gallon
+	initialGas  uint64
+	value       *big.Int
+	data        []byte
+	stateDB     vm.StateDB
+	evm         *vm.EVM
 }
 
-func NewStateTransition(evm *vm.EVM, msg MsgSendFrom, stateDB *evmstate.CommitStateDB) *StateTransition {
+func NewStateTransition(evm *vm.EVM, msg MsgSend, stateDB *evmstate.CommitStateDB) *StateTransition {
 	return &StateTransition{
-		gpGasLimit: new(ethcore.GasPool).AddGas(msg.GasLimit),
-		evm:        evm,
-		stateDB:    stateDB,
-		msg:        msg,
-		gasPrice:   big.NewInt(int64(msg.GasPrice)),
+		gpGasWanted: new(ethcore.GasPool).AddGas(msg.GasWanted),
+		evm:         evm,
+		stateDB:     stateDB,
+		msg:         msg,
+		gasPrice:    big.NewInt(int64(msg.GasPrice)),
 	}
 }
 
@@ -46,13 +45,13 @@ func (st *StateTransition) useGas(amount uint64) error {
 }
 
 func (st *StateTransition) buyGas() error {
-	st.gas = st.msg.Gas
+	st.gas = st.msg.GasWanted
 	st.initialGas = st.gas
 	fmt.Printf("msgGas=%d\n", st.initialGas)
 
 	eaSender := apptypes.ToEthAddress(st.msg.From)
 
-	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.Gas), st.gasPrice)
+	msgGasVal := new(big.Int).Mul(new(big.Int).SetUint64(st.msg.GasWanted), st.gasPrice)
 	fmt.Printf("msgGasVal=%s\n", msgGasVal.String())
 
 	if st.stateDB.GetBalance(eaSender).Cmp(msgGasVal) < 0 {
@@ -60,46 +59,13 @@ func (st *StateTransition) buyGas() error {
 	}
 
 	// try call subGas method, to check gas limit
-	if err := st.gpGasLimit.SubGas(st.msg.Gas); err != nil {
+	if err := st.gpGasWanted.SubGas(st.msg.GasWanted); err != nil {
 		fmt.Printf("SubGas error|err=%s\n", err)
 		return err
 	}
 
 	st.stateDB.SubBalance(eaSender, msgGasVal)
 	return nil
-}
-
-// IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
-func IntrinsicGas(data []byte, contractCreation, homestead bool) (uint64, error) {
-	// Set the starting gas for the raw transaction
-	var gas uint64
-	if contractCreation && homestead {
-		gas = params.TxGasContractCreation //53000
-	} else {
-		gas = params.TxGas //21000
-	}
-	// Bump the required gas by the amount of transactional data
-	if len(data) > 0 {
-		// Zero and non-zero bytes are priced differently
-		var nz uint64
-		for _, byt := range data {
-			if byt != 0 {
-				nz++
-			}
-		}
-		// Make sure we don't exceed uint64 for all data combinations
-		if (math.MaxUint64-gas)/params.TxDataNonZeroGas < nz {
-			return 0, vm.ErrOutOfGas
-		}
-		gas += nz * params.TxDataNonZeroGas
-
-		z := uint64(len(data)) - nz
-		if (math.MaxUint64-gas)/params.TxDataZeroGas < z {
-			return 0, vm.ErrOutOfGas
-		}
-		gas += z * params.TxDataZeroGas
-	}
-	return gas, nil
 }
 
 func (st *StateTransition) refundGas() {
@@ -119,7 +85,7 @@ func (st *StateTransition) refundGas() {
 
 	// Also return remaining gas to the block gas counter so it is
 	// available for the next transaction.
-	st.gpGasLimit.AddGas(st.gas)
+	st.gpGasWanted.AddGas(st.gas)
 }
 
 // gasUsed returns the amount of gas used up by the state transition.

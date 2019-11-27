@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 const (

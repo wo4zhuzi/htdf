@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/orientwalt/tendermint/crypto/encoding/amino"
 	amino "github.com/tendermint/go-amino"
+	"github.com/tendermint/tendermint/crypto/encoding/amino"
 )
 
 // amino codec to marshal/unmarshal

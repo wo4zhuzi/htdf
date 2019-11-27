@@ -6,12 +6,12 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/armor"
-	"github.com/orientwalt/tendermint/crypto/encoding/amino"
-	"github.com/orientwalt/tendermint/crypto/xsalsa20symmetric"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/armor"
+	"github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/tendermint/tendermint/crypto/xsalsa20symmetric"
 
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	cmn "github.com/tendermint/tendermint/libs/common"
 
 	"github.com/orientwalt/htdf/crypto/keys/keyerror"
 )

@@ -9,7 +9,7 @@ import (
 	"github.com/orientwalt/htdf/x/params"
 
 	"github.com/orientwalt/htdf/x/guardian"
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 const (
@@ -303,6 +303,7 @@ func (keeper Keeper) activateVotingPeriod(ctx sdk.Context, proposal ProposalCont
 
 	keeper.RemoveFromInactiveProposalQueue(ctx, proposal.GetDepositEndTime(), proposal.GetProposalID())
 	keeper.InsertActiveProposalQueue(ctx, proposal.GetVotingEndTime(), proposal.GetProposalID())
+	keeper.SetValidatorSet(ctx, proposal.GetProposalID())
 }
 
 // Params

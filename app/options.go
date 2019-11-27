@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 
-	dbm "github.com/orientwalt/tendermint/libs/db"
+	dbm "github.com/tendermint/tendermint/libs/db"
 
 	"github.com/orientwalt/htdf/store"
 	sdk "github.com/orientwalt/htdf/types"
@@ -19,7 +19,7 @@ func SetPruning(opts sdk.PruningOptions) func(*BaseApp) {
 
 // SetMinGasPrices returns an option that sets the minimum gas prices on the app.
 func SetMinGasPrices(gasPricesStr string) func(*BaseApp) {
-	gasPrices, err := sdk.ParseDecCoins(gasPricesStr)
+	gasPrices, err := sdk.ParseCoins(gasPricesStr)
 	if err != nil {
 		panic(fmt.Sprintf("invalid minimum gas prices: %v", err))
 	}

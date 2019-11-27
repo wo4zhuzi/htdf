@@ -9,12 +9,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/store"
@@ -60,7 +60,7 @@ func MakeTestCodec() *codec.Codec {
 
 	// Register Msgs
 	cdc.RegisterInterface((*sdk.Msg)(nil), nil)
-	cdc.RegisterConcrete(bank.MsgSend{}, "test/staking/Send", nil)
+	// cdc.RegisterConcrete(bank.MsgSend{}, "test/staking/Send", nil)
 	cdc.RegisterConcrete(types.MsgCreateValidator{}, "test/staking/CreateValidator", nil)
 	cdc.RegisterConcrete(types.MsgEditValidator{}, "test/staking/EditValidator", nil)
 	cdc.RegisterConcrete(types.MsgUndelegate{}, "test/staking/Undelegate", nil)

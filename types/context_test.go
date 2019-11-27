@@ -5,10 +5,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/orientwalt/htdf/store"
 	"github.com/orientwalt/htdf/types"
@@ -163,7 +163,7 @@ func TestContextWithCustom(t *testing.T) {
 	logger := NewMockLogger()
 	voteinfos := []abci.VoteInfo{{}}
 	meter := types.NewGasMeter(10000)
-	minGasPrices := types.DecCoins{types.NewInt64DecCoin("feetoken", 1)}
+	minGasPrices := types.Coins{types.NewInt64Coin("feetoken", 1)}
 
 	ctx = types.NewContext(nil, header, ischeck, logger)
 	require.Equal(t, header, ctx.BlockHeader())

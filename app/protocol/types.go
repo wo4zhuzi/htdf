@@ -5,7 +5,7 @@ import (
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 type Protocol interface {

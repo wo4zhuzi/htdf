@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/orientwalt/tendermint/types"
+	"github.com/tendermint/tendermint/types"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
-	bam "github.com/orientwalt/htdf/baseapp"
+	bam "github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 )

@@ -52,7 +52,7 @@ func GetCmdCreate(cdc *codec.Codec) *cobra.Command {
 
 			encodeflag := viper.GetBool(htdfservice.FlagEncode)
 
-			msg := htdfservice.NewMsgSendFrom(fromaddr, toaddr, coins)
+			msg := htdfservice.NewMsgSendDefault(fromaddr, toaddr, coins)
 
 			return PrintUnsignedStdTx(txBldr, cliCtx, []sdk.Msg{msg}, encodeflag)
 		},
@@ -70,7 +70,7 @@ func PrintUnsignedStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msg
 			return err
 		}
 
-		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.Gas())
+		fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.GasWanted())
 	}
 	stdSignMsg, err := txBldr.BuildSignMsg(msgs)
 	if err != nil {

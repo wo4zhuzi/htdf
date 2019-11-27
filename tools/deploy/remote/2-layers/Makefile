@@ -36,7 +36,7 @@ REFINED_PRIV_COL_INDEX = 2
 REFINED_PASS_COL_INDEX = 3
 # blockchain configuration
 CHAINID = testchain#mainchain
-MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
+MINIMUM_GAS_PRICES = 100satoshi
 ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3#htdf1h6dmymwjgqc5xxxvvsf3rwl54plr2pe3kjyw8n
 # STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8#htdf18a6g5u5msn04l87kdk06cn97qjumgemu2phxwd
 DEFAULT_VAL_COUNT = 4#7

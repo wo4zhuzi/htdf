@@ -6,14 +6,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/orientwalt/tendermint/abci/server"
+	"github.com/tendermint/tendermint/abci/server"
 
-	tcmd "github.com/orientwalt/tendermint/cmd/tendermint/commands"
-	cmn "github.com/orientwalt/tendermint/libs/common"
-	"github.com/orientwalt/tendermint/node"
-	"github.com/orientwalt/tendermint/p2p"
-	pvm "github.com/orientwalt/tendermint/privval"
-	"github.com/orientwalt/tendermint/proxy"
+	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/node"
+	"github.com/tendermint/tendermint/p2p"
+	pvm "github.com/tendermint/tendermint/privval"
+	"github.com/tendermint/tendermint/proxy"
 )
 
 // Tendermint full-node start flags

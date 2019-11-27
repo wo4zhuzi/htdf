@@ -12,10 +12,10 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto/tmhash"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/tmhash"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/orientwalt/htdf/app/protocol"
 	"github.com/orientwalt/htdf/codec"
@@ -23,7 +23,7 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/version"
 	"github.com/orientwalt/htdf/x/auth"
-	tmstate "github.com/orientwalt/tendermint/state"
+	tmstate "github.com/tendermint/tendermint/state"
 )
 
 // Key to store the consensus params in the main store.
@@ -86,7 +86,7 @@ type BaseApp struct {
 
 	// The minimum gas prices a validator is willing to accept for processing a
 	// transaction. This is mainly used for DoS and spam prevention.
-	minGasPrices sdk.DecCoins
+	minGasPrices sdk.Coins
 
 	// flag for sealing options and parameters to a BaseApp
 	sealed bool
@@ -234,9 +234,9 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	}
 
 	// memoize baseKey
-	if app.baseKey != nil {
-		panic("app.baseKey expected to be nil; duplicate init?")
-	}
+	// if app.baseKey != nil {
+	// 	panic("app.baseKey expected to be nil; duplicate init?")
+	// }
 	app.baseKey = baseKey
 
 	// Load the consensus params from the main store. If the consensus params are
@@ -253,6 +253,11 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 		}
 
 		app.setConsensusParams(consensusParams)
+	} else {
+		// It will get saved later during InitChain.
+		if app.LastBlockHeight() != 0 {
+			panic(errors.New("consensus params is empty"))
+		}
 	}
 
 	// needed for `gaiad export`, which inits from store but never calls initchain
@@ -262,7 +267,7 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	return nil
 }
 
-func (app *BaseApp) setMinGasPrices(gasPrices sdk.DecCoins) {
+func (app *BaseApp) setMinGasPrices(gasPrices sdk.Coins) {
 	app.minGasPrices = gasPrices
 }
 
@@ -352,6 +357,7 @@ func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
 	lastCommitID := app.cms.LastCommitID()
 
 	return abci.ResponseInfo{
+		AppVersion:       version.ProtocolVersion,
 		Data:             app.name,
 		LastBlockHeight:  lastCommitID.Version,
 		LastBlockAppHash: lastCommitID.Hash,
@@ -471,7 +477,7 @@ func handleQueryApp(app *BaseApp, path []string, req abci.RequestQuery) (res abc
 			return abci.ResponseQuery{
 				Code:      uint32(sdk.CodeOK),
 				Codespace: string(sdk.CodespaceRoot),
-				Value:     []byte(version.Version),
+				Value:     []byte(version.GetVersion()),
 			}
 
 		default:
@@ -633,8 +639,8 @@ func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeg
 // NOTE:CheckTx does not run the actual Msg handler function(s).
 func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 	var result sdk.Result
-	fmt.Println("CheckTx88888888888888888888")
 	tx, err := app.txDecoder(txBytes)
+	fmt.Println("CheckTx88888888888888888888:tx", tx)
 	if err != nil {
 		result = err.Result()
 	} else {
@@ -663,6 +669,8 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 		result = app.runTx(runTxModeDeliver, txBytes, tx)
 	}
 	fmt.Println("DeliverTx1111111111111", result.Data, result.Log, result.Tags)
+	// junying-todo, 2019-10-18
+	// this return value is written to database(blockchain)
 	return abci.ResponseDeliverTx{
 		Code:      uint32(result.Code),
 		Codespace: string(result.Codespace),
@@ -674,22 +682,22 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 	}
 }
 
-// validateBasicTxMsgs executes basic validator calls for messages.
-func validateBasicTxMsgs(msgs []sdk.Msg) sdk.Error {
-	if msgs == nil || len(msgs) == 0 {
-		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
-	}
-
-	for _, msg := range msgs {
-		// Validate the Msg.
-		err := msg.ValidateBasic()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
+// // junying-todo, 2019-11-13
+// // ValidateBasic executes basic validator calls for all messages
+// // and checking minimum for ?
+// func ValidateBasic(ctx sdk.Context, tx sdk.Tx) sdk.Error {
+// 	stdtx, ok := tx.(auth.StdTx)
+// 	if !ok {
+// 		return sdk.ErrInternal("tx must be StdTx")
+// 	}
+// 	// skip gentxs
+// 	fmt.Println("Current BlockHeight:", ctx.BlockHeight())
+// 	if ctx.BlockHeight() < 1 {
+// 		return nil
+// 	}
+// 	// Validate Tx
+// 	return stdtx.ValidateBasic()
+// }
 
 // retrieve the context for the tx w/ txBytes and other memoized values.
 func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Context) {
@@ -705,6 +713,14 @@ func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Con
 	return
 }
 
+// Check if the msg is MsgSend
+func IsMsgSend(msg sdk.Msg) bool {
+	if msg.Route() == "htdfservice" {
+		return true
+	}
+	return false
+}
+
 // runMsgs iterates through all the messages and executes them.
 func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (result sdk.Result) {
 	idxLogs := make([]sdk.ABCIMessageLog, 0, len(msgs)) // a list of JSON-encoded logs with msg index
@@ -713,6 +729,8 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 	var tags sdk.Tags // also just append them all
 	var code sdk.CodeType
 	var codespace sdk.CodespaceType
+	// var gasUsed uint64
+
 	fmt.Println("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
 	for msgIdx, msg := range msgs {
 		// match message route
@@ -725,7 +743,6 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		}
 
 		var msgResult sdk.Result
-
 		// skip actual execution for CheckTx mode
 		if mode != runTxModeCheck {
 			fmt.Println("runMsgs/msgResult.IsOK()~~~~~~~~~~~~~~~~~~~~~~~~", msgRoute)
@@ -733,6 +750,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 		}
 
+		fmt.Println("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
 		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
 
 		// Result.Data must be length prefixed in order to separate each result
@@ -742,6 +760,11 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 		idxLog := sdk.ABCIMessageLog{MsgIndex: msgIdx, Log: msgResult.Log}
 
+		// junying-todo, 2019-11-05
+		if IsMsgSend(msg) {
+			ctx.GasMeter().UseGas(sdk.Gas(msgResult.GasUsed), msgRoute)
+		}
+
 		// stop execution and return on first failed message
 		if !msgResult.IsOK() {
 			idxLog.Success = false
@@ -749,14 +772,16 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 
 			code = msgResult.Code
 			codespace = msgResult.Codespace
+
 			break
 		}
 
 		idxLog.Success = true
 		idxLogs = append(idxLogs, idxLog)
-	}
 
+	}
 	logJSON := codec.Cdc.MustMarshalJSON(idxLogs)
+
 	result = sdk.Result{
 		Code:      code,
 		Codespace: codespace,
@@ -800,6 +825,41 @@ func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
 	return ctx.WithMultiStore(msCache), msCache
 }
 
+// Validate Tx
+func (app *BaseApp) ValidateTx(ctx sdk.Context, txBytes []byte, tx sdk.Tx) sdk.Error {
+	// TxByteSize Check
+	var msgs = tx.GetMsgs()
+	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msgs); err != nil {
+		return err
+	}
+
+	// // ValidateBasic
+	// if err := ValidateBasic(ctx, tx); err != nil {
+	// 	fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
+	// 	return err
+	// }
+
+	// Msgs Check
+	// All htdfservice Msgs: OK
+	// All non-htdfservice Msgs: OK
+	// htdfservice Msg(s) + non-htdfservice Msg(s): No
+	// htdfservice Msg: OK, Msgs: No?
+	var count = 0
+	for _, msg := range msgs {
+		if msg.Route() == "htdfservice" {
+			count = count + 1
+		}
+	}
+	if count > 0 && len(msgs) != count {
+		return sdk.ErrInternal("mixed type of htdfservice msgs & non-htdfservice msgs can't be used")
+	}
+	// htdfservice Msgs: No
+	// if count > 1 {
+	// 	return sdk.ErrInternal("the number of htdfservice can't be more than one")
+	// }
+	return nil
+}
+
 // runTx processes a transaction. The transactions is proccessed via an
 // anteHandler. The provided txBytes may be nil in some cases, eg. in tests. For
 // further details on transaction execution, reference the BaseApp SDK
@@ -808,24 +868,17 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// NOTE: GasWanted should be returned by the AnteHandler. GasUsed is
 	// determined by the GasMeter. We need access to the context to get the gas
 	// meter so we initialize upfront.
+
 	var gasWanted uint64
 	ctx := app.getContextForTx(mode, txBytes)
 	ms := ctx.MultiStore()
 
 	// only run the tx if there is block gas remaining
 	if mode == runTxModeDeliver && ctx.BlockGasMeter().IsOutOfGas() {
-		result = sdk.ErrOutOfGas("no block gas left to run tx").Result()
-		return
+		return sdk.ErrOutOfGas("no block gas left to run tx").Result()
 	}
 
-	var msgs = tx.GetMsgs()
-	if err := app.Engine.GetCurrentProtocol().ValidateTx(ctx, txBytes, msgs); err != nil {
-		result = err.Result()
-		return
-	}
-
-	if err := validateBasicTxMsgs(msgs); err != nil {
-		fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
+	if err := app.ValidateTx(ctx, txBytes, tx); err != nil {
 		return err.Result()
 	}
 
@@ -833,18 +886,19 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	if mode == runTxModeDeliver {
 		startingGas = ctx.BlockGasMeter().GasConsumed()
 	}
-
+	fmt.Println("runTx:startingGas", startingGas)
 	if mode == runTxModeDeliver {
 		app.deliverState.ctx = app.deliverState.ctx.WithCheckValidNum(app.deliverState.ctx.CheckValidNum() + 1)
 	}
 
 	defer func() {
+
 		if r := recover(); r != nil {
 			switch rType := r.(type) {
 			case sdk.ErrorOutOfGas:
 				log := fmt.Sprintf(
 					"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
-					rType.Descriptor, gasWanted, ctx.GasMeter().GasConsumed(),
+					rType.Descriptor, gasWanted, ctx.GasMeter().GasConsumed(), //result.GasUsed, //
 				)
 				result = sdk.ErrOutOfGas(log).Result()
 			default:
@@ -855,14 +909,20 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		}
 
 		result.GasWanted = gasWanted
-		result.GasUsed = ctx.GasMeter().GasConsumed()
-	}()
+		// commented by junying, 2019-10-30
+		// this value is the lethal one that is finally written into blockchain(database)
+		// By this comment, at last, the value changed
+		result.GasUsed = ctx.GasMeter().GasConsumed() // commented before
 
+	}()
+	fmt.Println("runTx:result.GasUsed", result.GasUsed)
 	// Add cache in fee refund. If an error is returned or panic happes during refund,
 	// no value will be written into blockchain state.
 	defer func() {
 
-		result.GasUsed = ctx.GasMeter().GasConsumed()
+		// commented by junying,2019-10-30
+		result.GasUsed = ctx.GasMeter().GasConsumed() // commented before
+
 		var refundCtx sdk.Context
 		var refundCache sdk.CacheMultiStore
 		refundCtx, refundCache = app.cacheTxContext(ctx, txBytes)
@@ -888,7 +948,8 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	defer func() {
 		if mode == runTxModeDeliver {
 			ctx.BlockGasMeter().ConsumeGas(
-				ctx.GasMeter().GasConsumedToLimit(),
+				ctx.GasMeter().GasConsumedToLimit(), // replaced by junying,2019-10-30
+				// result.GasUsed, ///////////////////////// with this
 				"block gas meter",
 			)
 
@@ -924,7 +985,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		anteCtx, msCache = app.cacheTxContext(ctx, txBytes)
 
 		newCtx, result, abort := anteHandler(anteCtx, tx, mode == runTxModeSimulate)
-
+		fmt.Println("anteHandler", result.GasUsed, result.GasWanted, result.Log)
 		if !newCtx.IsZero() {
 			// At this point, newCtx.MultiStore() is cache-wrapped, or something else
 			// replaced by the ante handler. We want the original multistore, not one
@@ -947,26 +1008,29 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	}
 	fmt.Println("6runTx!!!!!!!!!!!!!!!!!")
 	if mode == runTxModeCheck {
-
 		return
 	}
 	fmt.Println("7runTx!!!!!!!!!!!!!!!!!")
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
-	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", msgs, mode)
-	result = app.runMsgs(runMsgCtx, msgs, mode)
-	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", msgs)
+	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs(), mode)
+	result = app.runMsgs(runMsgCtx, tx.GetMsgs(), mode)
+	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs())
 	result.GasWanted = gasWanted
 
 	if mode == runTxModeSimulate {
-
 		return
 	}
-	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK())
+	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK(), result.GasUsed, result.GasWanted)
 	// only update state if all messages pass
-	if result.IsOK() {
-
+	// junying-todo, 2019-11-05
+	// wondering if should add some condition for evm failure
+	// if result.IsOK()
+	// result.Code = 0: Success
+	// result.Code = 1,2: EVM ERROR
+	if result.Code < 3 {
+		fmt.Println("11runTx!!!!!!!!!!!!!!!!!")
 		msCache.Write()
 	}
 

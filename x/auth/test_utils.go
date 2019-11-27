@@ -2,11 +2,11 @@
 package auth
 
 import (
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/store"
@@ -54,15 +54,13 @@ func newTestMsg(addrs ...sdk.AccAddress) *sdk.TestMsg {
 }
 
 func newStdFee() StdFee {
-	return NewStdFee(50000,
-		sdk.NewCoins(sdk.NewInt64Coin("atom", 150)),
-	)
+	return NewStdFee(2000000, 100)
 }
 
 // coins to more than cover the fee
 func newCoins() sdk.Coins {
 	return sdk.Coins{
-		sdk.NewInt64Coin("atom", 10000000),
+		sdk.NewInt64Coin("satoshi", 1000000000),
 	}
 }
 

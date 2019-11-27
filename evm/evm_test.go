@@ -4,28 +4,29 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/magiconair/properties/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"math/big"
 	"os"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/require"
 
 	ec "github.com/orientwalt/htdf/evm/core"
 	"github.com/orientwalt/htdf/evm/vm"
 
 	//cosmos-sdk
 	"github.com/orientwalt/htdf/codec"
+	"github.com/orientwalt/htdf/evm/state"
 	"github.com/orientwalt/htdf/store"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/params"
-	"github.com/orientwalt/htdf/evm/state"
 
 	//tendermint
-	abci "github.com/orientwalt/tendermint/abci/types"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
-	tmlog "github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	//evm
 	newevmtypes "github.com/orientwalt/htdf/evm/types"
@@ -229,8 +230,8 @@ func TestNewEvm(t *testing.T) {
 	assert.Equal(t, stateDB.GetBalance(fromAddress).String() == "1000000000000000000", true)
 
 	//---------------------call evm--------------------------------------
-	abiFileName := "./testdata/coin_sol_Coin.abi"
-	binFileName := "./testdata/coin_sol_Coin.bin"
+	abiFileName := "../tests/evm/coin/coin_sol_Coin.abi"
+	binFileName := "../tests/evm/coin/coin_sol_Coin.bin"
 	data := loadBin(binFileName)
 
 	config := appParams.MainnetChainConfig
@@ -398,8 +399,8 @@ func reOpenDB(t *testing.T, lastContractCode []byte, strContractAddress string, 
 	}
 
 	//---------------------call evm--------------------------------------
-	abiFileName := "./testdata/coin_sol_Coin.abi"
-	binFileName := "./testdata/coin_sol_Coin.bin"
+	abiFileName := "../tests/evm/coin/coin_sol_Coin.abi"
+	binFileName := "../tests/evm/coin/coin_sol_Coin.bin"
 	data := loadBin(binFileName)
 
 	//	config := params.TestnetChainConfig

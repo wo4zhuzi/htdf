@@ -11,8 +11,6 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 
-	"errors"
-
 	"github.com/spf13/viper"
 )
 
@@ -22,19 +20,18 @@ type TxBuilder struct {
 	keybase            crkeys.Keybase
 	accountNumber      uint64
 	sequence           uint64
-	gas                uint64
+	gasWanted          uint64
+	gasPrice           uint64
 	gasAdjustment      float64
 	simulateAndExecute bool
 	chainID            string
 	memo               string
-	fees               sdk.Coins
-	gasPrices          sdk.DecCoins
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
 func NewTxBuilder(
-	txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, fees sdk.Coins, gasPrices sdk.DecCoins,
+	txEncoder sdk.TxEncoder, accNumber, seq, gasWanted uint64, gasAdj float64,
+	simulateAndExecute bool, chainID, memo string, gasPrice uint64,
 ) TxBuilder {
 
 	return TxBuilder{
@@ -42,13 +39,12 @@ func NewTxBuilder(
 		keybase:            nil,
 		accountNumber:      accNumber,
 		sequence:           seq,
-		gas:                gas,
+		gasWanted:          gasWanted,
+		gasPrice:           gasPrice,
 		gasAdjustment:      gasAdj,
 		simulateAndExecute: simulateAndExecute,
 		chainID:            chainID,
 		memo:               memo,
-		fees:               fees,
-		gasPrices:          gasPrices,
 	}
 }
 
@@ -60,18 +56,19 @@ func NewTxBuilderFromCLI() TxBuilder {
 		panic(err)
 	}
 	txbldr := TxBuilder{
-		keybase:            kb,
-		accountNumber:      uint64(viper.GetInt64(client.FlagAccountNumber)),
-		sequence:           uint64(viper.GetInt64(client.FlagSequence)),
-		gas:                client.GasFlagVar.Gas,
+		keybase:       kb,
+		accountNumber: uint64(viper.GetInt64(client.FlagAccountNumber)),
+		sequence:      uint64(viper.GetInt64(client.FlagSequence)),
+		// gas:                client.GasFlagVar.Gas, // commented by junying, 2019-10-21, gas_wanted set to 200000 as default here.
+		gasWanted:          uint64(viper.GetInt64(client.FlagGasWanted)), // added by junying, 2019-11-07
 		gasAdjustment:      viper.GetFloat64(client.FlagGasAdjustment),
 		simulateAndExecute: client.GasFlagVar.Simulate,
 		chainID:            viper.GetString(client.FlagChainID),
 		memo:               viper.GetString(client.FlagMemo),
 	}
 
-	txbldr = txbldr.WithFees(viper.GetString(client.FlagFees))
-	txbldr = txbldr.WithGasPrices(viper.GetString(client.FlagGasPrices))
+	txbldr = txbldr.WithGasPrices(uint64(viper.GetInt64(client.FlagGasPrices)))
+	txbldr = txbldr.WithGasWanted(uint64(viper.GetInt64(client.FlagGasWanted))) // added by junying, 2019-11-07
 
 	return txbldr
 }
@@ -86,7 +83,7 @@ func (bldr TxBuilder) AccountNumber() uint64 { return bldr.accountNumber }
 func (bldr TxBuilder) Sequence() uint64 { return bldr.sequence }
 
 // Gas returns the gas for the transaction
-func (bldr TxBuilder) Gas() uint64 { return bldr.gas }
+func (bldr TxBuilder) GasWanted() uint64 { return bldr.gasWanted }
 
 // GasAdjustment returns the gas adjustment
 func (bldr TxBuilder) GasAdjustment() float64 { return bldr.gasAdjustment }
@@ -105,10 +102,10 @@ func (bldr TxBuilder) ChainID() string { return bldr.chainID }
 func (bldr TxBuilder) Memo() string { return bldr.memo }
 
 // Fees returns the fees for the transaction
-func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }
+// func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }?
 
 // GasPrices returns the gas prices set for the transaction, if any.
-func (bldr TxBuilder) GasPrices() sdk.DecCoins { return bldr.gasPrices }
+func (bldr TxBuilder) GasPrice() uint64 { return bldr.gasPrice }
 
 // WithTxEncoder returns a copy of the context with an updated codec.
 func (bldr TxBuilder) WithTxEncoder(txEncoder sdk.TxEncoder) TxBuilder {
@@ -123,30 +120,25 @@ func (bldr TxBuilder) WithChainID(chainID string) TxBuilder {
 }
 
 // WithGas returns a copy of the context with an updated gas.
-func (bldr TxBuilder) WithGas(gas uint64) TxBuilder {
-	bldr.gas = gas
+func (bldr TxBuilder) WithGasWanted(gasWanted uint64) TxBuilder {
+	bldr.gasWanted = gasWanted
 	return bldr
 }
 
-// WithFees returns a copy of the context with an updated fee.
-func (bldr TxBuilder) WithFees(fees string) TxBuilder {
-	parsedFees, err := sdk.ParseCoins(fees)
-	if err != nil {
-		panic(err)
-	}
+// // WithFees returns a copy of the context with an updated fee.
+// func (bldr TxBuilder) WithFees(fees string) TxBuilder {
+// 	parsedFees, err := sdk.ParseCoins(fees)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	bldr.fees = parsedFees
-	return bldr
-}
+// 	bldr.fees = parsedFees
+// 	return bldr
+// }
 
 // WithGasPrices returns a copy of the context with updated gas prices.
-func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
-	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices)
-	if err != nil {
-		panic(err)
-	}
-
-	bldr.gasPrices = parsedGasPrices
+func (bldr TxBuilder) WithGasPrices(gasPrice uint64) TxBuilder {
+	bldr.gasPrice = gasPrice
 	return bldr
 }
 
@@ -182,31 +174,21 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 	if chainID == "" {
 		return StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
 	}
-
-	fees := bldr.fees
-	if !bldr.gasPrices.IsZero() {
-		if !fees.IsZero() {
-			return StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
-		}
-
-		glDec := sdk.NewDec(int64(bldr.gas))
-
-		// Derive the fees based on the provided gas prices, where
-		// fee = ceil(gasPrice * gasLimit).
-		fees = make(sdk.Coins, len(bldr.gasPrices))
-		for i, gp := range bldr.gasPrices {
-			fee := gp.Amount.Mul(glDec)
-			fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
-		}
-	}
-
+	// junying-todo, 2019-11-08
+	// converted from fee based to gas*gasprice based
+	// if bldr.gasPrices.IsZero() {
+	// 	return StdSignMsg{}, errors.New("gasprices can't not be zero")
+	// }
+	// if bldr.gasWanted <= 0 {
+	// 	return StdSignMsg{}, errors.New("gasWanted must be provided")
+	// }
 	return StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,
 		Sequence:      bldr.sequence,
 		Memo:          bldr.memo,
 		Msgs:          msgs,
-		Fee:           auth.NewStdFee(bldr.gas, fees),
+		Fee:           auth.NewStdFee(bldr.gasWanted, bldr.gasPrice), // junying-todo, 2019-11-07
 	}, nil
 }
 

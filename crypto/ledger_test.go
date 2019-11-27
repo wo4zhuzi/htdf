@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	tmcrypto "github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/encoding/amino"
 	"github.com/stretchr/testify/require"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/encoding/amino"
 
 	"github.com/orientwalt/htdf/crypto/keys/hd"
 	"github.com/orientwalt/htdf/tests"

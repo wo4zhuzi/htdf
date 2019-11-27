@@ -7,11 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/multisig"
-	"github.com/orientwalt/tendermint/crypto/secp256k1"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/multisig"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	"github.com/orientwalt/htdf/codec"
+	txparam "github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -27,6 +28,21 @@ func init() {
 	copy(simSecp256k1Pubkey[:], bz)
 }
 
+// Check if EVM Tx exists
+func ExistsMsgSend(tx sdk.Tx) bool {
+	for _, msg := range tx.GetMsgs() {
+		if msg.Route() == "htdfservice" {
+			return true
+		}
+	}
+	return false
+}
+
+// Estimate RealFee by calculating real gas consumption
+func EstimateFee(tx StdTx) StdFee {
+	return NewStdFee(txparam.DefaultMsgGas*uint64(len(tx.Msgs)), tx.Fee.GasPrice)
+}
+
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
@@ -34,9 +50,15 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 	return func(
 		ctx sdk.Context, tx sdk.Tx, simulate bool,
 	) (newCtx sdk.Context, res sdk.Result, abort bool) {
-
 		// all transactions must be of type auth.StdTx
 		stdTx, ok := tx.(StdTx)
+		fmt.Println("NewAnteHandler:tx", tx)
+		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
+		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
+		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount())
+		fmt.Println("NewAnteHandler:stdTx.Fee.GasWanted", stdTx.Fee.GasWanted)
+		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrice)
+		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
 		if !ok {
 			// Set a gas meter with limit 0 as to prevent an infinite gas meter attack
 			// during runTx.
@@ -49,51 +71,65 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		// Ensure that the provided fees meet a minimum threshold for the validator,
 		// if this is a CheckTx. This is only for local mempool purposes, and thus
 		// is only ran on check tx.
-		// junying-todo, 2019-08-27
-		// conventional fee prechecking doesn't needed anymore
-		// evm will replace it.
-		// if ctx.IsCheckTx() && !simulate {
-		// 	res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
-		// 	if !res.IsOK() {
-		// 		return newCtx, res, true
-		// 	}
-		// }
+		// junying-todo, 2019-11-07
+		// Check if Fee.Amount > Fee.Gas * minGasPrice or not
+		// It can be rephrased in Fee.GasPrices() > minGasPrice or not?
+		if ctx.IsCheckTx() && !simulate {
+			res := EnsureSufficientMempoolFees(ctx, stdTx.Fee)
+			if !res.IsOK() {
+				return newCtx, res, true
+			}
+		}
 
-		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.Gas)
-
+		newCtx = SetGasMeter(simulate, ctx, stdTx.Fee.GasWanted)
 		// AnteHandlers must have their own defer/recover in order for the BaseApp
 		// to know how much gas was used! This is because the GasMeter is created in
 		// the AnteHandler, but if it panics the context won't be set properly in
 		// runTx's recover call.
 		// junying-todo, 2019-08-27
-		// conventional gas metering doesn't needed anymore
+		// conventional gas metering isn't necessary anymore
 		// evm will replace it.
-		// defer func() {
-		// 	if r := recover(); r != nil {
-		// 		switch rType := r.(type) {
-		// 		case sdk.ErrorOutOfGas:
-		// 			log := fmt.Sprintf(
-		// 				"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
-		// 				rType.Descriptor, stdTx.Fee.Gas, newCtx.GasMeter().GasConsumed(),
-		// 			)
-		// 			res = sdk.ErrOutOfGas(log).Result()
-		// 			res.GasWanted = stdTx.Fee.Gas
-		// 			res.GasUsed = newCtx.GasMeter().GasConsumed()
-		// 			abort = true
-		// 		default:
-		// 			panic(r)
-		// 		}
-		// 	}
-		// }()
+		// junying-todo, 2019-10-24
+		// this is enabled again in order to handle non-htdfservice txs.
+		defer func() {
+			if r := recover(); r != nil {
+				switch rType := r.(type) {
+				case sdk.ErrorOutOfGas:
+					log := fmt.Sprintf(
+						"out of gas in location: %v; gasWanted: %d, gasUsed: %d",
+						rType.Descriptor, stdTx.Fee.GasWanted, newCtx.GasMeter().GasConsumed(),
+					)
+					res = sdk.ErrOutOfGas(log).Result()
+					res.GasWanted = stdTx.Fee.GasWanted
+					res.GasUsed = newCtx.GasMeter().GasConsumed()
+					abort = true
+				default:
+					panic(r)
+				}
+			}
+		}()
 
+		// junying-todo, 2019-11-13
+		// planed to be moved to baseapp.ValidateTx by
 		if err := tx.ValidateBasic(); err != nil {
+			return newCtx, err.Result(), true
+		}
+		// junying-todo, 2019-11-13
+		// check gas,gasprice for non-genesis block
+		if err := stdTx.ValidateFee(); err != nil && ctx.BlockHeight() != 0 {
 			return newCtx, err.Result(), true
 		}
 
 		// junying-todo, 2019-08-27
-		// conventional gas consuming doesn't needed anymore
+		// conventional gas consuming isn't necessary anymore
 		// evm will replace it.
-		// newCtx.GasMeter().ConsumeGas(params.TxSizeCostPerByte*sdk.Gas(len(newCtx.TxBytes())), "txSize")
+		// junying-todo, 2019-10-24
+		// this is enabled again in order to handle non-htdfservice txs.
+		// junying-todo, 2019-11-13
+		// GasMetering Disabled, Now Constant Gas used for Staking Txs
+		if !ExistsMsgSend(tx) {
+			newCtx.GasMeter().UseGas(sdk.Gas(txparam.DefaultMsgGas*uint64(len(stdTx.Msgs))), "AnteHandler")
+		}
 
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
@@ -111,21 +147,20 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			return newCtx, res, true
 		}
 
-		// junying-todo, 2019-08-27
-		// conventional deducting fee module doesn't needed anymore.
-		// evm will replace it.
-		// if !stdTx.Fee.Amount.IsZero() {
-		// 	signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], stdTx.Fee)
-		// 	if !res.IsOK() {
-		// 		return newCtx, res, true
-		// 	}
-		// 	fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
-		// }
+		// junying-todo, 2019-11-19
+		// Deduct(DefaultMsgGas * len(Msgs)) for non-htdfservice msgs
+		if !stdTx.Fee.Amount().IsZero() && !ExistsMsgSend(tx) {
+			estimatedFee := EstimateFee(stdTx)
+			signerAccs[0], res = DeductFees(ctx.BlockHeader().Time, signerAccs[0], estimatedFee)
+			if !res.IsOK() {
+				return newCtx, res, true
+			}
+			fck.AddCollectedFees(newCtx, estimatedFee.Amount())
+		}
 
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
 		stdSigs := stdTx.GetSignatures()
-
 		for i := 0; i < len(stdSigs); i++ {
 			// skip the fee payer, account is cached and fees were deducted already
 			if i != 0 {
@@ -146,7 +181,8 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// TODO: tx tags (?)
-		return newCtx, sdk.Result{GasWanted: stdTx.Fee.Gas}, false // continue...
+		fmt.Println("NewAnteHandler:----------FINISHED")
+		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted}, false //, GasUsed: newCtx.GasMeter().GasConsumed()}, false // continue...
 	}
 }
 
@@ -196,6 +232,7 @@ func processSig(
 		// StdSignature (Amino encoding) and simulate gas consumption
 		// (assuming a SECP256k1 simulation key).
 		consumeSimSigGas(ctx.GasMeter(), pubKey, sig, params)
+		// fmt.Println("NewAnteHandler.processSig:simulated in")
 	}
 
 	if res := consumeSigVerificationGas(ctx.GasMeter(), sig.Signature, pubKey, params); !res.IsOK() {
@@ -203,7 +240,7 @@ func processSig(
 	}
 
 	if !simulate && !pubKey.VerifyBytes(signBytes, sig.Signature) {
-		return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
+		return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account number, account sequence and/or chain-id").Result()
 	}
 
 	if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
@@ -317,7 +354,7 @@ func consumeMultisignatureVerificationGas(meter sdk.GasMeter,
 // the CoinKeeper doesn't give us accounts), but it seems easier to do this.
 func DeductFees(blockTime time.Time, acc Account, fee StdFee) (Account, sdk.Result) {
 	coins := acc.GetCoins()
-	feeAmount := fee.Amount
+	feeAmount := fee.Amount()
 
 	if !feeAmount.IsValid() {
 		return nil, sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee amount: %s", feeAmount)).Result()
@@ -355,21 +392,23 @@ func DeductFees(blockTime time.Time, acc Account, fee StdFee) (Account, sdk.Resu
 // consensus.
 func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 	minGasPrices := ctx.MinGasPrices()
+	fmt.Println("EnsureSufficientMempoolFees:minGasPrices", minGasPrices)
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
 
 		// Determine the required fees by multiplying each required minimum gas
 		// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
-		glDec := sdk.NewDec(int64(stdFee.Gas))
+		gaslimit := sdk.NewInt(int64(stdFee.GasWanted))
 		for i, gp := range minGasPrices {
-			fee := gp.Amount.Mul(glDec)
-			requiredFees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+			fee := gp.Amount.Mul(gaslimit)
+			requiredFees[i] = sdk.NewCoin(gp.Denom, fee)
 		}
-
-		if !stdFee.Amount.IsAnyGTE(requiredFees) {
+		fmt.Println("EnsureSufficientMempoolFees:requiredFees", requiredFees)
+		fmt.Println("EnsureSufficientMempoolFees:stdFee", stdFee)
+		if !stdFee.Amount().IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(
-					"insufficient fees; got: %q required: %q", stdFee.Amount, requiredFees,
+					"insufficient fees; got: %q required: %q", stdFee.Amount(), requiredFees,
 				),
 			).Result()
 		}
@@ -385,8 +424,8 @@ func SetGasMeter(simulate bool, ctx sdk.Context, gasLimit uint64) sdk.Context {
 	if simulate || ctx.BlockHeight() == 0 {
 		return ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 	}
-
-	return ctx.WithGasMeter(sdk.NewGasMeter(gasLimit))
+	// junying-todo, 2019-11-11
+	return ctx.WithGasMeter(sdk.NewFalseGasMeter(gasLimit)) // NewGasMeter to NewFalseGasMeter
 }
 
 // GetSignBytes returns a slice of bytes to sign over for a given transaction

@@ -9,33 +9,31 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/orientwalt/htdf/types"
 )
 
 type mockResponseWriter struct{}
 
 func TestBaseReqValidateBasic(t *testing.T) {
-	fromAddr := "cosmos1cq0sxam6x4l0sv9yz3a2vlqhdhvt2k6jtgcse0"
-	tenstakes, err := types.ParseCoins("10stake")
-	require.NoError(t, err)
-	onestake, err := types.ParseDecCoins("1.0stake")
-	require.NoError(t, err)
-
+	fromAddr := "htdf1lmyv4ars9j0glk6n0d23njlcjnrxuwxpxxqymd"
+	gasWanted := "200000"
+	gasPrice := "100"
 	req1 := NewBaseReq(
-		fromAddr, "", "nonempty", "", "", 0, 0, tenstakes, nil, false,
+		fromAddr, "", "nonempty", gasWanted, gasPrice, "", 0, 0, false,
 	)
 	req2 := NewBaseReq(
-		"", "", "nonempty", "", "", 0, 0, tenstakes, nil, false,
+		"", "", "nonempty", gasWanted, gasPrice, "", 0, 0, false,
 	)
 	req3 := NewBaseReq(
-		fromAddr, "", "", "", "", 0, 0, tenstakes, nil, false,
+		fromAddr, "", "", gasWanted, gasPrice, "", 0, 0, false,
 	)
 	req4 := NewBaseReq(
-		fromAddr, "", "nonempty", "", "", 0, 0, tenstakes, onestake, false,
+		fromAddr, "", "nonempty", gasWanted, "", "", 0, 0, false,
 	)
 	req5 := NewBaseReq(
-		fromAddr, "", "nonempty", "", "", 0, 0, types.Coins{}, types.DecCoins{}, false,
+		fromAddr, "", "nonempty", "", gasPrice, "", 0, 0, false,
+	)
+	req6 := NewBaseReq(
+		fromAddr, "", "nonempty", "", "", "", 0, 0, false,
 	)
 
 	tests := []struct {
@@ -45,10 +43,11 @@ func TestBaseReqValidateBasic(t *testing.T) {
 		want bool
 	}{
 		{"ok", req1, httptest.NewRecorder(), true},
-		{"neither fees nor gasprices provided", req5, httptest.NewRecorder(), true},
 		{"empty from", req2, httptest.NewRecorder(), false},
 		{"empty chain-id", req3, httptest.NewRecorder(), false},
-		{"fees and gasprices provided", req4, httptest.NewRecorder(), false},
+		{"gasPrice not provided", req4, httptest.NewRecorder(), true},
+		{"gasWanted not provided", req5, httptest.NewRecorder(), true},
+		{"neither gasPrice nor gasWanted provided", req6, httptest.NewRecorder(), true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/orientwalt/iavl"
-	"github.com/orientwalt/tendermint/crypto/merkle"
-	cmn "github.com/orientwalt/tendermint/libs/common"
+	"github.com/tendermint/iavl"
+	"github.com/tendermint/tendermint/crypto/merkle"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // MultiStoreProof defines a collection of store proofs in a multi-store

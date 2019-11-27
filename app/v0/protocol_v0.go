@@ -21,9 +21,9 @@ import (
 	"github.com/orientwalt/htdf/x/slashing"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
-	abci "github.com/orientwalt/tendermint/abci/types"
-	cfg "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 const (
@@ -119,7 +119,7 @@ func MakeLatestCodec() *codec.Codec {
 	htdfservice.RegisterCodec(cdc)
 	params.RegisterCodec(cdc) // only used by querier
 	mint.RegisterCodec(cdc)   // only used by querier
-	bank.RegisterCodec(cdc)
+	// bank.RegisterCodec(cdc)
 	stake.RegisterCodec(cdc)
 	distr.RegisterCodec(cdc)
 	slashing.RegisterCodec(cdc)
@@ -255,6 +255,13 @@ func (p *ProtocolV0) configKeepers() {
 		gov.DefaultCodespace,
 	)
 
+	p.crisisKeeper = crisis.NewKeeper(
+		p.paramsKeeper.Subspace(crisis.DefaultParamspace),
+		p.distrKeeper,
+		p.bankKeeper,
+		p.feeCollectionKeeper,
+	)
+
 	p.serviceKeeper = service.NewKeeper(
 		p.cdc,
 		protocol.KeyService,
@@ -283,7 +290,7 @@ func (p *ProtocolV0) configRouters() {
 
 	p.router.
 		AddRoute(RouterKey, htdfservice.NewHandler(p.accountMapper, p.feeCollectionKeeper, protocol.KeyStorage, protocol.KeyCode)).
-		AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
+		// AddRoute(protocol.BankRoute, bank.NewHandler(p.bankKeeper)).
 		AddRoute(protocol.StakeRoute, stake.NewHandler(p.StakeKeeper)).
 		AddRoute(protocol.SlashingRoute, slashing.NewHandler(p.slashingKeeper)).
 		AddRoute(protocol.DistrRoute, distr.NewHandler(p.distrKeeper)).
@@ -379,7 +386,6 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 		evmacc := newevmtypes.NewAccount(acc) // junying-todo, 2019-08-26
 		p.accountMapper.SetGenesisAccount(ctx, evmacc)
 	}
-
 	// initialize distribution (must happen before staking)
 	distr.InitGenesis(ctx, p.distrKeeper, genesisState.DistrData)
 
@@ -394,6 +400,7 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 	auth.InitGenesis(ctx, p.accountMapper, p.feeCollectionKeeper, genesisState.AuthData)
 	slashing.InitGenesis(ctx, p.slashingKeeper, genesisState.SlashingData, genesisState.StakeData.Validators.ToSDKValidators())
 	mint.InitGenesis(ctx, p.mintKeeper, genesisState.MintData)
+	crisis.InitGenesis(ctx, p.crisisKeeper, genesisState.CrisisData)
 	service.InitGenesis(ctx, p.serviceKeeper, genesisState.ServiceData)
 	guardian.InitGenesis(ctx, p.guardianKeeper, genesisState.GuardianData)
 	upgrade.InitGenesis(ctx, p.upgradeKeeper, genesisState.UpgradeData)

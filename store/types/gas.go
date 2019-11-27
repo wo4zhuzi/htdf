@@ -39,6 +39,7 @@ type GasMeter interface {
 	GasConsumedToLimit() Gas
 	Limit() Gas
 	ConsumeGas(amount Gas, descriptor string)
+	UseGas(amount Gas, descriptor string) // junying-todo, 2019-11-18
 	IsPastLimit() bool
 	IsOutOfGas() bool
 }
@@ -95,6 +96,10 @@ func (g *basicGasMeter) ConsumeGas(amount Gas, descriptor string) {
 
 }
 
+func (g *basicGasMeter) UseGas(amount Gas, descriptor string) {
+	g.ConsumeGas(amount, descriptor)
+}
+
 func (g *basicGasMeter) IsPastLimit() bool {
 	return g.consumed > g.limit
 }
@@ -135,6 +140,10 @@ func (g *infiniteGasMeter) ConsumeGas(amount Gas, descriptor string) {
 	}
 }
 
+func (g *infiniteGasMeter) UseGas(amount Gas, descriptor string) {
+	g.ConsumeGas(amount, descriptor)
+}
+
 func (g *infiniteGasMeter) IsPastLimit() bool {
 	return false
 }
@@ -142,6 +151,67 @@ func (g *infiniteGasMeter) IsPastLimit() bool {
 func (g *infiniteGasMeter) IsOutOfGas() bool {
 	return false
 }
+
+// junying-todo, 2019-11-////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+type FalseGasMeter struct {
+	consumed Gas
+	limit    Gas
+}
+
+// NewInfiniteGasMeter returns a reference to a new infiniteGasMeter.
+func NewFalseGasMeter(limit Gas) GasMeter {
+	return &FalseGasMeter{
+		consumed: 0,
+		limit:    limit, // evm tx can't oversize the limit
+	}
+}
+
+//
+func (g *FalseGasMeter) GasConsumed() Gas {
+	return g.consumed
+}
+
+//
+func (g *FalseGasMeter) GasConsumedToLimit() Gas {
+	return g.consumed
+}
+
+//
+func (g *FalseGasMeter) Limit() Gas {
+	return 0
+}
+
+//
+func (g *FalseGasMeter) ConsumeGas(amount Gas, descriptor string) {
+	return
+}
+
+// added by junying, 2019-11-14
+func (g *FalseGasMeter) UseGas(amount Gas, descriptor string) {
+	var overflow bool
+	// TODO: Should we set the consumed field after overflow checking?
+	g.consumed, overflow = addUint64Overflow(g.consumed, amount)
+	if overflow {
+		panic(ErrorGasOverflow{descriptor})
+	}
+
+	if g.consumed > g.limit {
+		panic(ErrorOutOfGas{descriptor})
+	}
+}
+
+//
+func (g *FalseGasMeter) IsPastLimit() bool {
+	return g.consumed > g.limit
+}
+
+//
+func (g *FalseGasMeter) IsOutOfGas() bool {
+	return g.consumed > g.limit
+}
+
+/////////////////////////////////////////////////////////////////
 
 // GasConfig defines gas cost for each operation on KVStores
 type GasConfig struct {

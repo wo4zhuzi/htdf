@@ -10,7 +10,7 @@ import (
 	"github.com/orientwalt/htdf/x/bank"
 	"github.com/orientwalt/htdf/x/guardian"
 	"github.com/orientwalt/htdf/x/params"
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 var DepositedCoinsAccAddr = sdk.AccAddress(crypto.AddressHash([]byte("serviceDepositedCoins")))

@@ -1,19 +1,18 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 
+	htdfRest "github.com/orientwalt/htdf/accounts/rest"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/types/rest"
+	"github.com/orientwalt/htdf/utils/unit_convert"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	htdfRest "github.com/orientwalt/htdf/accounts/rest"
-	"github.com/orientwalt/htdf/utils/unit_convert"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 )
 
@@ -41,15 +40,13 @@ func CreateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		req.BaseReq.ChainID = mreq.BaseReq.ChainID
 		req.BaseReq.AccountNumber = mreq.BaseReq.AccountNumber
 		req.BaseReq.Sequence = mreq.BaseReq.Sequence
-		req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
-		req.BaseReq.GasPrices = mreq.BaseReq.GasPrices
-		req.BaseReq.Gas = unit_convert.BigAmountToDefaultAmount(mreq.BaseReq.Gas)
+		// req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
+		req.BaseReq.GasPrice = mreq.BaseReq.GasPrice
+		req.BaseReq.GasWanted = unit_convert.BigAmountToDefaultAmount(mreq.BaseReq.GasWanted)
 		req.BaseReq.GasAdjustment = mreq.BaseReq.GasAdjustment
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
 		req.To = mreq.To
 		req.Encode = mreq.Encode
-
-		fmt.Printf("req.BaseReq.Fees=%v\n", req.BaseReq.Fees)
 
 		// Santize
 		BaseReq := req.BaseReq.Sanitize()
@@ -71,7 +68,7 @@ func CreateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 			return
 		}
 
-		msg := htdfservice.NewMsgSendFrom(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount))
+		msg := htdfservice.NewMsgSendDefault(fromAddr, toAddr, unit_convert.BigCoinsToDefaultCoins(mreq.Amount))
 		WriteGenerateStdTxResponse(w, cdc, cliCtx, BaseReq, []sdk.Msg{msg}, req.Encode)
 
 		return
@@ -92,15 +89,22 @@ func WriteGenerateStdTxResponse(w http.ResponseWriter, cdc *codec.Codec,
 		return
 	}
 
-	simAndExec, gas, err := client.ParseGas(br.Gas)
+	simAndExec, gasWanted, err := client.ParseGas(br.GasWanted)
+	if err != nil {
+		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var gasPrice uint64
+	gasPrice, err = client.ParseGasPrice(br.GasPrice)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	txBldr := authtxb.NewTxBuilder(
-		utils.GetTxEncoder(cdc), br.AccountNumber, br.Sequence, gas, gasAdj,
-		br.Simulate, br.ChainID, br.Memo, br.Fees, br.GasPrices,
+		utils.GetTxEncoder(cdc), br.AccountNumber, br.Sequence, gasWanted, gasAdj,
+		br.Simulate, br.ChainID, br.Memo, gasPrice,
 	)
 
 	if simAndExec {

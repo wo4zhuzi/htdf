@@ -356,19 +356,19 @@ func (coins Coins) IsAllGTE(coinsB Coins) bool {
 	return true
 }
 
-// IsAllLT returns True iff for every denom in coins, the denom is present at
+// IsAllLT returns True if for every denom in coins, the denom is present at
 // a smaller amount in coinsB.
 func (coins Coins) IsAllLT(coinsB Coins) bool {
 	return coinsB.IsAllGT(coins)
 }
 
-// IsAllLTE returns true iff for every denom in coins, the denom is present at
+// IsAllLTE returns true if for every denom in coins, the denom is present at
 // a smaller or equal amount in coinsB.
 func (coins Coins) IsAllLTE(coinsB Coins) bool {
 	return coinsB.IsAllGTE(coins)
 }
 
-// IsAnyGTE returns true iff coins contains at least one denom that is present
+// IsAnyGTE returns true if coins contains at least one denom that is present
 // at a greater or equal amount in coinsB; it returns false otherwise.
 //
 // NOTE: IsAnyGTE operates under the invariant that both coin sets are sorted

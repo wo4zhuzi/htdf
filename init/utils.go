@@ -7,16 +7,16 @@ import (
 	"path/filepath"
 	"time"
 
-	cfg "github.com/orientwalt/tendermint/config"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/libs/common"
-	"github.com/orientwalt/tendermint/p2p"
-	"github.com/orientwalt/tendermint/privval"
-	"github.com/orientwalt/tendermint/types"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/p2p"
+	"github.com/tendermint/tendermint/privval"
+	"github.com/tendermint/tendermint/types"
 	amino "github.com/tendermint/go-amino"
 
-	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/app/v0"
+	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/server"
 )
 

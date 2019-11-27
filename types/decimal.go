@@ -384,6 +384,31 @@ func (d Dec) String() string {
 	return string(bzStr)
 }
 
+// junying-todo, 2019-11-12
+// 1.1satoshi to 1
+func (d Dec) ToUint64() uint64 {
+	if d.Int == nil || d.IsNegative() {
+		return 0
+	}
+
+	bzInt, err := d.Int.MarshalText()
+	if err != nil {
+		return 0
+	}
+	inputSize := len(bzInt)
+
+	// TODO: Remove trailing zeros
+	// case 1, purely decimal
+	if inputSize <= Precision {
+		return 0
+	}
+	result, err := strconv.ParseUint(string(bzInt[:inputSize-Precision]), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return result
+}
+
 //     ____
 //  __|    |__   "chop 'em
 //       ` \     round!"

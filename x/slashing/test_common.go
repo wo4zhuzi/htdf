@@ -8,11 +8,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/ed25519"
-	dbm "github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	dbm "github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/store"
@@ -44,7 +44,7 @@ func createTestCodec() *codec.Codec {
 	cdc := codec.New()
 	sdk.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
-	bank.RegisterCodec(cdc)
+	// bank.RegisterCodec(cdc)
 	staking.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 	return cdc

@@ -18,6 +18,7 @@ const (
 	CodeInvalidDelegation CodeType = 102
 	CodeInvalidInput      CodeType = 103
 	CodeValidatorJailed   CodeType = 104
+	CodeInvalidUndelegate CodeType = 105
 	CodeInvalidAddress    CodeType = sdk.CodeInvalidAddress
 	CodeUnauthorized      CodeType = sdk.CodeUnauthorized
 	CodeInternal          CodeType = sdk.CodeInternal
@@ -211,4 +212,8 @@ func ErrNeitherShareMsgsGiven(codespace sdk.CodespaceType) sdk.Error {
 
 func ErrMissingSignature(codespace sdk.CodespaceType) sdk.Error {
 	return sdk.NewError(codespace, CodeInvalidValidator, "missing signature")
+}
+
+func ErrUndelegate(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeInvalidUndelegate, "can not undelegate, please chat with manager")
 }

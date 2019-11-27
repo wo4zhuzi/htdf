@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	"github.com/orientwalt/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto"
 
 	codec "github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"

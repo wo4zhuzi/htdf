@@ -5,13 +5,13 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/orientwalt/htdf/baseapp"
+	"github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // assertAll asserts the all invariants against application state
-func assertAllInvariants(t *testing.T, app *baseapp.BaseApp, invs sdk.Invariants,
+func assertAllInvariants(t *testing.T, app *app.BaseApp, invs sdk.Invariants,
 	event string, logWriter LogWriter) {
 
 	ctx := app.NewContext(false, abci.Header{Height: app.LastBlockHeight() + 1})

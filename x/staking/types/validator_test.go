@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	tmtypes "github.com/orientwalt/tendermint/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func TestValidatorTestEquivalent(t *testing.T) {

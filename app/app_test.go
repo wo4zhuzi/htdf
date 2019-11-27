@@ -4,60 +4,76 @@ import (
 	"os"
 	"testing"
 
-	"github.com/orientwalt/htdf/x/bank"
-
-	"github.com/orientwalt/tendermint/libs/db"
-	"github.com/orientwalt/tendermint/libs/log"
+	"github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/db"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/stretchr/testify/require"
 
+	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/codec"
+	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
+	"github.com/orientwalt/htdf/x/crisis"
 	distr "github.com/orientwalt/htdf/x/distribution"
 	"github.com/orientwalt/htdf/x/gov"
+	"github.com/orientwalt/htdf/x/guardian"
 	"github.com/orientwalt/htdf/x/mint"
+	"github.com/orientwalt/htdf/x/service"
 	"github.com/orientwalt/htdf/x/slashing"
 	"github.com/orientwalt/htdf/x/staking"
+	"github.com/orientwalt/htdf/x/upgrade"
 
-	abci "github.com/orientwalt/tendermint/abci/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
-func setGenesis(gapp *HtdfServiceApp, accs ...*auth.BaseAccount) error {
-	genaccs := make([]GenesisAccount, len(accs))
+func setGenesis(happ *HtdfServiceApp, accs ...*auth.BaseAccount) error {
+	genaccs := make([]v0.GenesisAccount, len(accs))
 	for i, acc := range accs {
-		genaccs[i] = NewGenesisAccount(acc)
+		genaccs[i] = v0.NewGenesisAccount(acc)
 	}
 
-	genesisState := NewGenesisState(
+	genesisState := v0.NewGenesisState(
 		genaccs,
 		auth.DefaultGenesisState(),
-		bank.DefaultGenesisState(),
 		staking.DefaultGenesisState(),
 		mint.DefaultGenesisState(),
 		distr.DefaultGenesisState(),
 		gov.DefaultGenesisState(),
+		upgrade.DefaultGenesisState(),
+		service.DefaultGenesisState(),
+		guardian.DefaultGenesisState(),
 		slashing.DefaultGenesisState(),
+		crisis.DefaultGenesisState(),
 	)
 
-	stateBytes, err := codec.MarshalJSONIndent(gapp.cdc, genesisState)
+	stateBytes, err := codec.MarshalJSONIndent(v0.MakeLatestCodec(), genesisState)
 	if err != nil {
 		return err
 	}
 
 	// Initialize the chain
 	vals := []abci.ValidatorUpdate{}
-	gapp.InitChain(abci.RequestInitChain{Validators: vals, AppStateBytes: stateBytes})
-	gapp.Commit()
+	happ.InitChain(abci.RequestInitChain{Validators: vals, AppStateBytes: stateBytes})
+	happ.Commit()
 
 	return nil
 }
 
-func TestGaiadExport(t *testing.T) {
+func TestHsdExport(t *testing.T) {
 	db := db.NewMemDB()
-	gapp := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), db, nil, true)
-	setGenesis(gapp)
+
+	happ := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), config.TestInstrumentationConfig(), db, nil, true, 0)
+	// accs added by junying, 2019-11-20
+	key := secp256k1.GenPrivKey()
+	pub := key.PubKey()
+	addr := sdk.AccAddress(pub.Address())
+	acc := auth.NewBaseAccountWithAddress(addr)
+	setGenesis(happ, &acc)
 
 	// Making a new app object with the db, so that initchain hasn't been called
-	newGapp := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), db, nil, true)
-	_, _, err := newGapp.ExportAppStateAndValidators(false, []string{})
+	// panic: consensus params is empty
+	newGapp := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), config.TestInstrumentationConfig(), db, nil, true, 0)
+	_, _, err := newGapp.ExportAppStateAndValidators(false)
 	require.NoError(t, err, "ExportAppStateAndValidators should not have an error")
 }

@@ -35,7 +35,7 @@ FIRST_ROW_INDEX = 2
 # constants
 ## chain
 CHAIN_ID = testchain
-MINIMUM_GAS_PRICES = 0.000001satoshi,0.000001stake
+MINIMUM_GAS_PRICES = 100satoshi
 ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3
 # STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8
 DEFAULT_PORT = 26656
@@ -75,13 +75,14 @@ install: clean pre vals genesis.json config.toml refine distr.config start
 
 ############################################################################################
 ############################################################################################
-chk.var: pre mk.acc.file
+chk.var: pre# mk.acc.file
 	@echo "number_of_validators = ${VALS_COUNT}"
 	@echo "validator indeces = [${VALS_INDEX}]"
-	@echo "number of genesis accounts = $$(linecount ${ACCOUNTS_GENESIS_INIT})"
+	# @echo "number of genesis accounts = $$(linecount ${ACCOUNTS_GENESIS_INIT})"
 	@echo 
 	@echo [servers]
 	@colex 2 ${SERVER_LIST}
+	@wc ${VALIDATOR_IP} | awk '{print$$1F}'
 
 clean: clear
 	#@rm -rf $(HOME)/.hsd
@@ -107,7 +108,7 @@ mk.acc.file:
 # prepare
 pre:
 	@if ! [ -d ${CONFIGTMPDIR} ]; then mkdir -p ${CONFIGTMPDIR}; fi
-	#@if ! [ -d ${ACCOUNTDIR} ]; then mkdir -p ${ACCOUNTDIR}; fi
+	# @if ! [ -d ${ACCOUNTDIR} ]; then mkdir -p ${ACCOUNTDIR}; fi
 	@if ! [ -f ${SERVER_LIST} ]; then rowex 1 ${SERVER_INFO} >> ${SERVER_LIST};fi
 	@column ${PRIV_COL_INDEX} ${SERVER_LIST} >> ${VALIDATOR_IP}
 	@column ${PASS_COL_INDEX} ${SERVER_LIST} >> ${VALIDATOR_PASSWORD}
@@ -229,9 +230,11 @@ ssh.vals:
 	 ipaddr=$$(row $$index ${SERVER_LIST}|column ${PRIV_COL_INDEX});\
 	 passwd=$$(row $$index ${SERVER_LIST}|column ${PEM_COL_INDEX});\
 	 sshpass -p $$passwd ssh root@$$ipaddr
+
 # temp zone
-apt.install.make:
+cmd = apt install make
+run.cmd:
 	@for index in $(VALS_INDEX); do \
 	 ipaddr=$$(row $$index ${SERVER_LIST} 1|column ${PRIV_COL_INDEX});\
 	 passwd=$$(row $$index ${SERVER_LIST} 1|column ${PEM_COL_INDEX});\
-	 sshpass -p $$passwd ssh root@$$ipaddr apt install make; done
+	 sshpass -p $$passwd ssh root@$$ipaddr ${cmd}; done

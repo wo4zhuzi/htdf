@@ -3,8 +3,8 @@ package keys
 import (
 	"fmt"
 
-	"github.com/orientwalt/tendermint/crypto"
-	"github.com/orientwalt/tendermint/crypto/multisig"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/multisig"
 
 	"github.com/orientwalt/htdf/crypto/keys/hd"
 	"github.com/orientwalt/htdf/types"

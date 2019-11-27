@@ -1,66 +1,114 @@
 package htdfservice
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"math"
 
+	"github.com/orientwalt/htdf/evm/vm"
 	"github.com/orientwalt/htdf/types"
 
 	"github.com/ethereum/go-ethereum/common"
+	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 )
 
-const (
-	defaultGasLimit = 21000
-	defaultGasPrice = 1
-)
+// junying-todo, 2019-11-06
+// from x/core/transition.go
+// IntrinsicGas computes the 'intrinsic gas' for a message with the given data.
+func IntrinsicGas(data []byte, homestead bool) (uint64, error) {
+	// Set the starting gas for the raw transaction
+	var gas uint64
+	if len(data) > 0 && homestead {
+		gas = params.DefaultMsgGasContractCreation // 53000 -> 60000
+	} else {
+		gas = params.DefaultMsgGas // 21000 -> 30000
+	}
+	// Bump the required gas by the amount of transactional data
+	if len(data) > 0 {
+		// Zero and non-zero bytes are priced differently
+		var nz uint64
+		for _, byt := range data {
+			if byt != 0 {
+				nz++
+			}
+		}
+		// Make sure we don't exceed uint64 for all data combinations
+		if (math.MaxUint64-gas)/ethparams.TxDataNonZeroGas < nz {
+			return 0, vm.ErrOutOfGas
+		}
+		gas += nz * ethparams.TxDataNonZeroGas
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MsgSendFrom defines a SendFrom message /////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-type MsgSendFrom struct {
-	From     sdk.AccAddress
-	To       sdk.AccAddress
-	Amount   sdk.Coins
-	Data     string
-	Gas      uint64 //unit,  gallon
-	GasPrice uint64 //unit,  satoshi/gallon
-	GasLimit uint64 //unit,  gallon
+		z := uint64(len(data)) - nz
+		if (math.MaxUint64-gas)/ethparams.TxDataZeroGas < z {
+			return 0, vm.ErrOutOfGas
+		}
+		gas += z * ethparams.TxDataZeroGas
+	}
+	return gas, nil
 }
 
-var _ sdk.Msg = MsgSendFrom{}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MsgSend defines a SendFrom message /////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+type MsgSend struct {
+	From      sdk.AccAddress
+	To        sdk.AccAddress
+	Amount    sdk.Coins
+	Data      string
+	GasPrice  uint64 //unit,  satoshi/gallon
+	GasWanted uint64 //unit,  gallon
+}
+
+var _ sdk.Msg = MsgSend{}
 
 // NewMsgSend is a constructor function for MsgSend
-func NewMsgSendFrom(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSendFrom {
-	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		Gas:      defaultGasLimit,
-		GasPrice: defaultGasPrice,
-		GasLimit: defaultGasLimit,
+// Normal Transaction
+// Default GasWanted, Default GasPrice
+func NewMsgSendDefault(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins) MsgSend {
+	return MsgSend{
+		From:      fromaddr,
+		To:        toaddr,
+		Amount:    amount,
+		GasPrice:  params.DefaultMinGasPrice,
+		GasWanted: params.DefaultMsgGas,
 	}
 }
 
-func NewMsgSendFromForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gas uint64, gasPrice uint64, gasLimit uint64) MsgSendFrom {
-	return MsgSendFrom{
-		From:     fromaddr,
-		To:       toaddr,
-		Amount:   amount,
-		Data:     data,
-		Gas:      gas,
-		GasPrice: gasPrice,
-		GasLimit: gasLimit,
+// Normal Transaction
+// Default GasWanted, Customized GasPrice
+func NewMsgSend(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, gasPrice uint64, gasWanted uint64) MsgSend {
+	return MsgSend{
+		From:      fromaddr,
+		To:        toaddr,
+		Amount:    amount,
+		GasPrice:  gasPrice,
+		GasWanted: gasWanted,
+	}
+}
+
+// Contract Transaction
+func NewMsgSendForData(fromaddr sdk.AccAddress, toaddr sdk.AccAddress, amount sdk.Coins, data string, gasPrice uint64, gasWanted uint64) MsgSend {
+	return MsgSend{
+		From:      fromaddr,
+		To:        toaddr,
+		Amount:    amount,
+		Data:      data,
+		GasPrice:  gasPrice,
+		GasWanted: gasWanted,
 	}
 }
 
 // Route should return the name of the module
-func (msg MsgSendFrom) Route() string { return "htdfservice" }
+func (msg MsgSend) Route() string { return "htdfservice" }
 
 // Type should return the action
-func (msg MsgSendFrom) Type() string { return "sendfrom" }
+func (msg MsgSend) Type() string { return "send" }
 
 // ValidateBasic runs stateless checks on the message
-func (msg MsgSendFrom) ValidateBasic() sdk.Error {
+func (msg MsgSend) ValidateBasic() sdk.Error {
 	if msg.From.Empty() {
 		return sdk.ErrInvalidAddress(msg.From.String())
 	}
@@ -77,18 +125,34 @@ func (msg MsgSendFrom) ValidateBasic() sdk.Error {
 		if !msg.Amount.IsAllPositive() {
 			return sdk.ErrInsufficientCoins("Amount must be positive")
 		}
+
+		// junying-todo, 2019-11-12
+		if msg.GasWanted < params.DefaultMsgGas {
+			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d", params.DefaultMsgGas))
+		}
+
 	} else {
-		// access smart contract, amount must be 0 ?
-		// if !msg.Amount.IsZero() {
-		// 	return sdk.NewError(types.Codespace, types.ErrCode_BeZeroAmount, "access smart contract, amount must be 0")
-		// }
+		// junying-todo, 2019-11-12
+		inputCode, err := hex.DecodeString(msg.Data)
+		if err != nil {
+			return sdk.ErrTxDecode("decoding msg.data failed. you should check msg.data")
+		}
+		//Intrinsic gas calc
+		itrsGas, err := IntrinsicGas(inputCode, true)
+		if err != nil {
+			return sdk.ErrOutOfGas("intrinsic out of gas")
+		}
+		if itrsGas > msg.GasWanted {
+			return sdk.ErrOutOfGas(fmt.Sprintf("gaswanted must be greather than %d to pass validating", itrsGas))
+		}
+
 	}
 
 	return nil
 }
 
 // GetSignBytes encodes the message for signing
-func (msg MsgSendFrom) GetSignBytes() []byte {
+func (msg MsgSend) GetSignBytes() []byte {
 	b, err := json.Marshal(msg)
 	if err != nil {
 		panic(err)
@@ -97,23 +161,23 @@ func (msg MsgSendFrom) GetSignBytes() []byte {
 }
 
 // GetSigners defines whose signature is required
-func (msg MsgSendFrom) GetSigners() []sdk.AccAddress {
+func (msg MsgSend) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.From}
 }
 
 // GetStringAddr defines whose fromaddr is required
-func (msg MsgSendFrom) GetFromAddrStr() string {
-	return sdk.AccAddress.String(msg.From)
-}
+// func (msg MsgSend) GetFromAddrStr() string {
+// 	return sdk.AccAddress.String(msg.From)
+// }
 
 //
-func (msg MsgSendFrom) GetFromAddr() sdk.AccAddress {
-	return msg.From
-}
-
-//
-func (msg MsgSendFrom) FromAddress() common.Address {
+func (msg MsgSend) FromAddress() common.Address {
 	return types.ToEthAddress(msg.From)
+}
+
+// junying-todo, 2019-11-06
+func (msg MsgSend) GetData() string {
+	return msg.Data
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
