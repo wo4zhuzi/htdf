@@ -21,6 +21,14 @@
     export DEBUGAPI=ON  ##  "ON", develop and test version (ApiSecuritylevel=low); "OFF", default value, production version (ApiSecuritylevel=high); 
     
     # compile and install
+    make install    
+        
+    # turn off proxy temporary when orientwalt/tendermint can not download
+    export GOPROXY=
+    make install
+    
+    # ... after download orientwalt/tendermint success, turn on proxy again
+    export GOPROXY=https://goproxy.io
     make install
 
     # print the version and ApiSecuritylevel

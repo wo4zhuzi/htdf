@@ -46,7 +46,7 @@ update:
 	@rm -rf .vendor-new
 	@dep ensure -v -update
 
-build: 
+build: unittest
 	echo BUILD_FLAGS=$(BUILD_FLAGS)
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hsd ./cmd/hsd
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hscli ./cmd/hscli
@@ -89,7 +89,11 @@ test:
 unittest:
 	@go test -v ./evm/...
 	@go test -v ./types/...
+	@go test -v ./store/...
 	@go test -v ./utils/...
+	@go test -v ./x/mint/...
+	@go test -v ./x/bank/...
+
 
 CHAIN_ID = testchain
 GENESIS_ACCOUNT_PASSWORD = 12345678
