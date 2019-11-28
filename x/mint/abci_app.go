@@ -2,7 +2,6 @@ package mint
 
 import (
 	"fmt"
-	"math/big"
 
 	sdk "github.com/orientwalt/htdf/types"
 )
@@ -42,25 +41,15 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	totalSupply := k.sk.TotalTokens(ctx)
 	//
 	curBlkHeight := ctx.BlockHeight()
-	////fmt.Printf("current Blk Height: %d\n", curBlkHeight)
-	// roundIndex = curBlkHeight / BlkCountPerRound
-	roundIndex := new(big.Int).Div(big.NewInt(curBlkHeight), big.NewInt(BlksPerRound))
-	fmt.Print("curBlkHeight:", curBlkHeight, "\n")
-	fmt.Print("roundIndex:", roundIndex, "\n")
+	fmt.Println("curBlkHeight:", curBlkHeight)
 	// BlockProvision = 25 / 2**roundIndex
-	BlockProvision := sdk.ZeroDec()
-	if roundIndex.Cmp(big.NewInt(LastRoundIndex)) == -1 {
-		division := new(big.Int).Exp(big.NewInt(2), roundIndex, nil)
-		divisionDec, err := sdk.NewDecFromStr(division.String())
-		if err == nil {
-			BlockProvision = sdk.NewDec(int64(InitialReward)).Quo(divisionDec)
-		}
-	}
-	// AnnualProvisions = fRatio * FirstRoundBlkReward
-	AnnualProvisions := BlockProvision.Mul(sdk.NewDec(int64(BlksPerRound)))
+	BlkRewardInt64 := int64(Htdf2Satoshi * calcMiningReward(int(curBlkHeight)))
+	BlockProvision := sdk.NewDec(BlkRewardInt64)
+	fmt.Println("BlockProvision:", BlkRewardInt64)
+	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
 	// Inflation = AnnualProvisions / totalSupply
-	Inflation := AnnualProvisions.Quo(sdk.NewDecFromInt(totalSupply))
-	return AnnualProvisions, Inflation, BlockProvision
+	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
+	return AnnualProvisionsDec, Inflation, BlockProvision
 }
 
 // Inflate every block, update inflation parameters once per hour
