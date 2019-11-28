@@ -44,7 +44,7 @@ DEFAULT_WALLET_PASSWORD = xy11223355xx111
 ACCOUNTS_COUNT_SMALL = 100000
 ACCOUNTS_COUNT_BIG = 2
 ## setup
-CONFIGDIR = $(HOME)/config-nosentry/htdf/public
+CONFIGDIR = $(HOME)/config/nosentry/htdf/public
 SERVER_INFO = $(CONFIGDIR)/servers.info
 SERVER_LIST = $(CONFIGDIR)/server.list
 ##### servers
@@ -76,6 +76,8 @@ install: clean pre vals genesis.json config.toml refine distr.config start
 ############################################################################################
 ############################################################################################
 chk.var: pre mk.acc.file
+	@echo ${CONFIGDIR}
+	@if [ -f ${SERVER_INFO} ]; then echo servers.info exists; fi
 	@echo "number_of_validators = ${VALS_COUNT}"
 	@echo "validator indeces = [${VALS_INDEX}]"
 	@echo "number of genesis accounts = $$(linecount ${ACCOUNTS_GENESIS_INIT})"
@@ -227,10 +229,13 @@ ssh.vals:
 	@read -p "Enter Server Index To Check: " index; \
 	 ipaddr=$$(row $$index ${SERVER_LIST}|column ${PUB_COL_INDEX});\
 	 passwd=$$(row $$index ${SERVER_LIST}|column ${PEM_COL_INDEX});\
+	 echo sshpass -p $$passwd ssh root@$$ipaddr
 	 sshpass -p $$passwd ssh root@$$ipaddr
+
 # temp zone
-apt.install.make:
+cmd = apt install make
+run.cmd:
 	@for index in $(VALS_INDEX); do \
 	 ipaddr=$$(row $$index ${SERVER_LIST} 1|column ${PUB_COL_INDEX});\
 	 passwd=$$(row $$index ${SERVER_LIST} 1|column ${PEM_COL_INDEX});\
-	 sshpass -p $$passwd ssh root@$$ipaddr apt install make; done
+	 sshpass -p $$passwd ssh root@$$ipaddr ${cmd}; done
