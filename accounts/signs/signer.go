@@ -58,12 +58,11 @@ func SignTx(txbuilder authtxb.TxBuilder, stdTx auth.StdTx, privKey tmcrypto.Priv
 
 //
 func BuildAndSign(txbuilder authtxb.TxBuilder, privKey tmcrypto.PrivKey, msgs []sdk.Msg) ([]byte, error) {
-	msg, err := BuildSignMsg(txbuilder, msgs)
+	unsigned, err := BuildSignMsg(txbuilder, msgs)
 	if err != nil {
 		return nil, err
 	}
-
-	return Sign(txbuilder, privKey, msg)
+	return Sign(txbuilder, privKey, unsigned)
 }
 
 //
@@ -94,6 +93,7 @@ func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignM
 
 //
 func Sign(txbuilder authtxb.TxBuilder, privKey tmcrypto.PrivKey, msg authtxb.StdSignMsg) ([]byte, error) {
+	fmt.Println("unsigned:", msg.Bytes())
 	sig, err := MakeSignature(privKey, msg)
 	if err != nil {
 		return nil, err
