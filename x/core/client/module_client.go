@@ -38,8 +38,8 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 	}
 
 	htdfsvcTxCmd.AddCommand(client.PostCommands(
-		htdfservicecmd.GetCmdAdd(mc.cdc),
-		htdfservicecmd.GetCmdIssue(mc.cdc),
+		//htdfservicecmd.GetCmdAdd(mc.cdc),
+		//htdfservicecmd.GetCmdIssue(mc.cdc),
 		htdfservicecmd.GetCmdSend(mc.cdc),
 		htdfservicecmd.GetCmdCreate(mc.cdc),
 		htdfservicecmd.GetCmdSign(mc.cdc),
