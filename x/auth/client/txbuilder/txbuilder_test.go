@@ -57,7 +57,7 @@ func TestTxBuilderBuild(t *testing.T) {
 				Sequence:      1,
 				Memo:          "hello from Voyager 1!",
 				Msgs:          defaultMsg,
-				Fee:           auth.NewStdFee(200000, sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))}),
+				Fee:           auth.NewStdFee(200000, 1),
 			},
 			false,
 		},
@@ -80,7 +80,7 @@ func TestTxBuilderBuild(t *testing.T) {
 				Sequence:      1,
 				Memo:          "hello from Voyager 2!",
 				Msgs:          defaultMsg,
-				Fee:           auth.NewStdFee(200000, sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))}),
+				Fee:           auth.NewStdFee(200000, 1),
 			},
 			false,
 		},
@@ -90,7 +90,7 @@ func TestTxBuilderBuild(t *testing.T) {
 		bldr := NewTxBuilder(
 			tc.fields.TxEncoder, tc.fields.AccountNumber, tc.fields.Sequence,
 			tc.fields.Gas, tc.fields.GasAdjustment, tc.fields.SimulateGas,
-			tc.fields.ChainID, tc.fields.Memo, tc.fields.Fees, tc.fields.GasPrices,
+			tc.fields.ChainID, tc.fields.Memo, tc.fields.GasPrices.AmountOf(sdk.DefaultBondDenom).Uint64(),
 		)
 
 		got, err := bldr.BuildSignMsg(tc.msgs)

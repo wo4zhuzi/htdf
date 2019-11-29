@@ -66,7 +66,7 @@ func (ms multiStore) LoadLatestVersion() error {
 	return nil
 }
 
-func (ms multiStore) LoadVersion(ver int64) error {
+func (ms multiStore) LoadVersion(ver int64, bVer bool) error {
 	panic("not implemented")
 }
 
@@ -79,6 +79,10 @@ func (ms multiStore) GetStore(key sdk.StoreKey) sdk.Store {
 }
 
 func (ms multiStore) GetStoreType() sdk.StoreType {
+	panic("not implemented")
+}
+
+func (ms multiStore) ResetTraceContext() sdk.MultiStore {
 	panic("not implemented")
 }
 
