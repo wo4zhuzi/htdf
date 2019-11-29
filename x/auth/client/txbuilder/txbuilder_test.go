@@ -23,13 +23,12 @@ func TestTxBuilderBuild(t *testing.T) {
 		TxEncoder     sdk.TxEncoder
 		AccountNumber uint64
 		Sequence      uint64
-		Gas           uint64
+		GasWanted     uint64
 		GasAdjustment float64
 		SimulateGas   bool
 		ChainID       string
 		Memo          string
-		Fees          sdk.Coins
-		GasPrices     sdk.DecCoins
+		GasPrice      uint64
 	}
 	defaultMsg := []sdk.Msg{sdk.NewTestMsg(addr)}
 	tests := []struct {
@@ -43,12 +42,12 @@ func TestTxBuilderBuild(t *testing.T) {
 				TxEncoder:     auth.DefaultTxEncoder(codec.New()),
 				AccountNumber: 1,
 				Sequence:      1,
-				Gas:           200000,
+				GasWanted:     200000,
 				GasAdjustment: 1.1,
 				SimulateGas:   false,
 				ChainID:       "test-chain",
 				Memo:          "hello from Voyager 1!",
-				Fees:          sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))},
+				GasPrice:      100,
 			},
 			defaultMsg,
 			StdSignMsg{
@@ -57,7 +56,7 @@ func TestTxBuilderBuild(t *testing.T) {
 				Sequence:      1,
 				Memo:          "hello from Voyager 1!",
 				Msgs:          defaultMsg,
-				Fee:           auth.NewStdFee(200000, 1),
+				Fee:           auth.NewStdFee(200000, 100),
 			},
 			false,
 		},
@@ -66,12 +65,12 @@ func TestTxBuilderBuild(t *testing.T) {
 				TxEncoder:     auth.DefaultTxEncoder(codec.New()),
 				AccountNumber: 1,
 				Sequence:      1,
-				Gas:           200000,
+				GasWanted:     200000,
 				GasAdjustment: 1.1,
 				SimulateGas:   false,
 				ChainID:       "test-chain",
 				Memo:          "hello from Voyager 2!",
-				GasPrices:     sdk.DecCoins{sdk.NewDecCoinFromDec(sdk.DefaultBondDenom, sdk.NewDecWithPrec(10000, sdk.Precision))},
+				GasPrice:      100,
 			},
 			defaultMsg,
 			StdSignMsg{
@@ -80,7 +79,7 @@ func TestTxBuilderBuild(t *testing.T) {
 				Sequence:      1,
 				Memo:          "hello from Voyager 2!",
 				Msgs:          defaultMsg,
-				Fee:           auth.NewStdFee(200000, 1),
+				Fee:           auth.NewStdFee(200000, 100),
 			},
 			false,
 		},
@@ -89,8 +88,8 @@ func TestTxBuilderBuild(t *testing.T) {
 	for i, tc := range tests {
 		bldr := NewTxBuilder(
 			tc.fields.TxEncoder, tc.fields.AccountNumber, tc.fields.Sequence,
-			tc.fields.Gas, tc.fields.GasAdjustment, tc.fields.SimulateGas,
-			tc.fields.ChainID, tc.fields.Memo, tc.fields.GasPrices.AmountOf(sdk.DefaultBondDenom).Uint64(),
+			tc.fields.GasWanted, tc.fields.GasAdjustment, tc.fields.SimulateGas,
+			tc.fields.ChainID, tc.fields.Memo, tc.fields.GasPrice,
 		)
 
 		got, err := bldr.BuildSignMsg(tc.msgs)
