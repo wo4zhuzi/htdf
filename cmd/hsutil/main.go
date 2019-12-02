@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-
+	"path/filepath"
+	
 	"github.com/cosmos/go-bip39"
 	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/orientwalt/htdf/client"
@@ -16,6 +17,8 @@ import (
 	"github.com/tendermint/tendermint/libs/bech32"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tmlibs/cli"
+	
 )
 
 var bech32Prefixes = []string{"htdf", "htdfub", "htdfvaloper", "htdfvaloperpub", "htdfvalcons", "htdfvalconspub"}
@@ -231,16 +234,16 @@ func TestCmdKeyRecover(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			key, err := keystore.GenerateKeyEx(mnemonic, bip39Passphrase, encryptPassword, account, index)
+			rootDir := viper.GetString(cli.HomeFlag)
+			defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
+			ksw := keystore.NewKeyStore(defaultKeyStoreHome)
+			err = ksw.RecoverKeyByMnemonic(mnemonic, bip39Passphrase, encryptPassword, account, index)
 			if err != nil {
 				return err
 			}
-			bech32addr := key.Address
+
+			bech32addr := ksw.Key().Address
 			fmt.Print(bech32addr, "\n")
-			err = keystore.StoreKeyEx(key)
-			if err != nil {
-				return err
-			}
 			return nil
 		},
 	}

@@ -19,11 +19,11 @@ func Commands() *cobra.Command {
     needs to sign with a private key.`,
 	}
 	cmd.AddCommand(
-		GetNewAccountCmd(),
-		GetListAccCmd(),
+		GetNewCmd(),
+		GetListCmd(),
 		client.LineBreak,
 		GetRecoverAccountCmd(),
-		ExportPrivateKeyCmd(),
+		GetExportPivKeyCmd(),
 	)
 	return cmd
 }

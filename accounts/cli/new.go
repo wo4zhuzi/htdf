@@ -1,21 +1,15 @@
 package cli
 
 import (
-	"fmt"
-	"path/filepath"
-
 	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/orientwalt/htdf/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tendermint/tmlibs/cli"
 )
 
-//
 const FlagPublicKey string = "pubkey"
 
-// GetNewAccountCmd creates A new account
-func GetNewAccountCmd() *cobra.Command {
+func GetNewCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "new",
 		Short: "create a new account.",
@@ -42,13 +36,16 @@ func GetNewAccountCmd() *cobra.Command {
 			} else {
 				encryptPassword = args[0]
 			}
-			rootDir := viper.GetString(cli.HomeFlag)
-			defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
-			address, _, err := keystore.StoreKey(defaultKeyStoreHome, encryptPassword)
+
+			var ks = new(keystore.KeyStore)
+			ks = keystore.NewKeyStore(keystore.DefaultKeyStoreHome)
+			_, err = ks.NewKey(encryptPassword)
 			if err != nil {
 				return err
 			}
-			fmt.Print("", address, "\n")
+
+			println("Build new account successful!")
+			println("Address: ",ks.Key().Address)
 
 			return err
 		},

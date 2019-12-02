@@ -1,57 +1,144 @@
 package keystore
 
 import (
-	"github.com/orientwalt/htdf/x/auth"
-	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
+	"fmt"
+	"path/filepath"
 	"github.com/orientwalt/htdf/accounts"
+	sdk "github.com/orientwalt/htdf/types"
+	"github.com/orientwalt/htdf/x/auth"
+
+	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
+	"github.com/spf13/viper"
+	"github.com/tendermint/tmlibs/cli"
 )
 
-type keystoreWallet struct {
-	account  accounts.Account
-	keystore *KeyStore
+//var _ accounts.KeyStoreWallets = KeyStoreWallet{}
+var DefaultKeyStoreHome string
+
+func init() {
+	rootDir := viper.GetString(cli.HomeFlag)
+
+	DefaultKeyStoreHome = filepath.Join(rootDir, "keystores")
 }
 
-// URL implements accounts.Wallet, returning the URL of the account within.
-func (w *keystoreWallet) URL() accounts.URL {
-	return w.account.URL
+type KeyStoreWallet struct {
+	keyStore *KeyStore
+	scan     *scaner
 }
 
-// Open implements accounts.Wallet, but is a noop for plain wallets since there
-// is no connection or decryption step necessary to access the list of accounts.
-func (w *keystoreWallet) Open(passphrase string) error { return nil }
-
-// Close implements accounts.Wallet, but is a noop for plain wallets since is no
-// meaningful open operation.
-func (w *keystoreWallet) Close() error { return nil }
-
-// Accounts implements accounts.Wallet, returning an account list consisting of
-// a single account that the plain kestore wallet contains.
-func (w *keystoreWallet) Accounts() []accounts.Account {
-	return []accounts.Account{w.account}
-}
-
-// Contains implements accounts.Wallet, returning whether a particular account is
-// or is not wrapped by this wallet instance.
-func (w *keystoreWallet) Contains(account accounts.Account) bool {
-	return account.Address == w.account.Address && (account.URL == (accounts.URL{}) || account.URL == w.account.URL)
-}
-
-// Derive implements accounts.Wallet, but is a noop for plain wallets since there
-// is no notion of hierarchical account derivation for plain keystore accounts.
-func (w *keystoreWallet) Derive(path accounts.DerivationPath, pin bool) (accounts.Account, error) {
-	return accounts.Account{}, accounts.ErrNotSupported
-}
-
-// SignTxWithPassphrase implements accounts.Wallet, attempting to sign the given
-// transaction with the given account using passphrase as extra authentication.
-func (w *keystoreWallet) SignTx(a accounts.Account, passphrase string, txbuilder authtxb.TxBuilder, stdTx auth.StdTx) (auth.StdTx, error) {
-	// Make sure the requested account is contained within
-	if a.Address != w.account.Address {
-		return stdTx, accounts.ErrUnknownAccount
+func NewKeyStoreWallet(path string) *KeyStoreWallet {
+	ksw := &KeyStoreWallet{
+		keyStore: NewKeyStore(path),
+		scan:     newScaner(path),
 	}
-	if a.URL != (accounts.URL{}) && a.URL != w.account.URL {
-		return stdTx, accounts.ErrUnknownAccount
+
+	return ksw
+}
+
+func (ksw *KeyStoreWallet) Accounts() ([]accounts.Account, error) {
+	accounts, err := ksw.scan.accounts()
+	if err != nil {
+		return nil, err
 	}
-	// Account seems valid, request the keystore to sign
-	return w.keystore.SignTx(a, passphrase, txbuilder, stdTx)
+	return accounts, err
+}
+
+func (ksw *KeyStoreWallet) FindPrivKey(addr string) (string, error) {
+	key, err := ksw.scan.getSigner(addr)
+	if err != nil {
+		return "", err
+	}
+	return key.PrivKey, err
+}
+
+func (ksw *KeyStoreWallet) BuildAndSign(txbuilder authtxb.TxBuilder, addr string, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+	msg, err := BuildSignMsg(txbuilder, msgs)
+	if err != nil {
+		return nil, err
+	}
+
+	return ksw.Sign(txbuilder, addr, passphrase, msg)
+}
+
+func BuildSignMsg(txbuilder authtxb.TxBuilder, msgs []sdk.Msg) (authtxb.StdSignMsg, error) {
+	fmt.Println("BuildSignMsg:txbuilder.GasWanted()", txbuilder.GasWanted())
+	chainID := txbuilder.ChainID()
+	if chainID == "" {
+		return authtxb.StdSignMsg{}, fmt.Errorf("chain ID required but not specified")
+	}
+	// junying-todo, 2019-11-08
+	// converted from fee based to gas*gasprice based
+	// if txbuilder.GasPrices().IsZero() {
+	// 	return authtxb.StdSignMsg{}, errors.New("gasprices can't not be zero")
+	// }
+	// if txbuilder.GasWanted() <= 0 {
+	// 	return authtxb.StdSignMsg{}, errors.New("gasWanted must be provided")
+	// }
+	fmt.Println("BuildSignMsg:Fee", auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrice()), txbuilder.GasWanted())
+	return authtxb.StdSignMsg{
+		ChainID:       txbuilder.ChainID(),
+		AccountNumber: txbuilder.AccountNumber(),
+		Sequence:      txbuilder.Sequence(),
+		Memo:          txbuilder.Memo(),
+		Msgs:          msgs,
+		Fee:           auth.NewStdFee(txbuilder.GasWanted(), txbuilder.GasPrice()), // auth.NewStdFee(txbuilder.GasWanted(), fees),
+	}, nil
+}
+
+func (ksw *KeyStoreWallet) Sign(txbuilder authtxb.TxBuilder, addr string, passphrase string, msg authtxb.StdSignMsg) ([]byte, error) {
+	key, err := ksw.scan.getSigner(addr)
+	if err != nil {
+		return nil, err
+	}
+	ksw.keyStore.key = key
+	sig, err := ksw.makeSignature(passphrase, msg)
+	if err != nil {
+		return nil, err
+	}
+	en := txbuilder.TxEncoder()
+
+	return en(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
+}
+
+func (ksw *KeyStoreWallet) SignStdTx(txbuilder authtxb.TxBuilder, stdTx auth.StdTx, addr string, passphrase string) (signedStdTx auth.StdTx, err error) {
+	key, err := ksw.scan.getSigner(addr)
+	if err != nil {
+		return
+	}
+	ksw.keyStore.key = key
+
+	stdSignature, err := ksw.makeSignature(passphrase, authtxb.StdSignMsg{
+		ChainID:       txbuilder.ChainID(),
+		AccountNumber: txbuilder.AccountNumber(),
+		Sequence:      txbuilder.Sequence(),
+		Fee:           stdTx.Fee,
+		Msgs:          stdTx.GetMsgs(),
+		Memo:          stdTx.GetMemo(),
+	})
+	if err != nil {
+		return
+	}
+
+	sigs := stdTx.GetSignatures()
+
+	if len(sigs) == 0 {
+		sigs = []auth.StdSignature{stdSignature}
+	} else {
+		sigs = append(sigs, stdSignature)
+	}
+
+	signedStdTx = auth.NewStdTx(stdTx.GetMsgs(), stdTx.Fee, sigs, stdTx.GetMemo())
+	return
+}
+
+// MakeSignature builds a StdSignature given keybase, key name, passphrase, and a StdSignMsg.
+func (ksw *KeyStoreWallet) makeSignature(passphrase string, msg authtxb.StdSignMsg) (sig auth.StdSignature, err error) {
+	sigBytes, pubkey, err := ksw.keyStore.key.Sign(passphrase, msg.Bytes())
+	if err != nil {
+		return
+	}
+	return auth.StdSignature{
+		PubKey:    pubkey,
+		Signature: sigBytes,
+	}, nil
 }

@@ -2,42 +2,32 @@ package cli
 
 import (
 	"fmt"
-	"path/filepath"
+	_ "path/filepath"
 
-	"github.com/orientwalt/htdf/accounts"
 	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tmlibs/cli"
+	_ "github.com/spf13/viper"
+	_ "github.com/tendermint/tmlibs/cli"
 )
 
-// GetListAccCmd lists Accounts
-func GetListAccCmd() *cobra.Command {
+func GetListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "Show local account list",
-		Long:  "list",
+		Short: "show all account",
+		Long:  "show all account in keystore",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var am *accounts.Manager
-			// Assemble the account manager and supported backends
-			rootDir := viper.GetString(cli.HomeFlag)
-			defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
-			backends := []accounts.Backend{
-				keystore.NewKeyStore(defaultKeyStoreHome),
+
+			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+
+			accounts, err := ksw.Accounts()
+
+			if err != nil {
+				return err
 			}
 
-			am = accounts.NewManager(backends...)
-			if am == nil {
-				fmt.Print("Get account list error !")
-				return nil
-			}
-			var index int
-			for _, wallet := range am.Wallets() {
-				for _, account := range wallet.Accounts() {
-					fmt.Printf("%s\n", account.Address)
-					index++
-				}
+			for _, account := range accounts {
+				fmt.Printf("%s\n", account.Address)
 			}
 			return nil
 		},

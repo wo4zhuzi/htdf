@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/orientwalt/htdf/accounts/keystore"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
@@ -50,17 +49,6 @@ func SignTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		}
 
 		// derive the from account address and name from the Keybase
-		fromAddr, err := sdk.AccAddressFromBech32(req.BaseReq.From)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		priv, err := keystore.GetPrivKeyEx(fromAddr, req.Passphrase, "")
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
 
 		txBldr := authtxb.NewTxBuilder(
 			utils.GetTxEncoder(cdc),
@@ -73,9 +61,11 @@ func SignTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			req.Tx.GetMemo(),
 			req.Tx.Fee.GasPrice,
 		)
-
+		
 		var signedTx auth.StdTx
-		signedTx, err = hsign.SignTx(txBldr, signedTx, priv)
+		addr := req.BaseReq.From
+		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+		signedTx, err := ksw.SignStdTx(txBldr, signedTx, addr, req.Passphrase)
 		if keyerror.IsErrKeyNotFound(err) {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -122,19 +112,8 @@ func SignTxRawRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http
 			return
 		}
 
-		fromAddr := stdTx.GetSigners()[0]
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		priv, err := keystore.GetPrivKeyEx(fromAddr, req.Passphrase, "")
-		if err != nil {
-			return
-		}
-
 		// sign
-		res, err := hscorecli.SignTransaction(authtxb.NewTxBuilderFromCLI(), cliCtx, stdTx, priv, req.Offline)
+		res, err := hscorecli.SignTransaction(authtxb.NewTxBuilderFromCLI(), cliCtx, stdTx, req.Passphrase, req.Offline)
 		if err != nil {
 			return
 		}
