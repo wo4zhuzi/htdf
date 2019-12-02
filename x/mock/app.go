@@ -99,18 +99,16 @@ func NewApp() *App {
 		KeyGuardian:      sdk.NewKVStoreKey("guardian"),
 		TotalCoinsSupply: sdk.Coins{},
 	}
-
+	app.ParamsKeeper = params.NewKeeper(
+		app.Cdc,
+		app.KeyParams, app.TkeyParams,
+	)
 	// Define the AccountKeeper
 	app.AccountKeeper = auth.NewAccountKeeper(
 		app.Cdc,
 		app.KeyAccount,
 		app.ParamsKeeper.Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
-	)
-
-	app.ParamsKeeper = params.NewKeeper(
-		app.Cdc,
-		app.KeyParams, app.TkeyParams,
 	)
 
 	app.BankKeeper = bank.NewBaseKeeper(
