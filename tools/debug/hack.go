@@ -10,8 +10,8 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
+	"github.com/orientwalt/htdf/store"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -25,6 +25,7 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	cfg "github.com/tendermint/tendermint/config"
 	tmtypes "github.com/tendermint/tendermint/types"
+	"github.com/orientwalt/htdf/x/auth"
 )
 
 func runHackCmd(cmd *cobra.Command, args []string) error {
@@ -33,18 +34,18 @@ func runHackCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("Expected 1 arg")
 	}
 
-	// ".iris"
+	// ".htdf"
 	dataDir := args[0]
 	dataDir = path.Join(dataDir, "data")
 
 	// load the app
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
-	db, err := dbm.NewGoLevelDB("iris", dataDir)
+	db, err := dbm.NewGoLevelDB("htdf", dataDir)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	app := NewIrisApp(logger, db, bam.SetPruning(viper.GetString("pruning")))
+	app := NewHtdfApp(logger, db, bam.SetPruning(store.PruneNothing))
 
 	// print some info
 	id := app.LastCommitID()
@@ -110,19 +111,20 @@ func hexToBytes(h string) []byte {
 // so we can access internal fields!
 
 const (
-	appName = "IrisApp"
+	appName = "HtdfApp"
 )
 
 // Extended ABCI application
-type IrisApp struct {
+type HtdfApp struct {
 	*bam.BaseApp
 }
 
-func NewIrisApp(logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseApp)) *IrisApp {
-	bApp := bam.NewBaseApp(appName, logger, db, baseAppOptions...)
+func NewHtdfApp(logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseApp)) *HtdfApp {
+	cdc := bam.MakeLatestCodec()
+	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 
 	// create your application object
-	var app = &IrisApp{
+	var app = &HtdfApp{
 		BaseApp: bApp,
 	}
 	protocolKeeper := sdk.NewProtocolKeeper(protocol.KeyMain)
@@ -135,7 +137,7 @@ func NewIrisApp(logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseAp
 		cmn.Exit(err.Error())
 	}
 
-	engine.Add(v0.NewProtocolV0(0, logger, protocolKeeper, true, false, cfg.DefaultInstrumentationConfig()))
+	engine.Add(v0.NewProtocolV0(0, logger, protocolKeeper, 0, cfg.DefaultInstrumentationConfig()))
 	// engine.Add(v1.NewProtocolV1(1, ...))
 
 	engine.LoadCurrentProtocol(app.GetKVStore(protocol.KeyMain))
@@ -143,12 +145,12 @@ func NewIrisApp(logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseAp
 	return app
 }
 
-// export the state of iris for a genesis file
-func (app *IrisApp) ExportAppStateAndValidators(forZeroHeight bool) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
+// export the state of htdf for a genesis file
+func (app *HtdfApp) ExportAppStateAndValidators(forZeroHeight bool) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 	ctx := app.NewContext(true, abci.Header{})
-	return app.Engine.GetCurrentProtocol().ExportAppStateAndValidators(ctx, forZeroHeight)
+	return app.Engine.GetCurrentProtocol().ExportAppStateAndValidators(ctx, forZeroHeight,nil)
 }
 
-func (app *IrisApp) LoadHeight(height int64) error {
+func (app *HtdfApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height, protocol.KeyMain, false)
 }
