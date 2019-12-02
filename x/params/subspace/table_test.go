@@ -1,9 +1,17 @@
 package subspace
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/orientwalt/htdf/codec"
+	sdk "github.com/orientwalt/htdf/types"
 	"github.com/stretchr/testify/require"
+)
+
+var (
+	TestDefaultParamSpace = "test"
 )
 
 type testparams struct {
@@ -16,6 +24,23 @@ func (tp *testparams) ParamSetPairs() ParamSetPairs {
 		{[]byte("i"), &tp.i},
 		{[]byte("b"), &tp.b},
 	}
+}
+func (tp *testparams) GetParamSpace() string {
+	return TestDefaultParamSpace
+}
+
+func (tp *testparams) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("i: %d\n", tp.i))
+	return sb.String()
+}
+
+func (tp *testparams) StringFromBytes(cdc *codec.Codec, key string, bytes []byte) (string, error) {
+	return "", nil
+}
+
+func (tp *testparams) Validate(key string, value string) (interface{}, sdk.Error) {
+	return nil, nil
 }
 
 func TestKeyTable(t *testing.T) {
