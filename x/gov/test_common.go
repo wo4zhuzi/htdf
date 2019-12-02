@@ -35,7 +35,7 @@ func getMockApp(t *testing.T, numGenAccs int, genState GenesisState, genAccs []a
 	keyGov := sdk.NewKVStoreKey(StoreKey)
 
 	pk := mapp.ParamsKeeper
-	ck := bank.NewBaseKeeper(mapp.AccountKeeper, mapp.ParamsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace)
+	ck := bank.NewBaseKeeper(mapp.AccountKeeper, mapp.ParamsKeeper.Subspace("testbank"), bank.DefaultCodespace)
 	sk = staking.NewKeeper(mapp.Cdc, keyStaking, tkeyStaking, ck, pk.Subspace(staking.DefaultParamspace), staking.DefaultCodespace, stakekeeper.NopMetrics())
 	guardianKeeper := guardian.NewKeeper(mapp.Cdc, sdk.NewKVStoreKey("guardian"), guardian.DefaultCodespace)
 	keeper = NewKeeper(mapp.Cdc, keyGov, pk, sdk.NewProtocolKeeper(sdk.NewKVStoreKey("main")), guardianKeeper, pk.Subspace("testgov"), ck, sk, DefaultCodespace)
@@ -150,11 +150,7 @@ func SortByteArrays(src [][]byte) [][]byte {
 	return sorted
 }
 
-// func testProposal() TextProposal {
-// 	return NewTextProposal("Test", "description")
-// }
+func testProposal() *TextProposal {
+	return NewTextProposal("Test", "description")
+}
 
-// checks if two proposals are equal (note: slow, for tests only)
-// func ProposalEqual(proposalA ProposalContent, proposalB ProposalContent) bool {
-// 	return bytes.Equal(msgCdc.MustMarshalBinaryBare(proposalA), msgCdc.MustMarshalBinaryBare(proposalB))
-// }

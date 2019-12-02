@@ -34,7 +34,9 @@ func TestEqualProposals(t *testing.T) {
 	ctx := mapp.BaseApp.NewContext(false, abci.Header{})
 
 	// Submit two proposals
-	proposal := testProposal()
+	var proposal ProposalContent
+
+	proposal = testProposal()
 	proposal1, err := keeper.SubmitProposal(ctx, proposal)
 	require.NoError(t, err)
 	proposal2, err := keeper.SubmitProposal(ctx, proposal)
@@ -45,14 +47,14 @@ func TestEqualProposals(t *testing.T) {
 	require.False(t, ProposalEqual(proposal1, proposal2))
 
 	// Now create two genesis blocks
-	state1 := GenesisState{Proposals: []Proposal{proposal1}}
-	state2 := GenesisState{Proposals: []Proposal{proposal2}}
+	state1 := GenesisState{Proposals: []ProposalContent{proposal1}}
+	state2 := GenesisState{Proposals: []ProposalContent{proposal2}}
 	require.NotEqual(t, state1, state2)
 	require.False(t, state1.Equal(state2))
 
 	// Now make proposals identical by setting both IDs to 55
-	proposal1.ProposalID = 55
-	proposal2.ProposalID = 55
+	proposal1.SetProposalID(55)
+	proposal2.SetProposalID(55)
 	require.Equal(t, proposal1, proposal1)
 	require.True(t, ProposalEqual(proposal1, proposal2))
 
@@ -79,11 +81,11 @@ func TestImportExportQueues(t *testing.T) {
 	proposal := testProposal()
 	proposal1, err := keeper.SubmitProposal(ctx, proposal)
 	require.NoError(t, err)
-	proposalID1 := proposal1.ProposalID
+	proposalID1 := proposal1.GetProposalID()
 
 	proposal2, err := keeper.SubmitProposal(ctx, proposal)
 	require.NoError(t, err)
-	proposalID2 := proposal2.ProposalID
+	proposalID2 := proposal2.GetProposalID()
 
 	_, votingStarted := keeper.AddDeposit(ctx, proposalID2, addrs[0], keeper.GetDepositParams(ctx).MinDeposit)
 	require.True(t, votingStarted)
@@ -92,8 +94,8 @@ func TestImportExportQueues(t *testing.T) {
 	require.True(t, ok)
 	proposal2, ok = keeper.GetProposal(ctx, proposalID2)
 	require.True(t, ok)
-	require.True(t, proposal1.Status == StatusDepositPeriod)
-	require.True(t, proposal2.Status == StatusVotingPeriod)
+	require.True(t, proposal1.GetStatus() == StatusDepositPeriod)
+	require.True(t, proposal2.GetStatus() == StatusVotingPeriod)
 
 	genAccs := mapp.AccountKeeper.GetAllAccounts(ctx)
 
@@ -114,8 +116,8 @@ func TestImportExportQueues(t *testing.T) {
 	require.True(t, ok)
 	proposal2, ok = keeper2.GetProposal(ctx2, proposalID2)
 	require.True(t, ok)
-	require.True(t, proposal1.Status == StatusDepositPeriod)
-	require.True(t, proposal2.Status == StatusVotingPeriod)
+	require.True(t, proposal1.GetStatus() == StatusDepositPeriod)
+	require.True(t, proposal2.GetStatus() == StatusVotingPeriod)
 
 	// Run the endblocker.  Check to make sure that proposal1 is removed from state, and proposal2 is finished VotingPeriod.
 	EndBlocker(ctx2, keeper2)
@@ -124,5 +126,5 @@ func TestImportExportQueues(t *testing.T) {
 	require.False(t, ok)
 	proposal2, ok = keeper2.GetProposal(ctx2, proposalID2)
 	require.True(t, ok)
-	require.True(t, proposal2.Status == StatusRejected)
+	require.True(t, proposal2.GetStatus() == StatusRejected)
 }

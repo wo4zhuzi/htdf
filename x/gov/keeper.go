@@ -147,7 +147,7 @@ func (keeper Keeper) SubmitProposal(ctx sdk.Context, content ProposalContent) (p
 	}
 
 	submitTime := ctx.BlockHeader().Time
-	depositPeriod := keeper.GetDepositParams(ctx).MaxDepositPeriod
+	// depositPeriod := keeper.GetDepositParams(ctx).MaxDepositPeriod
 
 	proposal = &Proposal{
 		ProposalID: proposalID,
@@ -156,7 +156,7 @@ func (keeper Keeper) SubmitProposal(ctx sdk.Context, content ProposalContent) (p
 		FinalTallyResult: EmptyTallyResult(),
 		TotalDeposit:     sdk.NewCoins(),
 		SubmitTime:       submitTime,
-		DepositEndTime:   submitTime.Add(depositPeriod),
+		// DepositEndTime:   submitTime.Add(depositPeriod),
 	}
 
 	keeper.SetProposal(ctx, proposal)
