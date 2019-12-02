@@ -12,7 +12,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/libs/common"
 
-	"github.com/orientwalt/htdf/cmd/gaia/app"
+	"github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
@@ -24,7 +24,7 @@ var (
 )
 
 func TestParseQueryResponse(t *testing.T) {
-	cdc := app.MakeCodec()
+	cdc := app.MakeLatestCodec()
 	sdkResBytes := cdc.MustMarshalBinaryLengthPrefixed(sdk.Result{GasUsed: 10})
 	gas, err := parseQueryResponse(cdc, sdkResBytes)
 	assert.Equal(t, gas, uint64(10))
@@ -35,7 +35,7 @@ func TestParseQueryResponse(t *testing.T) {
 }
 
 func TestCalculateGas(t *testing.T) {
-	cdc := app.MakeCodec()
+	cdc := app.MakeLatestCodec()
 	makeQueryFunc := func(gasUsed uint64, wantErr bool) func(string, common.HexBytes) ([]byte, error) {
 		return func(string, common.HexBytes) ([]byte, error) {
 			if wantErr {
@@ -106,7 +106,7 @@ func compareEncoders(t *testing.T, expected sdk.TxEncoder, actual sdk.TxEncoder)
 }
 
 func makeCodec() *codec.Codec {
-	cdc := app.MakeCodec()
+	cdc := app.MakeLatestCodec()
 	cdc.RegisterConcrete(sdk.TestMsg{}, "cosmos-sdk/Test", nil)
 	return cdc
 }
@@ -116,7 +116,7 @@ func TestReadStdTxFromFile(t *testing.T) {
 	sdk.RegisterCodec(cdc)
 
 	// Build a test transaction
-	fee := auth.NewStdFee(50000, sdk.Coins{sdk.NewInt64Coin("atom", 150)})
+	fee := auth.NewStdFee(50000, 200000)
 	stdTx := auth.NewStdTx([]sdk.Msg{}, fee, []auth.StdSignature{}, "foomemo")
 
 	// Write it to the file
