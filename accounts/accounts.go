@@ -21,7 +21,7 @@ type KeyStoreWallets interface {
 
 	SignStdTx(txbuilder authtxb.TxBuilder, stdTx auth.StdTx, addr string, passphrase string) (signedStdTx auth.StdTx, err error)
 
-	FindPrivKey(addr string) (string, error)
+	GetPrivKey(addr string) (string, error)
 }
 
 type KeyStores interface {

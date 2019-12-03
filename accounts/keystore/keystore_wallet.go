@@ -13,7 +13,8 @@ import (
 	"github.com/tendermint/tmlibs/cli"
 )
 
-//var _ accounts.KeyStoreWallets = KeyStoreWallet{}
+var _ accounts.KeyStoreWallets = (*KeyStoreWallet)(nil)
+
 var DefaultKeyStoreHome string
 
 func init() {
@@ -45,7 +46,7 @@ func (ksw *KeyStoreWallet) Accounts() ([]accounts.Account, error) {
 	return accounts, err
 }
 
-func (ksw *KeyStoreWallet) FindPrivKey(addr string) (string, error) {
+func (ksw *KeyStoreWallet) GetPrivKey(addr string) (string, error) {
 	key, err := ksw.scan.getSigner(addr)
 	if err != nil {
 		return "", err
@@ -178,7 +179,7 @@ func (ksw *KeyStoreWallet) makeSignature(passphrase string, msg authtxb.StdSignM
 	if err != nil {
 		return
 	}
-	
+
 	return auth.StdSignature{
 		PubKey:    pubkey,
 		Signature: sigBytes,
