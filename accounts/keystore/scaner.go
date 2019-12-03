@@ -45,6 +45,7 @@ func (sc *scaner) getSigner(addr string) (*Key, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		key, err := getKey(addr, acc.URL.Path)
 		if err != nil {
 			return nil, err

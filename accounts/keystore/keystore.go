@@ -104,16 +104,45 @@ func (ks *KeyStore) storeKey() error {
 	return writeKeyfile(ks.url.Path, ks.key.Address, content)
 }
 
+func (ks *KeyStore) update(acc accounts.Account, passphrase, newPassphrase string)error{
+
+	privKey, err := mintkey.UnarmorDecryptPrivKey(ks.key.PrivKey, passphrase)
+	if err != nil {
+		return err
+	}
+
+	privArmor := mintkey.EncryptArmorPrivKey(privKey, newPassphrase)
+	ks.key.PrivKey = privArmor
+
+	err = ks.drop(acc)
+	if err != nil {
+		return err
+	}
+
+	return ks.storeKey()
+}
+
+func (ks *KeyStore) drop(acc accounts.Account)error{
+	err := os.Remove(acc.URL.Path)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func getKey(addr string, filename string) (*Key, error) {
 	keyJSON := new(Key)
 	bz, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
+
 	err = json.Unmarshal(bz, &keyJSON)
 	if keyJSON.Address != addr {
 		return nil, fmt.Errorf("key content mismatch: have address %x, want %x", keyJSON.Address, addr)
 	}
+	
 	return keyJSON, nil
 }
 

@@ -24,6 +24,8 @@ func Commands() *cobra.Command {
 		client.LineBreak,
 		GetRecoverAccountCmd(),
 		GetExportPivKeyCmd(),
+		GetUpdateCmd(),
+		GetDelCmd(),
 	)
 	return cmd
 }

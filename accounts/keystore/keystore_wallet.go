@@ -2,6 +2,7 @@ package keystore
 
 import (
 	"fmt"
+	"errors"
 	"path/filepath"
 	"github.com/orientwalt/htdf/accounts"
 	sdk "github.com/orientwalt/htdf/types"
@@ -40,6 +41,7 @@ func (ksw *KeyStoreWallet) Accounts() ([]accounts.Account, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return accounts, err
 }
 
@@ -48,7 +50,43 @@ func (ksw *KeyStoreWallet) FindPrivKey(addr string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return key.PrivKey, err
+}
+
+func (ksw *KeyStoreWallet) Update(addr string, passphrase, newPassphrase string)error{
+	key, err := ksw.scan.getSigner(addr)
+	if err != nil {
+		return  err
+	}
+
+	ksw.keyStore.key = key
+	
+	account := accounts.Account{Address: addr}
+	acc, err := ksw.scan.find(account)
+	if err != nil {
+		return err
+	}
+
+	err = ksw.keyStore.update(acc,passphrase,newPassphrase)
+	return err
+}
+
+func (ksw *KeyStoreWallet)Drop(addr string)error{
+
+	found := ksw.scan.hasAddress(addr)
+	if found {
+		account := accounts.Account{Address: addr}
+		acc, err := ksw.scan.find(account)
+		if err != nil {
+			return err
+		}
+		
+		err = ksw.keyStore.drop(acc)
+		return err
+	}
+
+	return  errors.New("not found address!")
 }
 
 func (ksw *KeyStoreWallet) BuildAndSign(txbuilder authtxb.TxBuilder, addr string, passphrase string, msgs []sdk.Msg) ([]byte, error) {
@@ -90,11 +128,13 @@ func (ksw *KeyStoreWallet) Sign(txbuilder authtxb.TxBuilder, addr string, passph
 	if err != nil {
 		return nil, err
 	}
+
 	ksw.keyStore.key = key
 	sig, err := ksw.makeSignature(passphrase, msg)
 	if err != nil {
 		return nil, err
 	}
+
 	en := txbuilder.TxEncoder()
 
 	return en(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
@@ -105,6 +145,7 @@ func (ksw *KeyStoreWallet) SignStdTx(txbuilder authtxb.TxBuilder, stdTx auth.Std
 	if err != nil {
 		return
 	}
+
 	ksw.keyStore.key = key
 
 	stdSignature, err := ksw.makeSignature(passphrase, authtxb.StdSignMsg{
@@ -137,6 +178,7 @@ func (ksw *KeyStoreWallet) makeSignature(passphrase string, msg authtxb.StdSignM
 	if err != nil {
 		return
 	}
+	
 	return auth.StdSignature{
 		PubKey:    pubkey,
 		Signature: sigBytes,
