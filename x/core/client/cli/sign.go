@@ -44,7 +44,7 @@ func GetCmdSign(cdc *codec.Codec) *cobra.Command {
 				return err //err.
 			}
 			
-			passphrase, err := keys.ReadPassphraseFromStdin(sdk.AccAddress.String(stdTx.GetSigners()[0]))
+			passphrase, err := keys.ReadShortPassphraseFromStdin(sdk.AccAddress.String(stdTx.GetSigners()[0]))
 			if err != nil {
 				return err
 			}

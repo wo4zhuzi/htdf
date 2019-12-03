@@ -119,7 +119,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 		fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
 	}
 
-	passphrase, err := keys.ReadPassphraseFromStdin(sdk.AccAddress.String(fromaddr))
+	passphrase, err := keys.ReadShortPassphraseFromStdin(sdk.AccAddress.String(fromaddr))
 	if err != nil {
 		return err
 	}

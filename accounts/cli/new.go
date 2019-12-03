@@ -44,7 +44,7 @@ func GetNewCmd() *cobra.Command {
 				return err
 			}
 
-			println("Build new account successful!")
+			println("Create new account successful!")
 			println("Address: ",ks.Key().Address)
 
 			return err

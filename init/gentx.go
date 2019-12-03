@@ -32,7 +32,6 @@ import (
 	"github.com/orientwalt/htdf/client/keys"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 	hstakingcli "github.com/orientwalt/htdf/x/staking/client/cli"
-	// tencli"github.com/tendermint/tendermint/libs/cli"
 	"github.com/orientwalt/htdf/accounts/keystore"
 )
 
@@ -140,14 +139,12 @@ following delegation and commission default parameters:
 				return err
 			}
 
-			passphrase, err := keys.ReadPassphraseFromStdin(sdk.AccAddress.String(stdTx.GetSigners()[0]))
+			passphrase, err := keys.ReadShortPassphraseFromStdin(sdk.AccAddress.String(stdTx.GetSigners()[0]))
 			if err != nil {
 				return err
 			}
 
 			fromaddr := stdTx.GetSigners()[0]
-			// rootDir := viper.GetString(tencli.HomeFlag)
-			// defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
 			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
 			signedTx, err := ksw.SignStdTx(txBldr,stdTx,sdk.AccAddress.String(fromaddr), passphrase)
 			if err != nil {
