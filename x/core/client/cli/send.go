@@ -124,7 +124,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 		return err
 	}
 	addr := sdk.AccAddress.String(fromaddr)
-	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 	txBytes,err :=ksw.BuildAndSign(txBldr, addr, passphrase, msgs)
 	if err != nil {
 		return err

@@ -18,7 +18,7 @@ func GetExportPivKeyCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 
 			accounts, err := ksw.Accounts()
 			if err != nil {
@@ -38,7 +38,7 @@ func GetExportPivKeyCmd() *cobra.Command {
 }
 
 func getPrivateKey(ksw *keystore.KeyStoreWallet, addr string, passphrase string) (string, error) {
-	privKeyArmor, err := ksw.FindPrivKey(addr)
+	privKeyArmor, err := ksw.GetPrivKey(addr)
 	if err != nil {
 		return "", err
 	}

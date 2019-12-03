@@ -145,7 +145,7 @@ following delegation and commission default parameters:
 			}
 
 			fromaddr := stdTx.GetSigners()[0]
-			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 			signedTx, err := ksw.SignStdTx(txBldr,stdTx,sdk.AccAddress.String(fromaddr), passphrase)
 			if err != nil {
 				return err

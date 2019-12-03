@@ -2,7 +2,7 @@ package keystore
 
 import (
 	"fmt"
-	"errors"
+
 	"path/filepath"
 	"github.com/orientwalt/htdf/accounts"
 	sdk "github.com/orientwalt/htdf/types"
@@ -15,12 +15,16 @@ import (
 
 var _ accounts.KeyStoreWallets = (*KeyStoreWallet)(nil)
 
-var DefaultKeyStoreHome string
+type DefaultKeyStorePath func() string 
 
-func init() {
-	rootDir := viper.GetString(cli.HomeFlag)
+var DefaultKeyStoreHome = defaultKeyStoreHome()
 
-	DefaultKeyStoreHome = filepath.Join(rootDir, "keystores")
+func defaultKeyStoreHome() DefaultKeyStorePath{
+	return func()string{
+		rootDir := viper.GetString(cli.HomeFlag)
+		defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
+		return defaultKeyStoreHome
+	}
 }
 
 type KeyStoreWallet struct {
@@ -87,7 +91,7 @@ func (ksw *KeyStoreWallet)Drop(addr string)error{
 		return err
 	}
 
-	return  errors.New("not found address!")
+	return  ErrNoMatch
 }
 
 func (ksw *KeyStoreWallet) BuildAndSign(txbuilder authtxb.TxBuilder, addr string, passphrase string, msgs []sdk.Msg) ([]byte, error) {

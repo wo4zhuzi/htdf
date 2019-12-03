@@ -21,7 +21,7 @@ func GetRecoverAccountCmd() *cobra.Command {
 			strPrivateKey := args[0]
 			strPasswd := args[1]
 
-			ks := keystore.NewKeyStore(keystore.DefaultKeyStoreHome)
+			ks := keystore.NewKeyStore(keystore.DefaultKeyStoreHome())
 
 			err = ks.RecoverKey(strPrivateKey, strPasswd)
 			if err != nil {

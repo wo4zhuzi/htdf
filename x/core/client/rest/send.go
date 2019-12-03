@@ -178,7 +178,7 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 		return
 	}
 
-	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 	txBytes, err := ksw.BuildAndSign(txBldr, bech32, password, msgs)
 	if keyerror.IsErrKeyNotFound(err) {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

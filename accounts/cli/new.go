@@ -38,7 +38,7 @@ func GetNewCmd() *cobra.Command {
 			}
 
 			var ks = new(keystore.KeyStore)
-			ks = keystore.NewKeyStore(keystore.DefaultKeyStoreHome)
+			ks = keystore.NewKeyStore(keystore.DefaultKeyStoreHome())
 			_, err = ks.NewKey(encryptPassword)
 			if err != nil {
 				return err

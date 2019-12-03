@@ -19,7 +19,7 @@ import (
 
 func AccountListRequestHandlerFn(w http.ResponseWriter, r *http.Request) {
 
-	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 
 	accounts, err := ksw.Accounts()
 	if err != nil {

@@ -235,7 +235,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 		txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID).WithMemo(memo)
 
 		addr := sdk.AccAddress.String(accaddr)
-		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 		signedTx, err :=ksw.SignStdTx(txBldr,unsignedTx,addr, keyPass)
 		if err != nil {
 			_ = os.RemoveAll(outDir)

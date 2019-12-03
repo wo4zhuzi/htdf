@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/orientwalt/htdf/types/rest"
 	"net/http"
+
 	"github.com/orientwalt/htdf/accounts/keystore"
+	"github.com/orientwalt/htdf/types/rest"
 )
 
 type newaccountBody struct {
@@ -25,7 +26,7 @@ func NewAccountRequestHandlerFn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ks := keystore.NewKeyStore(keystore.DefaultKeyStoreHome)
+	ks := keystore.NewKeyStore(keystore.DefaultKeyStoreHome())
 	_, err = ks.NewKey(req.Password)
 	if err != nil {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

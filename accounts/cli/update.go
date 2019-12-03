@@ -17,7 +17,7 @@ func GetUpdateCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 			address := args[0]
 			oldpass := args[1]
 			newpass := args[2]

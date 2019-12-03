@@ -107,7 +107,7 @@ func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.S
 		}
 	}
 
-	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 
 	// signature
 	return ksw.SignStdTx(txBldr,stdTx,sdk.AccAddress.String(fromaddr), passphrase)

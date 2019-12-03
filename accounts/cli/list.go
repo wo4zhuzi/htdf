@@ -18,7 +18,7 @@ func GetListCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 
 			accounts, err := ksw.Accounts()
 

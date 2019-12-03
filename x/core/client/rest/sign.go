@@ -64,7 +64,7 @@ func SignTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		
 		var signedTx auth.StdTx
 		addr := req.BaseReq.From
-		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome)
+		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 		signedTx, err := ksw.SignStdTx(txBldr, signedTx, addr, req.Passphrase)
 		if keyerror.IsErrKeyNotFound(err) {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
