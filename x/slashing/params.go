@@ -61,7 +61,7 @@ type Params struct {
 
 func (p Params) String() string {
 	return fmt.Sprintf(`Slashing Params:
-  MaxEvidenceAge:          %s
+  MaxEvidenceAge:          %d
   SignedBlocksWindow:      %d
   MinSignedPerWindow:      %s
   DowntimeJailDuration:    %s
