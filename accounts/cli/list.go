@@ -2,12 +2,9 @@ package cli
 
 import (
 	"fmt"
-	_ "path/filepath"
 
 	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/spf13/cobra"
-	_ "github.com/spf13/viper"
-	_ "github.com/tendermint/tmlibs/cli"
 )
 
 func GetListCmd() *cobra.Command {

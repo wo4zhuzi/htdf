@@ -5,7 +5,7 @@ import (
 
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"github.com/orientwalt/htdf/cmd/gaia/app"
+	"github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"

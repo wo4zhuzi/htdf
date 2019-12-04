@@ -73,7 +73,6 @@ func TestHsdExport(t *testing.T) {
 
 	// Making a new app object with the db, so that initchain hasn't been called
 	// panic: consensus params is empty
-	newGapp := NewHtdfServiceApp(log.NewTMLogger(log.NewSyncWriter(os.Stdout)), config.TestInstrumentationConfig(), db, nil, true, 0)
-	_, _, err := newGapp.ExportAppStateAndValidators(false)
+	_, _, err := happ.ExportAppStateAndValidators(false)
 	require.NoError(t, err, "ExportAppStateAndValidators should not have an error")
 }
