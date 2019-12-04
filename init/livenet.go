@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/orientwalt/htdf/accounts/keystore"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	v0 "github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/server"
 	hsutils "github.com/orientwalt/htdf/utils"
@@ -298,13 +297,10 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 		// make unsigned transaction
 		unsignedTx := auth.NewStdTx([]sdk.Msg{msg}, auth.StdFee{}, []auth.StdSignature{}, memo)
 		txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID) //.WithMemo(memo)
-		priv, err := keystore.GetPrivKeyEx(accaddr, keyPass, clientDir)
-		if err != nil {
-			_ = os.RemoveAll(outDir)
-			return err
-		}
-		// build signed transaction
-		signedTx, err := hsign.SignTx(txBldr, unsignedTx, priv)
+
+		addr := sdk.AccAddress.String(accaddr)
+		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
+		signedTx, err :=ksw.SignStdTx(txBldr,unsignedTx,addr, keyPass)
 		if err != nil {
 			_ = os.RemoveAll(outDir)
 			return err

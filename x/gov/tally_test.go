@@ -53,18 +53,25 @@ func TestTallyNoOneVotes(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{5, 5})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, tallyResults, _:= tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.True(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -85,11 +92,13 @@ func TestTallyNoQuorum(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{2, 5})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -97,8 +106,14 @@ func TestTallyNoQuorum(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, _ := tally(ctx, keeper, proposal)
-	require.False(t, passes)
+	passes, _ ,_:= tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 }
 
 func TestTallyOnlyValidatorsAllYes(t *testing.T) {
@@ -118,11 +133,13 @@ func TestTallyOnlyValidatorsAllYes(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{5, 5})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod) 
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -132,9 +149,14 @@ func TestTallyOnlyValidatorsAllYes(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.True(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.True(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -155,11 +177,13 @@ func TestTallyOnlyValidators51No(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{5, 6})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -169,9 +193,14 @@ func TestTallyOnlyValidators51No(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, _ := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, _,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 }
 
 func TestTallyOnlyValidators51Yes(t *testing.T) {
@@ -191,11 +220,13 @@ func TestTallyOnlyValidators51Yes(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{6, 6, 7})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -207,9 +238,14 @@ func TestTallyOnlyValidators51Yes(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.True(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.True(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -230,11 +266,13 @@ func TestTallyOnlyValidatorsVetoed(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{6, 6, 7})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -246,9 +284,15 @@ func TestTallyOnlyValidatorsVetoed(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
 
-	require.False(t, passes)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -269,11 +313,13 @@ func TestTallyOnlyValidatorsAbstainPasses(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{6, 6, 7})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionAbstain)
@@ -285,9 +331,14 @@ func TestTallyOnlyValidatorsAbstainPasses(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.True(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.True(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -308,11 +359,13 @@ func TestTallyOnlyValidatorsAbstainFails(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{6, 6, 7})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionAbstain)
@@ -324,9 +377,14 @@ func TestTallyOnlyValidatorsAbstainFails(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -347,11 +405,13 @@ func TestTallyOnlyValidatorsNonVoter(t *testing.T) {
 	createValidators(t, stakingHandler, ctx, valAddrs, []int64{6, 6, 7})
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[1], OptionYes)
@@ -361,9 +421,14 @@ func TestTallyOnlyValidatorsNonVoter(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -388,27 +453,32 @@ func TestTallyDelgatorOverride(t *testing.T) {
 	delegator1Msg := staking.NewMsgDelegate(addrs[3], sdk.ValAddress(addrs[2]), sdk.NewCoin(sdk.DefaultBondDenom, delTokens))
 	stakingHandler(ctx, delegator1Msg)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
 	require.Nil(t, err)
 	err = keeper.AddVote(ctx, proposalID, addrs[1], OptionYes)
 	require.Nil(t, err)
-	err = keeper.AddVote(ctx, proposalID, addrs[2], OptionYes)
-	require.Nil(t, err)
-	err = keeper.AddVote(ctx, proposalID, addrs[3], OptionNo)
+	err = keeper.AddVote(ctx, proposalID, addrs[2], OptionNo)
 	require.Nil(t, err)
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -433,11 +503,13 @@ func TestTallyDelgatorInherit(t *testing.T) {
 	delegator1Msg := staking.NewMsgDelegate(addrs[3], sdk.ValAddress(addrs[2]), sdk.NewCoin(sdk.DefaultBondDenom, delTokens))
 	stakingHandler(ctx, delegator1Msg)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionNo)
@@ -449,9 +521,14 @@ func TestTallyDelgatorInherit(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.True(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.True(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -478,27 +555,32 @@ func TestTallyDelgatorMultipleOverride(t *testing.T) {
 	delegator1Msg2 := staking.NewMsgDelegate(addrs[3], sdk.ValAddress(addrs[1]), sdk.NewCoin(sdk.DefaultBondDenom, delTokens))
 	stakingHandler(ctx, delegator1Msg2)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
 	require.Nil(t, err)
-	err = keeper.AddVote(ctx, proposalID, addrs[1], OptionYes)
+	err = keeper.AddVote(ctx, proposalID, addrs[1], OptionNo)
 	require.Nil(t, err)
-	err = keeper.AddVote(ctx, proposalID, addrs[2], OptionYes)
-	require.Nil(t, err)
-	err = keeper.AddVote(ctx, proposalID, addrs[3], OptionNo)
+	err = keeper.AddVote(ctx, proposalID, addrs[2], OptionNo)
 	require.Nil(t, err)
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -538,11 +620,13 @@ func TestTallyDelgatorMultipleInherit(t *testing.T) {
 
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -554,9 +638,14 @@ func TestTallyDelgatorMultipleInherit(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.False(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.False(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }
 
@@ -590,11 +679,13 @@ func TestTallyJailedValidator(t *testing.T) {
 
 	staking.EndBlocker(ctx, sk)
 
-	tp := TextProposal{"Test", "description"}
-	proposal, err := keeper.SubmitProposal(ctx, tp)
+	tp := TextProposal{
+		Title: "Test", 
+		Description: "description"}
+	proposal, err := keeper.SubmitProposal(ctx, &tp)
 	require.NoError(t, err)
-	proposalID := proposal.ProposalID
-	proposal.Status = StatusVotingPeriod
+	proposalID := proposal.GetProposalID()
+	proposal.SetStatus(StatusVotingPeriod)
 	keeper.SetProposal(ctx, proposal)
 
 	err = keeper.AddVote(ctx, proposalID, addrs[0], OptionYes)
@@ -606,8 +697,13 @@ func TestTallyJailedValidator(t *testing.T) {
 
 	proposal, ok := keeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	passes, tallyResults := tally(ctx, keeper, proposal)
-
-	require.True(t, passes)
+	passes, tallyResults,_ := tally(ctx, keeper, proposal)
+	var status bool
+	if passes == PASS {
+		status = true
+	}else{
+		status = false
+	}
+	require.True(t, status)
 	require.False(t, tallyResults.Equals(EmptyTallyResult()))
 }

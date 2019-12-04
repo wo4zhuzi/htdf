@@ -6,9 +6,9 @@ import (
 
 	"github.com/orientwalt/htdf/crypto/keys"
 
+	"github.com/orientwalt/htdf/accounts/keystore"
 	clkeys "github.com/orientwalt/htdf/client/keys"
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/orientwalt/htdf/accounts/keystore"
 )
 
 // GenerateCoinKey returns the address of a public key, along with the secret
@@ -60,11 +60,12 @@ func GenerateSaveCoinKey(clientRoot, keyName, keyPass string,
 func GenerateSaveCoinKeyEx(clientRoot, keyPass string) (sdk.AccAddress, string, error) {
 	defaultKeyStoreHome := filepath.Join(clientRoot, "keystores")
 	// generate a private key, with recovery phrase
-	bech32addr, secret, err := keystore.StoreKey(defaultKeyStoreHome, keyPass)
+	ks := keystore.NewKeyStore(defaultKeyStoreHome)
+	secret, err := ks.NewKey(keyPass)
 	if err != nil {
 		return sdk.AccAddress([]byte{}), "", err
 	}
-	accaddr, err := sdk.AccAddressFromBech32(bech32addr)
+	accaddr, err := sdk.AccAddressFromBech32(ks.Key().Address)
 	if err != nil {
 		return sdk.AccAddress([]byte{}), "", err
 	}

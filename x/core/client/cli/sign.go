@@ -3,18 +3,17 @@ package cli
 import (
 	"fmt"
 
+	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
-	hsutils "github.com/orientwalt/htdf/utils"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	tmcrypto "github.com/tendermint/tendermint/crypto"
+	"github.com/orientwalt/htdf/client/keys"
 )
 
 // junying-todo-20190327
@@ -44,8 +43,8 @@ func GetCmdSign(cdc *codec.Codec) *cobra.Command {
 			if len(stdTx.GetSigners()) == 0 {
 				return err //err.
 			}
-
-			priv, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(stdTx.GetSigners()[0]))
+			
+			passphrase, err := keys.ReadShortPassphraseFromStdin(sdk.AccAddress.String(stdTx.GetSigners()[0]))
 			if err != nil {
 				return err
 			}
@@ -53,7 +52,7 @@ func GetCmdSign(cdc *codec.Codec) *cobra.Command {
 			offlineflag := viper.GetBool(htdfservice.FlagOffline)
 
 			// sign
-			res, err := SignTransaction(authtxb.NewTxBuilderFromCLI(), cliCtx, stdTx, priv, offlineflag)
+			res, err := SignTransaction(authtxb.NewTxBuilderFromCLI(), cliCtx, stdTx, passphrase, offlineflag)
 			if err != nil {
 				return err
 			}
@@ -94,7 +93,7 @@ func populateAccountFromState(txBldr authtxb.TxBuilder, cliCtx context.CLIContex
 }
 
 //
-func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.StdTx, privKey tmcrypto.PrivKey, offline bool) (signedTx auth.StdTx, err error) {
+func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.StdTx, passphrase string, offline bool) (signedTx auth.StdTx, err error) {
 	// from address
 	if len(stdTx.GetSigners()) == 0 {
 		return signedTx, nil
@@ -107,14 +106,17 @@ func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.S
 			return signedTx, err
 		}
 	}
+
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
+
 	// signature
-	return hsign.SignTx(txBldr, stdTx, privKey)
+	return ksw.SignStdTx(txBldr,stdTx,sdk.AccAddress.String(fromaddr), passphrase)
 }
 
 //
-func SignTransaction(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.StdTx, privKey tmcrypto.PrivKey, offline bool) (res []byte, err error) {
+func SignTransaction(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, stdTx auth.StdTx, passphrase string, offline bool) (res []byte, err error) {
 	// signature
-	signedTx, err := SignStdTx(txBldr, cliCtx, stdTx, privKey, offline)
+	signedTx, err := SignStdTx(txBldr, cliCtx, stdTx, passphrase, offline)
 	if err != nil {
 		return []byte("signing failed"), err
 	}

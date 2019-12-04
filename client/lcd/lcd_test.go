@@ -18,7 +18,7 @@ import (
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/keys"
 	clienttx "github.com/orientwalt/htdf/client/tx"
-	"github.com/orientwalt/htdf/cmd/gaia/app"
+	"github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/crypto/keys/mintkey"
 	"github.com/orientwalt/htdf/tests"
 	sdk "github.com/orientwalt/htdf/types"

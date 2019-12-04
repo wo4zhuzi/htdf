@@ -71,6 +71,18 @@ func ReadPassphraseFromStdin(name string) (string, error) {
 	return passphrase, nil
 }
 
+func ReadShortPassphraseFromStdin(address string) (string, error){
+	buf := client.BufferStdin()
+	prompt := fmt.Sprintf("Password to sign with '%s':", address)
+
+	passphrase, err := client.GetString(prompt, buf)
+	if err != nil {
+		return passphrase, fmt.Errorf("Error reading passphrase: %v", err)
+	}
+
+	return passphrase, nil
+}
+
 // NewKeyBaseFromHomeFlag initializes a Keybase based on the configuration.
 func NewKeyBaseFromHomeFlag() (keys.Keybase, error) {
 	rootDir := viper.GetString(cli.HomeFlag)

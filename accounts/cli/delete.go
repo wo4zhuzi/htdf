@@ -1,31 +1,25 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/spf13/cobra"
 )
 
-func GetListCmd() *cobra.Command {
+func GetDelCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "list",
-		Short: "show all account",
-		Long:  "show all account in keystore",
-		Args:  cobra.ExactArgs(0),
+		Use:   "del",
+		Short: "delete account",
+		Long:  "delete account from keystores",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
-
-			accounts, err := ksw.Accounts()
-
+			address := args[0]
+			err := ksw.Drop(address)
 			if err != nil {
 				return err
 			}
 
-			for _, account := range accounts {
-				fmt.Printf("%s\n", account.Address)
-			}
+			println("Delete success: ", address)
 			return nil
 		},
 	}

@@ -32,38 +32,38 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 func handleMsgSubmitProposal(ctx sdk.Context, keeper Keeper, msg MsgSubmitProposal) sdk.Result {
-	// var content ProposalContent
-	// switch msg.ProposalType {
-	// case ProposalTypeText:
-	// 	content = NewTextProposal(msg.Title, msg.Description)
-	// default:
-	// 	return ErrInvalidProposalType(keeper.codespace, msg.ProposalType).Result()
-	// }
-	// proposal, err := keeper.SubmitProposal(ctx, content)
-	// if err != nil {
-	// 	return err.Result()
-	// }
-	// proposalID := proposal.ProposalID
-	// proposalIDStr := fmt.Sprintf("%d", proposalID)
+	var content ProposalContent
+	switch msg.ProposalType {
+	case ProposalTypeText:
+		content = NewTextProposal(msg.Title, msg.Description)
+	default:
+		return ErrInvalidProposalType(keeper.codespace, msg.ProposalType).Result()
+	}
+	proposal, err := keeper.SubmitProposal(ctx, content)
+	if err != nil {
+		return err.Result()
+	}
+	proposalID := proposal.GetProposalID()
+	proposalIDStr := fmt.Sprintf("%d", proposalID)
 
-	// err, votingStarted := keeper.AddDeposit(ctx, proposalID, msg.Proposer, msg.InitialDeposit)
-	// if err != nil {
-	// 	return err.Result()
-	// }
+	err, votingStarted := keeper.AddDeposit(ctx, proposalID, msg.Proposer, msg.InitialDeposit)
+	if err != nil {
+		return err.Result()
+	}
 
-	// resTags := sdk.NewTags(
-	// 	tags.Proposer, []byte(msg.Proposer.String()),
-	// 	tags.ProposalID, proposalIDStr,
-	// )
+	resTags := sdk.NewTags(
+		tags.Proposer, []byte(msg.Proposer.String()),
+		tags.ProposalID, proposalIDStr,
+	)
 
-	// if votingStarted {
-	// 	resTags = resTags.AppendTag(tags.VotingPeriodStart, proposalIDStr)
-	// }
+	if votingStarted {
+		resTags = resTags.AppendTag(tags.VotingPeriodStart, proposalIDStr)
+	}
 
-	// return sdk.Result{
-	// 	Data: keeper.cdc.MustMarshalBinaryLengthPrefixed(proposalID),
-	// 	Tags: resTags,
-	// }
+	return sdk.Result{
+		Data: keeper.cdc.MustMarshalBinaryLengthPrefixed(proposalID),
+		Tags: resTags,
+	}
 	fmt.Println("..........handleMsgSubmitSoftwareUpgradeProposal..........")
 	return sdk.Result{}
 }

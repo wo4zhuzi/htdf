@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/orientwalt/htdf/accounts"
 	"github.com/orientwalt/htdf/accounts/keystore"
 	htdfRest "github.com/orientwalt/htdf/accounts/rest"
-	hsign "github.com/orientwalt/htdf/accounts/signs"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
 	"github.com/orientwalt/htdf/client/utils"
@@ -175,14 +173,13 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, cliCtx context.CLIContext
 	}
 
 	bech32 := sdk.AccAddress.String(fromaddr)
-	account := accounts.Account{Address: bech32}
-	privkey, err := keystore.GetPrivKey(account, password, "")
 
 	if err != nil {
 		return
 	}
 
-	txBytes, err := hsign.BuildAndSign(txBldr, privkey, msgs)
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
+	txBytes, err := ksw.BuildAndSign(txBldr, bech32, password, msgs)
 	if keyerror.IsErrKeyNotFound(err) {
 		rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
