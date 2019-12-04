@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orientwalt/htdf/mock"
-	bam "github.com/orientwalt/htdf/mock/baseapp"
 	sdk "github.com/orientwalt/htdf/types"
+	"github.com/orientwalt/htdf/x/mock"
+	bam "github.com/orientwalt/htdf/x/mock/baseapp"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/crypto/secp256k1"

@@ -18,7 +18,7 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	bam "github.com/orientwalt/htdf/mock/baseapp"
+	bam "github.com/orientwalt/htdf/x/mock/baseapp"
 )
 
 // Simulate tests application by sending random messages.
