@@ -10,6 +10,7 @@ import (
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/bank"
 	"github.com/orientwalt/htdf/x/mock"
+	stakekeeper "github.com/orientwalt/htdf/x/staking/keeper"
 )
 
 // getMockApp returns an initialized mock application for this module.
@@ -21,10 +22,10 @@ func getMockApp(t *testing.T) (*mock.App, Keeper) {
 	keyStaking := sdk.NewKVStoreKey(StoreKey)
 	tkeyStaking := sdk.NewTransientStoreKey(TStoreKey)
 
-	bankKeeper := bank.NewBaseKeeper(mApp.AccountKeeper, mApp.ParamsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace)
-	keeper := NewKeeper(mApp.Cdc, keyStaking, tkeyStaking, bankKeeper, mApp.ParamsKeeper.Subspace(DefaultParamspace), DefaultCodespace)
+	bankKeeper := bank.NewBaseKeeper(mApp.AccountKeeper, mApp.ParamsKeeper.Subspace("testbank"), bank.DefaultCodespace)
+	keeper := NewKeeper(mApp.Cdc, keyStaking, tkeyStaking, bankKeeper, mApp.ParamsKeeper.Subspace(DefaultParamspace), DefaultCodespace,stakekeeper.NopMetrics())
 
-	mApp.Router().AddRoute(RouterKey, NewHandler(keeper))
+	mApp.Router().AddRoute(RouterKey, []*sdk.KVStoreKey{keyStaking},NewHandler(keeper))
 	mApp.SetEndBlocker(getEndBlocker(keeper))
 	mApp.SetInitChainer(getInitChainer(mApp, keeper))
 
@@ -96,6 +97,7 @@ func checkDelegation(
 
 func TestStakingMsgs(t *testing.T) {
 	mApp, keeper := getMockApp(t)
+	ctx := mApp.NewContext(true,abci.Header{})
 
 	genTokens := sdk.TokensFromTendermintPower(42)
 	bondTokens := sdk.TokensFromTendermintPower(10)
@@ -123,7 +125,7 @@ func TestStakingMsgs(t *testing.T) {
 	)
 
 	header := abci.Header{Height: mApp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mApp.Cdc, mApp.BaseApp, header, []sdk.Msg{createValidatorMsg}, []uint64{0}, []uint64{0}, true, true, priv1)
+	mock.SignCheckDeliver(t,  mApp.BaseApp, []sdk.Msg{createValidatorMsg}, []uint64{0}, []uint64{0}, true, true, priv1)
 	mock.CheckBalance(t, mApp, addr1, sdk.Coins{genCoin.Sub(bondCoin)})
 
 	header = abci.Header{Height: mApp.LastBlockHeight() + 1}
@@ -142,7 +144,7 @@ func TestStakingMsgs(t *testing.T) {
 	editValidatorMsg := NewMsgEditValidator(sdk.ValAddress(addr1), description, nil, nil)
 
 	header = abci.Header{Height: mApp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mApp.Cdc, mApp.BaseApp, header, []sdk.Msg{editValidatorMsg}, []uint64{0}, []uint64{1}, true, true, priv1)
+	mock.SignCheckDeliver(t,  mApp.BaseApp, []sdk.Msg{editValidatorMsg}, []uint64{0}, []uint64{1}, true, true, priv1)
 
 	validator = checkValidator(t, mApp, keeper, sdk.ValAddress(addr1), true)
 	require.Equal(t, description, validator.Description)
@@ -152,14 +154,18 @@ func TestStakingMsgs(t *testing.T) {
 	delegateMsg := NewMsgDelegate(addr2, sdk.ValAddress(addr1), bondCoin)
 
 	header = abci.Header{Height: mApp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mApp.Cdc, mApp.BaseApp, header, []sdk.Msg{delegateMsg}, []uint64{1}, []uint64{0}, true, true, priv2)
+	mock.SignCheckDeliver(t,  mApp.BaseApp, []sdk.Msg{delegateMsg}, []uint64{0}, []uint64{0}, true, true, priv2)
 	mock.CheckBalance(t, mApp, addr2, sdk.Coins{genCoin.Sub(bondCoin)})
 	checkDelegation(t, mApp, keeper, addr2, sdk.ValAddress(addr1), true, bondTokens.ToDec())
 
 	// begin unbonding
+	undelegateMsgStatus := NewMsgSetUndelegateStatus(addr2, sdk.ValAddress(addr1), true)
+	got := NewHandler(keeper)(ctx, undelegateMsgStatus)
+	require.True(t, got.IsOK(), "expected set status to not be ok, got %v", got)
+
 	beginUnbondingMsg := NewMsgUndelegate(addr2, sdk.ValAddress(addr1), bondCoin)
 	header = abci.Header{Height: mApp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mApp.Cdc, mApp.BaseApp, header, []sdk.Msg{beginUnbondingMsg}, []uint64{1}, []uint64{1}, true, true, priv2)
+	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{beginUnbondingMsg}, []uint64{1}, []uint64{1}, true, true, priv2)
 
 	// delegation should exist anymore
 	checkDelegation(t, mApp, keeper, addr2, sdk.ValAddress(addr1), false, sdk.Dec{})
