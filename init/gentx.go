@@ -29,9 +29,10 @@ import (
 	"github.com/orientwalt/htdf/app"
 	"github.com/orientwalt/htdf/app/v0"
 	"github.com/orientwalt/htdf/server"
-	hsutils "github.com/orientwalt/htdf/utils"
+	"github.com/orientwalt/htdf/client/keys"
 	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 	hstakingcli "github.com/orientwalt/htdf/x/staking/client/cli"
+	"github.com/orientwalt/htdf/accounts/keystore"
 )
 
 var (
@@ -138,14 +139,14 @@ following delegation and commission default parameters:
 				return err
 			}
 
-			// get private key
-			privkey, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(stdTx.GetSigners()[0]))
+			passphrase, err := keys.ReadShortPassphraseFromStdin(sdk.AccAddress.String(stdTx.GetSigners()[0]))
 			if err != nil {
 				return err
 			}
 
-			// sign the transaction and write it to the output file
-			signedTx, err := hscorecli.SignStdTx(txBldr, cliCtx, stdTx, privkey, true)
+			fromaddr := stdTx.GetSigners()[0]
+			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
+			signedTx, err := ksw.SignStdTx(txBldr,stdTx,sdk.AccAddress.String(fromaddr), passphrase)
 			if err != nil {
 				return err
 			}

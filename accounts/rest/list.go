@@ -9,13 +9,9 @@ import (
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	sdkRest "github.com/orientwalt/htdf/types/rest"
-	"github.com/orientwalt/htdf/accounts"
 	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/orientwalt/htdf/utils/unit_convert"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tmlibs/cli"
 	"net/http"
-	"path/filepath"
 
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/orientwalt/htdf/x/core"
@@ -23,22 +19,10 @@ import (
 
 func AccountListRequestHandlerFn(w http.ResponseWriter, r *http.Request) {
 
-	var am *accounts.Manager
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&am)
-
-	// Assemble the account manager and supported backends
-	rootDir := viper.GetString(cli.HomeFlag)
-	defaultKeyStoreHome := filepath.Join(rootDir, "keystores")
-	backends := []accounts.Backend{
-		keystore.NewKeyStore(defaultKeyStoreHome),
-	}
-
-	am = accounts.NewManager(backends...)
-	if am == nil {
-
-		sdkRest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+	accounts, err := ksw.Accounts()
+	if err != nil {
 		return
 	}
 
@@ -53,21 +37,12 @@ func AccountListRequestHandlerFn(w http.ResponseWriter, r *http.Request) {
 
 	var index int
 	if bJsonFormat == false {
-		for _, wallet := range am.Wallets() {
-			for _, account := range wallet.Accounts() {
-				w.Header().Set("Content-Type", "application/json")
-				w.Write([]byte(fmt.Sprintf("Account #%d: {%s}\n", index, account.Address)))
-				index++
-			}
+		for _, account := range accounts {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(fmt.Sprintf("Account #%d: {%s}\n", index, account.Address)))
+			index++
 		}
 	} else {
-		var accounts []accounts.Account
-		for _, wallet := range am.Wallets() {
-			for _, account := range wallet.Accounts() {
-				accounts = append(accounts, account)
-			}
-
-		}
 		data, err := json.Marshal(accounts)
 		if err != nil {
 			fmt.Printf("Marshal error|err=%s\n", err)

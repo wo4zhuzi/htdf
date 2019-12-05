@@ -1,8 +1,9 @@
 package accounts
 
 import (
-	"github.com/orientwalt/htdf/accounts/event"
 	"github.com/orientwalt/htdf/x/auth"
+
+	sdk "github.com/orientwalt/htdf/types"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 )
 
@@ -11,48 +12,22 @@ type Account struct {
 	URL     URL
 }
 
-type Wallet interface {
-	URL() URL
+type KeyStoreWallets interface {
+	Accounts() ([]Account, error)
 
-	Open(passphrase string) error
+	BuildAndSign(txbuilder authtxb.TxBuilder, addr string, passphrase string, msgs []sdk.Msg) ([]byte, error)
 
-	Close() error
+	Sign(txbuilder authtxb.TxBuilder, addr string, passphrase string, msg authtxb.StdSignMsg) ([]byte, error)
 
-	Accounts() []Account
+	SignStdTx(txbuilder authtxb.TxBuilder, stdTx auth.StdTx, addr string, passphrase string) (signedStdTx auth.StdTx, err error)
 
-	Contains(account Account) bool
-
-	Derive(path DerivationPath, pin bool) (Account, error)
-
-	SignTx(account Account, passphrase string, txbuilder authtxb.TxBuilder, stdTx auth.StdTx) (signedStdTx auth.StdTx, err error)
+	GetPrivKey(addr string) (string, error)
 }
 
-type Backend interface {
-	Wallets() []Wallet
+type KeyStores interface {
+	NewKey(passphrase string) (string, error)
 
-	Subscribe(sink chan<- WalletEvent) event.Subscription
-}
+	RecoverKey(strPrivKey string, passPhrase string) error
 
-//WalletEventType represents the different event types that can be fired by
-//the wallet subscription subsystem.
-type WalletEventType int
-
-const (
-	// WalletArrived is fired when a new wallet is detected either via USB or via
-	// a filesystem event in the keystore.
-	WalletArrived WalletEventType = iota
-
-	// WalletOpened is fired when a wallet is successfully opened with the purpose
-	// of starting any background processes such as automatic key derivation.
-	WalletOpened
-
-	// WalletDropped
-	WalletDropped
-)
-
-// WalletEvent is an event fired by an account backend when a wallet arrival or
-// departure is detected.
-type WalletEvent struct {
-	Wallet Wallet          // Wallet instance arrived or departed
-	Kind   WalletEventType // Event type that happened in the system
+	RecoverKeyByMnemonic(mnemonic string, bip39Passphrase string, passPhrase string, account, index uint32) error
 }

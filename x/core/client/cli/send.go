@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	hsign "github.com/orientwalt/htdf/accounts/signs"
+	"github.com/orientwalt/htdf/accounts/keystore"
 	"github.com/orientwalt/htdf/client"
 	"github.com/orientwalt/htdf/client/context"
+	"github.com/orientwalt/htdf/client/keys"
 	"github.com/orientwalt/htdf/client/utils"
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
-	hsutils "github.com/orientwalt/htdf/utils"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	htdfservice "github.com/orientwalt/htdf/x/core"
 	"github.com/spf13/cobra"
@@ -118,18 +118,17 @@ func CompleteAndBroadcastTxCLI(txBldr authtxb.TxBuilder, cliCtx context.CLIConte
 		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.GasWanted()}
 		fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
 	}
-	fmt.Println("1--------------------")
-	privkey, err := hsutils.UnlockByStdIn(sdk.AccAddress.String(fromaddr))
+
+	passphrase, err := keys.ReadShortPassphraseFromStdin(sdk.AccAddress.String(fromaddr))
 	if err != nil {
 		return err
 	}
-	fmt.Println("2--------------------")
-	// build and sign the transaction
-	txBytes, err := hsign.BuildAndSign(txBldr, privkey, msgs)
+	addr := sdk.AccAddress.String(fromaddr)
+	ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
+	txBytes,err :=ksw.BuildAndSign(txBldr, addr, passphrase, msgs)
 	if err != nil {
 		return err
 	}
-	fmt.Println("3--------------------")
 	// broadcast to a Tendermint node
 	res, err := cliCtx.BroadcastTx(txBytes)
 	cliCtx.PrintOutput(res)

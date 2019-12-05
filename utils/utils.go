@@ -7,35 +7,9 @@ import (
 	"log"
 	"os"
 
-	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/types"
 	"github.com/tendermint/go-amino"
-
-	"github.com/orientwalt/htdf/accounts"
-	"github.com/orientwalt/htdf/accounts/keystore"
-	"github.com/orientwalt/htdf/client/keys"
+	"github.com/tendermint/tendermint/types"
 )
-
-// junying-todo-20190429
-// Unlock unlocks an account when address and password are given.
-func Unlock(encrypted, passphrase string) (tmcrypto.PrivKey, error) {
-	account := accounts.Account{Address: encrypted}
-	privkey, err := keystore.GetPrivKey(account, passphrase, "")
-	if err != nil {
-		return nil, err
-	}
-	return privkey, nil
-}
-
-// junying-todo-20190429
-// UnlockByStdIn needs user to type password when bechaddr is given.
-func UnlockByStdIn(bech32 string) (tmcrypto.PrivKey, error) {
-	passphrase, err := keys.ReadPassphraseFromStdin(bech32)
-	if err != nil {
-		return nil, err
-	}
-	return Unlock(bech32, passphrase)
-}
 
 // LoadGenesisDoc reads and unmarshals GenesisDoc from the given file.
 func LoadGenesisDoc(cdc *amino.Codec, genFile string) (genDoc types.GenesisDoc, err error) {

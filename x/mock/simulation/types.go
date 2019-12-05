@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"time"
 
-	bam "github.com/orientwalt/htdf/mock/baseapp"
 	sdk "github.com/orientwalt/htdf/types"
+	bam "github.com/orientwalt/htdf/x/mock/baseapp"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 )
