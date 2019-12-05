@@ -12,6 +12,7 @@ import (
 	"github.com/orientwalt/htdf/x/bank"
 	"github.com/orientwalt/htdf/x/mock"
 	"github.com/orientwalt/htdf/x/staking"
+	stakekeeper "github.com/orientwalt/htdf/x/staking/keeper"
 )
 
 var (
@@ -31,11 +32,11 @@ func getMockApp(t *testing.T) (*mock.App, staking.Keeper, Keeper) {
 	tkeyStaking := sdk.NewTransientStoreKey(staking.TStoreKey)
 	keySlashing := sdk.NewKVStoreKey(StoreKey)
 
-	bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper, mapp.ParamsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace)
-	stakingKeeper := staking.NewKeeper(mapp.Cdc, keyStaking, tkeyStaking, bankKeeper, mapp.ParamsKeeper.Subspace(staking.DefaultParamspace), staking.DefaultCodespace)
-	keeper := NewKeeper(mapp.Cdc, keySlashing, stakingKeeper, mapp.ParamsKeeper.Subspace(DefaultParamspace), DefaultCodespace)
-	mapp.Router().AddRoute(staking.RouterKey, staking.NewHandler(stakingKeeper))
-	mapp.Router().AddRoute(RouterKey, NewHandler(keeper))
+	bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper, mapp.ParamsKeeper.Subspace("testbank"), bank.DefaultCodespace)
+	stakingKeeper := staking.NewKeeper(mapp.Cdc, keyStaking, tkeyStaking, bankKeeper, mapp.ParamsKeeper.Subspace(staking.DefaultParamspace), staking.DefaultCodespace,stakekeeper.NopMetrics())
+	keeper := NewKeeper(mapp.Cdc, keySlashing, stakingKeeper, mapp.ParamsKeeper.Subspace(DefaultParamspace), DefaultCodespace,NopMetrics())
+	mapp.Router().AddRoute(staking.RouterKey, []*sdk.KVStoreKey{keyStaking}, staking.NewHandler(stakingKeeper))
+	mapp.Router().AddRoute(RouterKey, []*sdk.KVStoreKey{keySlashing},NewHandler(keeper))
 
 	mapp.SetEndBlocker(getEndBlocker(stakingKeeper))
 	mapp.SetInitChainer(getInitChainer(mapp, stakingKeeper))
@@ -113,7 +114,7 @@ func TestSlashingMsgs(t *testing.T) {
 	)
 
 	header := abci.Header{Height: mapp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, header, []sdk.Msg{createValidatorMsg}, []uint64{0}, []uint64{0}, true, true, priv1)
+	mock.SignCheckDeliver(t,mapp.BaseApp, []sdk.Msg{createValidatorMsg}, []uint64{0}, []uint64{0}, true, true, priv1)
 	mock.CheckBalance(t, mapp, addr1, sdk.Coins{genCoin.Sub(bondCoin)})
 
 	header = abci.Header{Height: mapp.LastBlockHeight() + 1}
@@ -130,7 +131,7 @@ func TestSlashingMsgs(t *testing.T) {
 
 	// unjail should fail with unknown validator
 	header = abci.Header{Height: mapp.LastBlockHeight() + 1}
-	res := mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, header, []sdk.Msg{unjailMsg}, []uint64{0}, []uint64{1}, false, false, priv1)
+	res := mock.SignCheckDeliver(t,  mapp.BaseApp,[]sdk.Msg{unjailMsg}, []uint64{0}, []uint64{1}, false, false, priv1)
 	require.EqualValues(t, CodeValidatorNotJailed, res.Code)
 	require.EqualValues(t, DefaultCodespace, res.Codespace)
 }

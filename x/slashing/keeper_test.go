@@ -22,64 +22,68 @@ func keeperTestParams() Params {
 
 // ______________________________________________________________
 
-//// Test that a validator is slashed correctly
-//// when we discover evidence of infraction
-//func TestHandleDoubleSign(t *testing.T) {
-//
-//	// initial setup
-//	ctx, ck, sk, _, keeper := createTestInput(t, keeperTestParams())
-//	// validator added pre-genesis
-//	ctx = ctx.WithBlockHeight(-1)
-//	power := int64(100)
-//	amt := sdk.TokensFromTendermintPower(power)
-//	operatorAddr, val := addrs[0], pks[0]
-//	got := staking.NewHandler(sk)(ctx, NewTestMsgCreateValidator(operatorAddr, val, amt))
-//	require.True(t, got.IsOK())
-//	staking.EndBlocker(ctx, sk)
-//	require.Equal(
-//		t, ck.GetCoins(ctx, sdk.AccAddress(operatorAddr)),
-//		sdk.Coins{sdk.NewCoin(sk.GetParams(ctx).BondDenom, initCoins.Sub(amt))},
-//	)
-//	require.Equal(t, amt, sk.Validator(ctx, operatorAddr).GetBondedTokens())
-//
-//	// handle a signature to set signing info
-//	keeper.handleValidatorSignature(ctx, val.Address(), amt.Int64(), true)
-//
-//	oldTokens := sk.Validator(ctx, operatorAddr).GetTokens()
-//
-//	// double sign less than max age
-//	keeper.handleDoubleSign(ctx, val.Address(), 0, time.Unix(0, 0), power)
-//
-//	// should be jailed
-//	require.True(t, sk.Validator(ctx, operatorAddr).IsJailed())
-//
-//	// tokens should be decreased
-//	newTokens := sk.Validator(ctx, operatorAddr).GetTokens()
-//	require.True(t, newTokens.LT(oldTokens))
-//
-//	// New evidence
-//	keeper.handleDoubleSign(ctx, val.Address(), 0, time.Unix(0, 0), power)
-//
-//	// tokens should be the same (capped slash)
-//	require.True(t, sk.Validator(ctx, operatorAddr).GetTokens().Equal(newTokens))
-//
-//	// Jump to past the unbonding period
-//	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Unix(1, 0).Add(sk.GetParams(ctx).UnbondingTime)})
-//
-//	// Still shouldn't be able to unjail
-//	msgUnjail := NewMsgUnjail(operatorAddr)
-//	res := handleMsgUnjail(ctx, msgUnjail, keeper)
-//	require.False(t, res.IsOK())
-//
-//	// Should be able to unbond now
-//	del, _ := sk.GetDelegation(ctx, sdk.AccAddress(operatorAddr), operatorAddr)
-//	validator, _ := sk.GetValidator(ctx, operatorAddr)
-//
-//	totalBond := validator.TokensFromShares(del.GetShares()).TruncateInt()
-//	msgUnbond := staking.NewMsgUndelegate(sdk.AccAddress(operatorAddr), operatorAddr, sdk.NewCoin(sk.GetParams(ctx).BondDenom, totalBond))
-//	res = staking.NewHandler(sk)(ctx, msgUnbond)
-//	require.True(t, res.IsOK())
-//}
+// Test that a validator is slashed correctly
+// when we discover evidence of infraction
+func TestHandleDoubleSign(t *testing.T) {
+
+	// initial setup
+	ctx, ck, sk, _, keeper := createTestInput(t, keeperTestParams())
+	// validator added pre-genesis
+	ctx = ctx.WithBlockHeight(-1)
+	power := int64(100)
+	amt := sdk.TokensFromTendermintPower(power)
+	operatorAddr, val := addrs[0], pks[0]
+	got := staking.NewHandler(sk)(ctx, NewTestMsgCreateValidator(operatorAddr, val, amt))
+	require.True(t, got.IsOK())
+	staking.EndBlocker(ctx, sk)
+	require.Equal(
+		t, ck.GetCoins(ctx, sdk.AccAddress(operatorAddr)),
+		sdk.Coins{sdk.NewCoin(sk.GetParams(ctx).BondDenom, initCoins.Sub(amt))},
+	)
+	require.Equal(t, amt, sk.Validator(ctx, operatorAddr).GetBondedTokens())
+
+	// handle a signature to set signing info
+	keeper.handleValidatorSignature(ctx, val.Address(), amt.Int64(), true)
+
+	oldTokens := sk.Validator(ctx, operatorAddr).GetTokens()
+
+	// double sign less than max age
+	keeper.handleDoubleSign(ctx, val.Address(), 0, time.Unix(0, 0), power)
+
+	// should be jailed
+	require.True(t, sk.Validator(ctx, operatorAddr).IsJailed())
+
+	// tokens should be decreased
+	newTokens := sk.Validator(ctx, operatorAddr).GetTokens()
+	require.True(t, newTokens.LT(oldTokens))
+
+	// New evidence
+	keeper.handleDoubleSign(ctx, val.Address(), 0, time.Unix(0, 0), power)
+
+	// tokens should be the same (capped slash)
+	require.True(t, sk.Validator(ctx, operatorAddr).GetTokens().Equal(newTokens))
+
+	// Jump to past the unbonding period
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Unix(1, 0).Add(sk.GetParams(ctx).UnbondingTime)})
+
+	// Still shouldn't be able to unjail
+	msgUnjail := NewMsgUnjail(operatorAddr)
+	res := handleMsgUnjail(ctx, msgUnjail, keeper)
+	require.False(t, res.IsOK())
+
+	// Should be able to unbond now
+	del, _ := sk.GetDelegation(ctx, sdk.AccAddress(operatorAddr), operatorAddr)
+	validator, _ := sk.GetValidator(ctx, operatorAddr)
+
+	undelegateMsgStatus := staking.NewMsgSetUndelegateStatus(sdk.AccAddress(operatorAddr), operatorAddr, true)
+	got = staking.NewHandler(sk)(ctx, undelegateMsgStatus)
+	require.True(t, got.IsOK(), "expected set status to not be ok, got %v", got)
+
+	totalBond := validator.TokensFromShares(del.GetShares()).TruncateInt()
+	msgUnbond := staking.NewMsgUndelegate(sdk.AccAddress(operatorAddr), operatorAddr, sdk.NewCoin(sk.GetParams(ctx).BondDenom, totalBond))
+	res = staking.NewHandler(sk)(ctx, msgUnbond)
+	require.True(t, res.IsOK())
+}
 
 // ______________________________________________________________
 
