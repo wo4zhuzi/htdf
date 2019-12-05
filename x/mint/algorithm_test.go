@@ -10,6 +10,7 @@ import (
 
 func calcErrRate(lastblkindex int64) float64 {
 	var actual, expected int64
+	actual = CurrentProvisionsAsSatoshi
 	for blkindex := int64(1); blkindex < lastblkindex; blkindex++ {
 		expected = estimatedAccumulatedSupply(blkindex)
 		var real, estimated int64
@@ -23,7 +24,7 @@ func calcErrRate(lastblkindex int64) float64 {
 }
 
 func TestSimulate(t *testing.T) {
-	threshold := float64(AvgBlkReward * 4)
+	threshold := float64(AvgBlkReward * 20)
 	require.True(t, math.Abs(calcErrRate(1001)) < threshold)
 	require.True(t, math.Abs(calcErrRate(10001)) < threshold)
 	require.True(t, math.Abs(calcErrRate(100001)) < threshold)
