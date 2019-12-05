@@ -1,25 +1,33 @@
 package mint
 
 import (
-	"fmt"
-	"github.com/stretchr/testify/require"
 	"math"
+	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestCalcMiningReward(t *testing.T) {
-	var sum float64
-	for i := 0; i < TotalMinableBlks; i++ {
-		sum += calcMiningReward(i)
+func calcErrRate(lastblkindex int64) float64 {
+	var actual, expected int64
+	for blkindex := int64(1); blkindex < lastblkindex; blkindex++ {
+		expected = estimatedAccumulatedSupply(blkindex)
+		var real, estimated int64
+		if expected > actual {
+			estimated = expected - actual
+			real = rand.Int63n(int64(float64(estimated)*RATIO) + estimated)
+		}
+		actual += real
 	}
-	fmt.Println("sum:", sum)
-	require.Equal(t, int(math.Round(sum)), TotolProvisions)
+	return float64(actual-expected) / htdf2satoshi
 }
 
-func TestEstimatePeak(t *testing.T) {
-	estimated := estimatePeak()
-	fmt.Println("RewardsPerMonth:", MonthProvisions)
-	fmt.Println("AvgBlksPerMonth:", AvgBlksPerMonth)
-	fmt.Println("estimatedPeak:", estimated)
-	require.Equal(t, estimated, Peak)
+func TestSimulate(t *testing.T) {
+	threshold := float64(AvgBlkReward * 4)
+	require.True(t, math.Abs(calcErrRate(1001)) < threshold)
+	require.True(t, math.Abs(calcErrRate(10001)) < threshold)
+	require.True(t, math.Abs(calcErrRate(100001)) < threshold)
+	require.True(t, math.Abs(calcErrRate(1000001)) < threshold)
+	require.True(t, math.Abs(calcErrRate(10000001)) < threshold)
+	require.True(t, math.Abs(calcErrRate(TotalMinableBlks)) < threshold)
 }

@@ -12,28 +12,28 @@ const (
 	Period           = AvgBlksPerMonth
 	TotalMinableBlks = 40 * 12 * AvgBlksPerMonth
 	BlkRadianIntv    = 2.0 * math.Pi / float64(Period)
-	MonthProvisions  = 75000
-	AnnualProvisions = 12 * MonthProvisions
-	TotolProvisions  = 40 * AnnualProvisions
-	Peak             = 0.1446759259259267
-	DeltaRadian      = 0.0
-	Htdf2Satoshi     = 100000000
+
+	MonthProvisions            = float64(75000)                          // 75000 per month
+	AnnualProvisions           = 12 * MonthProvisions                    // 900000 per year
+	TotalProvisions            = 40 * AnnualProvisions                   // 36,000,000 for 40 years
+	CurrentProvisions          = float64(60000000)                       // 60,000,000 at genesis
+	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi) // 60,000,000 at genesis
+	TotalLiquid                = TotalProvisions + CurrentProvisions     // 96,000,000
+	TotalLiquidAsSatoshi       = int64(TotalLiquid * htdf2satoshi)       // 96,000,000 * 100,000,000
+
+	Peak         = 0.1446759259259267
+	DeltaRadian  = 0.0
+	htdf2satoshi = 100000000 // 1 htdf = 10 ** 8 satoshi
+
+	// junying-todo, 2019-12-05
+	AvgBlkReward          = MonthProvisions / AvgBlksPerMonth
+	AvgBlkRewardAsSatoshi = htdf2satoshi * AvgBlkReward
+
+	RATIO = 0.5
 )
 
-func estimatePeak() float64 {
-	sum := 0.0
-	var i int64
-	for i = 0; i < Period; i++ {
-		radian := 2.0 * math.Pi * float64(i) / float64(Period)
-		sum += math.Sin(radian) + 1.0
-	}
-	return float64(75000) / sum
-}
-
-func calcMiningReward(blkheight int) float64 {
-	if blkheight > TotalMinableBlks {
-		return 0.0
-	}
-	radian := BlkRadianIntv * float64(blkheight%Period)
-	return Peak * (math.Sin(DeltaRadian+radian) + 1.0)
+// junying-todo, 2019-12-05
+func estimatedAccumulatedSupply(blkindex int64) int64 {
+	return CurrentProvisionsAsSatoshi +
+		int64(float64(blkindex)*AvgBlkRewardAsSatoshi)
 }

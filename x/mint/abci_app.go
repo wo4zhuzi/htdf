@@ -2,16 +2,12 @@ package mint
 
 import (
 	"fmt"
+	"math/rand"
 
 	sdk "github.com/orientwalt/htdf/types"
 )
 
 // junying-todo, 2019-07-17
-//	6,000,000	25
-//	6,000,000	12.5
-// 	6,000,000	6.25
-//	...
-// ex:
 //	BlksPerRound = 100
 //	rewards+commission+community-pool
 //	hscli query distr rewards htdf1zulqmaqlsgrgmagenaqf02p8kfgsuqkdwgwj80
@@ -20,14 +16,6 @@ import (
 //	not true becasue proper get more rewards,that's, different rewards on every node.
 //  hscli query distr commission cosmosvaloper1lwjmdnks33xwnmfayc64ycprww49n33mtm92ne
 // 	hscli query distr community-pool
-const (
-	// Block Reward of First Round
-	InitialReward = 25 * 100000000 //25htdf = 2500000000satoshi
-	// Block Count Per Round
-	BlksPerRound = 6000000 //10 //6,000,000
-	// Last Round Index with Block Rewards
-	LastRoundIndex = 31
-)
 
 // junying-todo, 2019-07-15
 // single node: 88.2 for delegators, 11.8 for validator(commission)
@@ -39,13 +27,22 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	//BlocksPerYear := params.BlocksPerYear
 	// recalculate inflation rate
 	totalSupply := k.sk.TotalTokens(ctx)
+	fmt.Println("totalSupply", totalSupply)
 	//
 	curBlkHeight := ctx.BlockHeight()
 	fmt.Println("curBlkHeight:", curBlkHeight)
-	// BlockProvision = 25 / 2**roundIndex
-	BlkRewardInt64 := int64(Htdf2Satoshi * calcMiningReward(int(curBlkHeight)))
-	BlockProvision := sdk.NewDec(BlkRewardInt64)
-	fmt.Println("BlockProvision:", BlkRewardInt64)
+	// check terminate condition, junying-todo, 2019-12-05
+	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) || curBlkHeight > TotalMinableBlks {
+		return sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)
+	}
+	expectedSupply := estimatedAccumulatedSupply(curBlkHeight)
+	var actualReward, estimatedReward int64
+	if expectedSupply > totalSupply.Int64() {
+		estimatedReward = expectedSupply - totalSupply.Int64()
+		actualReward = rand.Int63n(int64(float64(estimatedReward)*RATIO) + estimatedReward)
+	}
+	BlockProvision := sdk.NewDec(actualReward)
+	fmt.Println("BlockProvision:", actualReward)
 	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
 	// Inflation = AnnualProvisions / totalSupply
 	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
