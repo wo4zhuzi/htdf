@@ -6,7 +6,6 @@ import (
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/staking/types"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -206,6 +205,7 @@ func TestUnbondDelegation(t *testing.T) {
 	require.Equal(t, remainingTokens, pool.BondedTokens)
 }
 
+//!!!!!!!!!!!!!!!!!!!!
 func TestUnbondingDelegationsMaxEntries(t *testing.T) {
 	ctx, _, keeper := CreateTestInput(t, false, 1)
 	pool := keeper.GetPool(ctx)
@@ -237,6 +237,9 @@ func TestUnbondingDelegationsMaxEntries(t *testing.T) {
 	}
 
 	// an additional unbond should fail due to max entries
+	// undelegateMsgStatus:= types.NewMsgSetUndelegateStatus(addrDels[0], addrVals[0], true)
+	// got := NewHandler(keeper)(ctx, undelegateMsgStatus)
+	// require.True(t, got.IsOK(), "expected set status to not be ok, got %v", got)
 	_, err := keeper.Undelegate(ctx, addrDels[0], addrVals[0], sdk.NewDec(1))
 	require.Error(t, err)
 
