@@ -24,13 +24,10 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	// fetch params
 	totalSupply := k.sk.TotalTokens(ctx)
 	fmt.Println("totalSupply", totalSupply)
-	//
+	// block index
 	curBlkHeight := ctx.BlockHeight()
 	fmt.Println("curBlkHeight:", curBlkHeight)
-	// sine params
-	curAmplitude := k.sk.Amplitude(ctx)
-	curCycle := k.sk.Cycle(ctx)
-	curLastIndex := k.sk.LastIndex(ctx)
+
 	// check terminate condition, junying-todo, 2019-12-05
 	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) { // || curBlkHeight > TotalMinableBlks {
 		return sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)
@@ -40,6 +37,10 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	// Inflation = AnnualProvisions / totalSupply
 	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
 
+	// sine params
+	curAmplitude := k.sk.Amplitude(ctx)
+	curCycle := k.sk.Cycle(ctx)
+	curLastIndex := k.sk.LastIndex(ctx)
 	// check if it's time for new cycle
 	if curBlkHeight >= (curLastIndex + curCycle) {
 		k.sk.SetAmplitude(ctx, randomAmplitude())

@@ -73,7 +73,7 @@ def simulateSine(lastblkindex=30000):
     plot([i for i in range(0,step)],rewards)
     return
 
-# simulateSine()
+simulateSine()
 
 def testSineExp():
     y = []
@@ -86,7 +86,7 @@ def testSineExp():
         y.append(amp)
     plot([i for i in range(0,lastidx)],y)
 
-testSineExp()
+# testSineExp()
 
 def calcCycle(idx):
     scycle = 1000

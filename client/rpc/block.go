@@ -17,11 +17,11 @@ import (
 	"github.com/orientwalt/htdf/utils/unit_convert"
 	"github.com/orientwalt/htdf/x/auth"
 	htdfservice "github.com/orientwalt/htdf/x/core"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmTypes "github.com/tendermint/tendermint/types"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 //BlockCommand returns the verified block data for a given heights
@@ -198,7 +198,6 @@ type GetTxResponse struct {
 	Height    int64               `json:"height"`
 	TxHash    string              `json:"txhash"`
 	Code      uint32              `json:"code,omitempty"`
-	Data      string              `json:"data,omitempty"`
 	Log       sdk.ABCIMessageLogs `json:"log,omitempty"`
 	Info      string              `json:"info,omitempty"`
 	GasWanted int64               `json:"gas_wanted,omitempty"`
@@ -206,6 +205,8 @@ type GetTxResponse struct {
 	Tags      sdk.StringTags      `json:"tags,omitempty"`
 	Codespace string              `json:"codespace,omitempty"`
 	Tx        StdTx               `json:"tx,omitempty"`
+	// Data      string              `json:"data,omitempty"`
+
 }
 
 // GetBlockDetailFn
@@ -355,7 +356,7 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 		getTxResponse.Height = txResp.Height
 		getTxResponse.TxHash = txResp.TxHash
 		getTxResponse.Code = txResp.Code
-		getTxResponse.Data = txResp.Data
+		// getTxResponse.Data = txResp.Data
 		getTxResponse.Log = txResp.Logs
 		getTxResponse.Info = txResp.Info
 		getTxResponse.GasWanted = txResp.GasWanted
