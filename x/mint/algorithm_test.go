@@ -12,7 +12,7 @@ func calcErrRate(lastblkindex int64) float64 {
 	var actual, expected int64
 	actual = CurrentProvisionsAsSatoshi
 	for blkindex := int64(1); blkindex < lastblkindex; blkindex++ {
-		expected = estimatedAccumulatedSupply(blkindex)
+		expected = expectedtotalSupply(blkindex)
 		var real, estimated int64
 		if expected > actual {
 			estimated = expected - actual

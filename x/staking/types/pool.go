@@ -10,8 +10,11 @@ import (
 
 // Pool - tracking bonded and not-bonded token supply of the bond denomination
 type Pool struct {
-	NotBondedTokens sdk.Int `json:"not_bonded_tokens"` // tokens which are not bonded to a validator (unbonded or unbonding)
-	BondedTokens    sdk.Int `json:"bonded_tokens"`     // tokens which are currently bonded to a validator
+	NotBondedTokens           sdk.Int `json:"not_bonded_tokens"`       // tokens which are not bonded to a validator (unbonded or unbonding)
+	BondedTokens              sdk.Int `json:"bonded_tokens"`           // tokens which are currently bonded to a validator
+	LastZeroRewardBlockHeight int64   `json:"last_zero_block_height"`  // block height at which block reward is zero
+	Amplitude                 int64   `json:"amplitude_sine_function"` //
+	CycleAsBlocks             int64   `json:"cycle_sine_function"`     // cycle which is randomly generated when block height is last zero-reward block height.
 }
 
 // nolint
@@ -25,10 +28,38 @@ func (p Pool) Equal(p2 Pool) bool {
 // initial pool for testing
 func InitialPool() Pool {
 	return Pool{
-		NotBondedTokens: sdk.ZeroInt(),
-		BondedTokens:    sdk.ZeroInt(),
+		NotBondedTokens:           sdk.ZeroInt(),
+		BondedTokens:              sdk.ZeroInt(),
+		LastZeroRewardBlockHeight: 1,
+		CycleAsBlocks:             0,
+		Amplitude:                 0,
 	}
 }
+
+// // junying-todo, 2019-12-06
+// func (p Pool) GetLastZeroRewardBlockHeight() int64 {
+// 	return p.LastZeroRewardBlockHeight
+// }
+
+// func (p Pool) SetLastZeroRewardBlockHeight(blockheight int64) {
+// 	p.LastZeroRewardBlockHeight = blockheight
+// }
+
+// func (p Pool) GetCycleAsBlocks() int64 {
+// 	return p.CycleAsBlocks
+// }
+
+// func (p Pool) SetCycleAsBlocks(nextcycle int64) {
+// 	p.CycleAsBlocks = nextcycle
+// }
+
+// func (p Pool) GetAmplitude() float64 {
+// 	return p.Amplitude
+// }
+
+// func (p Pool) SetAmplitude(amp float64) {
+// 	p.Amplitude = amp
+// }
 
 // Sum total of all staking tokens in the pool
 func (p Pool) TokenSupply() sdk.Int {

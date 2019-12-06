@@ -5,6 +5,7 @@ import (
 	"github.com/orientwalt/htdf/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"fmt"
 )
 
 const FlagPublicKey string = "pubkey"
@@ -44,8 +45,9 @@ func GetNewCmd() *cobra.Command {
 				return err
 			}
 
-			println("Create new account successful!")
-			println("Address: ",ks.Key().Address)
+			// println("Create new account successful!")
+			// println("Address: ",ks.Key().Address)
+			fmt.Println(ks.Key().Address)
 
 			return err
 		},
