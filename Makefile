@@ -148,6 +148,9 @@ start:
 	@echo starting daemon....
 	@hsd start
 
+start.rest:
+	@hscli rest-server --chain-id=${CHAIN_ID} --trust-node=true --laddr=tcp://0.0.0.0:1317 
+
 stop:
 	pkill -9 $(HTDFSERVICE_DAEMON_BINARY)
 

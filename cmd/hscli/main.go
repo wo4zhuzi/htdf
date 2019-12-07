@@ -12,10 +12,10 @@ import (
 	"github.com/orientwalt/htdf/client/lcd"
 	"github.com/orientwalt/htdf/client/rpc"
 	"github.com/orientwalt/htdf/client/tx"
-	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tendermint/go-amino"
+	"github.com/tendermint/tendermint/libs/cli"
 
 	sdk "github.com/orientwalt/htdf/types"
 	authcmd "github.com/orientwalt/htdf/x/auth/client/cli"
@@ -112,7 +112,7 @@ func main() {
 func registerRoutes(rs *lcd.RestServer) {
 	rs.CliCtx = rs.CliCtx.WithAccountDecoder(rs.Cdc)
 	rpc.RegisterRoutes(rs.CliCtx, rs.Mux)
-	//tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	hsrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, storeHS)
 	accrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	accrest.RegisterRoute(rs.CliCtx, rs.Mux, rs.Cdc, storeAcc)

@@ -182,9 +182,9 @@ type BlockInfo struct {
 }
 
 type DisplayFee struct {
-	Amount    []sdk.BigCoin `json:"amount"`
-	GasWanted string        `json:"gas_wanted"`
-	GasPrice  []sdk.BigCoin `json:"gas_price"`
+	// Amount    []sdk.BigCoin `json:"amount"` // junying-todo, 2019-12-07
+	GasWanted string `json:"gas_wanted"`
+	GasPrice  string `json:"gas_price"`
 }
 
 type StdTx struct {
@@ -312,12 +312,12 @@ func formatTxResult(cdc *codec.Codec, res *ctypes.ResultTx, resBlock *ctypes.Res
 //
 func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		vars := mux.Vars(r)
 		hashHexStr := vars["hash"]
 
 		hash, err := hex.DecodeString(hashHexStr)
 		if err != nil {
-			fmt.Printf("DecodeString error|err=%s\n", err)
 			sdkRest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -325,32 +325,27 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 		// get the node
 		node, err := cliCtx.GetNode()
 		if err != nil {
-			fmt.Printf("getNode error|err=%s\n", err)
 			sdkRest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+
 		resultTx, err := node.Tx(hash, !cliCtx.TrustNode)
 		if err != nil {
-			fmt.Printf("Tx error|err=%s\n", err)
 			sdkRest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		resBlocks, err := getBlocksForTxResults(cliCtx, []*ctypes.ResultTx{resultTx})
 		if err != nil {
-			fmt.Printf("Tx error|err=%s\n", err)
 			sdkRest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		txResp, err := formatTxResult(cdc, resultTx, resBlocks[resultTx.Height])
 		if err != nil {
-			fmt.Printf("formatTxResult error|err=%s\n", err)
 			sdkRest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-
-		//fmt.Printf("hashHexStr=%v\n", hashHexStr)
 
 		var getTxResponse GetTxResponse
 		getTxResponse.Height = txResp.Height
@@ -364,32 +359,32 @@ func GetTxFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 		getTxResponse.Tags = txResp.Tags
 		getTxResponse.Codespace = txResp.Codespace
 
-		switch currTx := txResp.Tx.(type) {
-		case auth.StdTx:
-			// getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Fee.Amount())
-			getTxResponse.Tx.Fee.GasWanted = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Fee.GasWanted, 10))
-			getTxResponse.Tx.Signatures = currTx.Signatures
-			getTxResponse.Tx.Memo = currTx.Memo
+		// switch currTx := txResp.Tx.(type) {
+		// case auth.StdTx:
+		// 	// getTxResponse.Tx.Fee.Amount = unit_convert.DefaultCoinsToBigCoins(currTx.Fee.Amount())
+		// 	// getTxResponse.Tx.Fee.GasWanted = unit_convert.DefaultAmoutToBigAmount(strconv.FormatUint(currTx.Fee.GasWanted, 10))
+		// 	getTxResponse.Tx.Signatures = currTx.Signatures
+		// 	getTxResponse.Tx.Memo = currTx.Memo
 
-			var displayTx DisplayTx
-			for _, msg := range currTx.GetMsgs() {
-				//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
-				switch msg := msg.(type) {
-				case htdfservice.MsgSend:
-					displayTx.From = msg.From
-					displayTx.To = msg.To
-					displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)
-					getTxResponse.Tx.Msgs = append(getTxResponse.Tx.Msgs, displayTx)
+		// 	var displayTx DisplayTx
+		// 	for _, msg := range currTx.GetMsgs() {
+		// 		//fmt.Printf("msg|route=%s|type=%s\n", msg.Route(), msg.Type())
+		// 		switch msg := msg.(type) {
+		// 		case htdfservice.MsgSend:
+		// 			displayTx.From = msg.From
+		// 			displayTx.To = msg.To
+		// 			displayTx.Amount = unit_convert.DefaultCoinsToBigCoins(msg.Amount)
+		// 			getTxResponse.Tx.Msgs = append(getTxResponse.Tx.Msgs, displayTx)
 
-				default:
-					fmt.Printf("ignore type|type=%s|route=%s\n", msg.Type(), msg.Route())
-					continue
-				}
-			}
+		// 		default:
+		// 			fmt.Printf("ignore type|type=%s|route=%s\n", msg.Type(), msg.Route())
+		// 			continue
+		// 		}
+		// 	}
 
-		default:
-			fmt.Printf("unknown type: %+v\n", currTx)
-		}
+		// default:
+		// 	fmt.Printf("unknown type: %+v\n", currTx)
+		// }
 
 		sdkRest.PostProcessResponse(w, cdc, getTxResponse, cliCtx.Indent)
 	}
