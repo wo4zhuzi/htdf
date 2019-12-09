@@ -37,7 +37,7 @@
 
 ### transaction rest
     [send transaction]
-    curl -X POST "http://localhost:1317/hs/send" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"htdf103x7taejyqwxrvyadu2yxd7u04wdqs5stq5a40\", \"memo\": \"Sent via Cosmos Voyager \",\"password\": \"12345678\", \"chain_id\": \"testchain\", \"account_number\": \"3\", \"sequence\": \"2\", \"gas_wanted\": \"200000\", \"gas_price\": \"100\", \"simulate\": false }, \"amount\": [ { \"denom\": \"htdf\", \"amount\": \"0.1\" } ],\"to\": \"htdf1ec5yff9km0tlaemmuz6lk5zftkjv44hztjtfnc\"}"
+    curl -X POST "http://localhost:1317/hs/send" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"base_req\": { \"from\": \"htdf1njv34aldy8nn90jjqursjvvyvgmk38ez6hwpne\", \"memo\": \"Sent via Cosmos Voyager \",\"password\": \"12345678\", \"chain_id\": \"testchain\", \"account_number\": \"0\", \"sequence\": \"0\", \"gas_wanted\": \"200000\", \"gas_price\": \"100\", \"simulate\": false }, \"amount\": [ { \"denom\": \"htdf\", \"amount\": \"0.1\" } ],\"to\": \"htdf1xxe7xd28zf4njuszp6m5hlut5mvlyna8pvdwf6\"}"
     > {
         "height": "119",
         "txhash": "02A61744D89A14E9C01C9B08B74EFADD6FE9DB9A625EBF0D4D936D1D765B7684",
