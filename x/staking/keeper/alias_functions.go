@@ -112,6 +112,40 @@ func (k Keeper) InflateSupply(ctx sdk.Context, newTokens sdk.Int) {
 	k.SetPool(ctx, pool)
 }
 
+// junying-todo, 2019-12-06
+func (k Keeper) Amplitude(ctx sdk.Context) int64 {
+	pool := k.GetPool(ctx)
+	return pool.Amplitude
+}
+
+func (k Keeper) Cycle(ctx sdk.Context) int64 {
+	pool := k.GetPool(ctx)
+	return pool.CycleAsBlocks
+}
+
+func (k Keeper) LastIndex(ctx sdk.Context) int64 {
+	pool := k.GetPool(ctx)
+	return pool.LastZeroRewardBlockHeight
+}
+
+func (k Keeper) SetAmplitude(ctx sdk.Context, amp int64) {
+	pool := k.GetPool(ctx)
+	pool.Amplitude = amp
+	k.SetPool(ctx, pool)
+}
+
+func (k Keeper) SetCycle(ctx sdk.Context, newcycle int64) {
+	pool := k.GetPool(ctx)
+	pool.CycleAsBlocks = newcycle
+	k.SetPool(ctx, pool)
+}
+
+func (k Keeper) SetLastIndex(ctx sdk.Context, index int64) {
+	pool := k.GetPool(ctx)
+	pool.LastZeroRewardBlockHeight = index
+	k.SetPool(ctx, pool)
+}
+
 // Implements DelegationSet
 
 var _ sdk.DelegationSet = Keeper{}

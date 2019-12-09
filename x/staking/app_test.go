@@ -97,7 +97,7 @@ func checkDelegation(
 
 func TestStakingMsgs(t *testing.T) {
 	mApp, keeper := getMockApp(t)
-	ctx := mApp.NewContext(true,abci.Header{})
+	//ctx := mApp.NewContext(true,abci.Header{})
 
 	genTokens := sdk.TokensFromTendermintPower(42)
 	bondTokens := sdk.TokensFromTendermintPower(10)
@@ -160,12 +160,12 @@ func TestStakingMsgs(t *testing.T) {
 
 	// begin unbonding
 	undelegateMsgStatus := NewMsgSetUndelegateStatus(addr2, sdk.ValAddress(addr1), true)
-	got := NewHandler(keeper)(ctx, undelegateMsgStatus)
-	require.True(t, got.IsOK(), "expected set status to not be ok, got %v", got)
+	header = abci.Header{Height: mApp.LastBlockHeight() + 1}	
+	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{undelegateMsgStatus}, []uint64{0}, []uint64{2}, true, true, priv1)
 
 	beginUnbondingMsg := NewMsgUndelegate(addr2, sdk.ValAddress(addr1), bondCoin)
 	header = abci.Header{Height: mApp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{beginUnbondingMsg}, []uint64{1}, []uint64{1}, true, true, priv2)
+	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{beginUnbondingMsg}, []uint64{0}, []uint64{1}, true, true, priv2)
 
 	// delegation should exist anymore
 	checkDelegation(t, mApp, keeper, addr2, sdk.ValAddress(addr1), false, sdk.Dec{})

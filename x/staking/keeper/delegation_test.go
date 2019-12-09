@@ -232,6 +232,11 @@ func TestUnbondingDelegationsMaxEntries(t *testing.T) {
 	var completionTime time.Time
 	for i := uint16(0); i < maxEntries; i++ {
 		var err error
+		del, found := keeper.GetDelegation(ctx, addrDels[0], addrVals[0])
+		if found {
+			del.Status = true
+			keeper.UpgradeDelegation(ctx, del)
+		}
 		completionTime, err = keeper.Undelegate(ctx, addrDels[0], addrVals[0], sdk.NewDec(1))
 		require.NoError(t, err)
 	}
@@ -288,6 +293,11 @@ func TestUndelegateSelfDelegationBelowMinSelfDelegation(t *testing.T) {
 	keeper.SetDelegation(ctx, delegation)
 
 	val0AccAddr := sdk.AccAddress(addrVals[0].Bytes())
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.Undelegate(ctx, val0AccAddr, addrVals[0], sdk.TokensFromTendermintPower(6).ToDec())
 	require.NoError(t, err)
 
@@ -340,6 +350,11 @@ func TestUndelegateFromUnbondingValidator(t *testing.T) {
 
 	// unbond the all self-delegation to put validator in unbonding state
 	val0AccAddr := sdk.AccAddress(addrVals[0].Bytes())
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.Undelegate(ctx, val0AccAddr, addrVals[0], valTokens.ToDec())
 	require.NoError(t, err)
 
@@ -360,6 +375,11 @@ func TestUndelegateFromUnbondingValidator(t *testing.T) {
 	ctx = ctx.WithBlockTime(blockTime2)
 
 	// unbond some of the other delegation's shares
+	del, f = keeper.GetDelegation(ctx, addrDels[0], addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err = keeper.Undelegate(ctx, addrDels[0], addrVals[0], sdk.NewDec(6))
 	require.NoError(t, err)
 
@@ -406,6 +426,11 @@ func TestUndelegateFromUnbondedValidator(t *testing.T) {
 	ctx = ctx.WithBlockTime(time.Unix(333, 0))
 
 	// unbond the all self-delegation to put validator in unbonding state
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.Undelegate(ctx, val0AccAddr, addrVals[0], valTokens.ToDec())
 	require.NoError(t, err)
 
@@ -429,6 +454,11 @@ func TestUndelegateFromUnbondedValidator(t *testing.T) {
 	require.Equal(t, validator.Status, sdk.Unbonded)
 
 	// unbond some of the other delegation's shares
+	del, f = keeper.GetDelegation(ctx, addrDels[0], addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	unbondTokens := sdk.TokensFromTendermintPower(6)
 	_, err = keeper.Undelegate(ctx, addrDels[0], addrVals[0], unbondTokens.ToDec())
 	require.NoError(t, err)
@@ -477,6 +507,11 @@ func TestUnbondingAllDelegationFromValidator(t *testing.T) {
 	ctx = ctx.WithBlockTime(time.Unix(333, 0))
 
 	// unbond the all self-delegation to put validator in unbonding state
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.Undelegate(ctx, val0AccAddr, addrVals[0], valTokens.ToDec())
 	require.NoError(t, err)
 
@@ -485,6 +520,11 @@ func TestUnbondingAllDelegationFromValidator(t *testing.T) {
 	require.Equal(t, 1, len(updates))
 
 	// unbond all the remaining delegation
+	del, f = keeper.GetDelegation(ctx, addrDels[0], addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err = keeper.Undelegate(ctx, addrDels[0], addrVals[0], delTokens.ToDec())
 	require.NoError(t, err)
 
@@ -643,11 +683,21 @@ func TestRedelegationMaxEntries(t *testing.T) {
 	var completionTime time.Time
 	for i := uint16(0); i < maxEntries; i++ {
 		var err error
+		del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+		if f {
+			del.Status = true
+			keeper.UpgradeDelegation(ctx, del)
+		}
 		completionTime, err = keeper.BeginRedelegation(ctx, val0AccAddr, addrVals[0], addrVals[1], sdk.NewDec(1))
 		require.NoError(t, err)
 	}
 
 	// an additional redelegation should fail due to max entries
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.BeginRedelegation(ctx, val0AccAddr, addrVals[0], addrVals[1], sdk.NewDec(1))
 	require.Error(t, err)
 
@@ -699,6 +749,11 @@ func TestRedelegateSelfDelegation(t *testing.T) {
 	delegation := types.NewDelegation(addrDels[0], addrVals[0], issuedShares)
 	keeper.SetDelegation(ctx, delegation)
 
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.BeginRedelegation(ctx, val0AccAddr, addrVals[0], addrVals[1], delTokens.ToDec())
 	require.NoError(t, err)
 
@@ -757,6 +812,11 @@ func TestRedelegateFromUnbondingValidator(t *testing.T) {
 	ctx = ctx.WithBlockHeader(header)
 
 	// unbond the all self-delegation to put validator in unbonding state
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.Undelegate(ctx, val0AccAddr, addrVals[0], delTokens.ToDec())
 	require.NoError(t, err)
 
@@ -779,6 +839,11 @@ func TestRedelegateFromUnbondingValidator(t *testing.T) {
 	ctx = ctx.WithBlockHeader(header)
 
 	// unbond some of the other delegation's shares
+	del, f = keeper.GetDelegation(ctx, addrDels[0], addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	redelegateTokens := sdk.TokensFromTendermintPower(6)
 	_, err = keeper.BeginRedelegation(ctx, addrDels[0], addrVals[0], addrVals[1], redelegateTokens.ToDec())
 	require.NoError(t, err)
@@ -833,6 +898,11 @@ func TestRedelegateFromUnbondedValidator(t *testing.T) {
 	ctx = ctx.WithBlockTime(time.Unix(333, 0))
 
 	// unbond the all self-delegation to put validator in unbonding state
+	del, f := keeper.GetDelegation(ctx, val0AccAddr, addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	_, err := keeper.Undelegate(ctx, val0AccAddr, addrVals[0], delTokens.ToDec())
 	require.NoError(t, err)
 
@@ -850,6 +920,11 @@ func TestRedelegateFromUnbondedValidator(t *testing.T) {
 	keeper.unbondingToUnbonded(ctx, validator)
 
 	// redelegate some of the delegation's shares
+	del, f = keeper.GetDelegation(ctx, addrDels[0], addrVals[0])
+	if f {
+		del.Status = true
+		keeper.UpgradeDelegation(ctx, del)
+	}
 	redelegationTokens := sdk.TokensFromTendermintPower(6)
 	_, err = keeper.BeginRedelegation(ctx, addrDels[0], addrVals[0], addrVals[1], redelegationTokens.ToDec())
 	require.NoError(t, err)

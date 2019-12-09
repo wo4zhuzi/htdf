@@ -2,7 +2,6 @@ package mint
 
 import (
 	"fmt"
-	"math/rand"
 
 	sdk "github.com/orientwalt/htdf/types"
 )
@@ -23,29 +22,40 @@ import (
 // commission rate changes?
 func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	// fetch params
-	//params := k.GetParams(ctx)
-	//BlocksPerYear := params.BlocksPerYear
-	// recalculate inflation rate
 	totalSupply := k.sk.TotalTokens(ctx)
 	fmt.Println("totalSupply", totalSupply)
-	//
+	// block index
 	curBlkHeight := ctx.BlockHeight()
 	fmt.Println("curBlkHeight:", curBlkHeight)
+
 	// check terminate condition, junying-todo, 2019-12-05
-	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) || curBlkHeight > TotalMinableBlks {
+	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) { // || curBlkHeight > TotalMinableBlks {
 		return sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)
 	}
-	expectedSupply := estimatedAccumulatedSupply(curBlkHeight)
-	var actualReward, estimatedReward int64
-	if expectedSupply > totalSupply.Int64() {
-		estimatedReward = expectedSupply - totalSupply.Int64()
-		actualReward = rand.Int63n(int64(float64(estimatedReward)*RATIO) + estimatedReward)
-	}
-	BlockProvision := sdk.NewDec(actualReward)
-	fmt.Println("BlockProvision:", actualReward)
+
 	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
 	// Inflation = AnnualProvisions / totalSupply
 	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
+
+	// sine params
+	curAmplitude := k.sk.Amplitude(ctx)
+	curCycle := k.sk.Cycle(ctx)
+	curLastIndex := k.sk.LastIndex(ctx)
+	// check if it's time for new cycle
+	if curBlkHeight >= (curLastIndex + curCycle) {
+		k.sk.SetAmplitude(ctx, randomAmplitude())
+		k.sk.SetCycle(ctx, randomCycle())
+		k.sk.SetLastIndex(ctx, curBlkHeight)
+		return AnnualProvisionsDec, Inflation, sdk.NewDec(0)
+	}
+
+	BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight)
+	BlockProvision := sdk.NewDec(BlockReward)
+	fmt.Println("BlockProvision:", BlockReward)
+	fmt.Println("curAmplitude:", curAmplitude)
+	fmt.Println("curCycle:", curCycle)
+	fmt.Println("curLastIndex:", curLastIndex)
+
 	return AnnualProvisionsDec, Inflation, BlockProvision
 }
 
@@ -69,24 +79,3 @@ func BeginBlocker(ctx sdk.Context, k Keeper) {
 	k.sk.InflateSupply(ctx, mintedCoin.Amount)
 
 }
-
-// Inflate every block, update inflation parameters once per hour
-// func BeginBlocker(ctx sdk.Context, k Keeper) {
-
-// 	// fetch stored minter & params
-// 	minter := k.GetMinter(ctx)
-// 	params := k.GetParams(ctx)
-
-// 	// recalculate inflation rate
-// 	totalSupply := k.sk.TotalTokens(ctx)
-// 	bondedRatio := k.sk.BondedRatio(ctx)
-// 	minter.Inflation = minter.NextInflationRate(params, bondedRatio)
-// 	minter.AnnualProvisions = minter.NextAnnualProvisions(params, totalSupply)
-// 	k.SetMinter(ctx, minter)
-
-// 	// mint coins, add to collected fees, update supply
-// 	mintedCoin := minter.BlockProvision(params)
-// 	k.fck.AddCollectedFees(ctx, sdk.Coins{mintedCoin})
-// 	k.sk.InflateSupply(ctx, mintedCoin.Amount)
-
-// }

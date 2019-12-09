@@ -307,7 +307,7 @@
 	  }
 	}
 
-	[get tx by hash]-NOT PASSED
+	[get tx by hash]
 	Curl
 	curl -X GET "http://localhost:1317/txs/02A61744D89A14E9C01C9B08B74EFADD6FE9DB9A625EBF0D4D936D1D765B7684" -H "accept: application/json"
 	>{
