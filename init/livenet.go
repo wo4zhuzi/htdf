@@ -299,7 +299,8 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 		txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID) //.WithMemo(memo)
 
 		addr := sdk.AccAddress.String(accaddr)
-		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
+		defaultKeyStoreHome := filepath.Join(clientDir, "keystores")
+		ksw := keystore.NewKeyStoreWallet(defaultKeyStoreHome)
 		signedTx, err :=ksw.SignStdTx(txBldr,unsignedTx,addr, keyPass)
 		if err != nil {
 			_ = os.RemoveAll(outDir)
