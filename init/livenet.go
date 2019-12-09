@@ -18,12 +18,12 @@ import (
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/x/staking"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	tmtime "github.com/tendermint/tendermint/types/time"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/orientwalt/htdf/accounts/keystore"
 	v0 "github.com/orientwalt/htdf/app/v0"
@@ -37,13 +37,13 @@ func LiveNetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "livenet",
 		Short: "Initialize files for a hsd testnet",
-		Long: `testnet will create "v" number of directories and populate each with
+		Long: `livenet will create "v" number of directories and populate each with
 necessary files (private validator, genesis, config, etc.).
 
 Note, strict routability for addresses is turned off in the config file.
 
 Example:
-	hsd testnet --v 4 --output-dir ./output --starting-ip-address 192.168.10.2
+	hsd livenet --v 4 --output-dir ./output --starting-ip-address 192.168.10.2
 	`,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			config := ctx.Config
@@ -76,8 +76,8 @@ Example:
 		client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created",
 	)
 	cmd.Flags().String(
-		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
-		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 0.01photino,0.001stake)",
+		server.FlagMinGasPrices, fmt.Sprintf("100%s", sdk.DefaultBondDenom),
+		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 100satoshi)",
 	)
 	cmd.Flags().String(flagIssuerBechAddress, "", "issuer bech address")
 	// cmd.Flags().String(flagStakerBechAddress, "", "staker bech address") // blocked by junying, 2019-08-27, reason: stake doesn't exist anymore
@@ -87,15 +87,10 @@ Example:
 
 var (
 	// issuer allocation amount
-	issuerAccTokens = sdk.TokensFromTendermintPower(50000000000) //5*10 ** 10(* 10 ** 6)
-
-	// staker allocation amount
-	// blocked by junying, 2019-08-27
-	// reason: stake doesn't exist anymore
-	// stakerStakingTokens = sdk.TokensFromTendermintPower(10000000) // 10 ** 7(* 10 ** 6)
+	issuerAccTokens = sdk.TokensFromTendermintPower(56000000) // 5.6*10**7(*10**8)
 
 	// validator stake alloc amount
-	validatorStakingTokens = sdk.TokensFromTendermintPower(1000000) // 10 ** 6(* 10 ** 6)
+	validatorStakingTokens = sdk.TokensFromTendermintPower(1000000) // (4*)0.1*10**7(*10**8)
 )
 
 func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
@@ -301,7 +296,7 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 		addr := sdk.AccAddress.String(accaddr)
 		defaultKeyStoreHome := filepath.Join(clientDir, "keystores")
 		ksw := keystore.NewKeyStoreWallet(defaultKeyStoreHome)
-		signedTx, err :=ksw.SignStdTx(txBldr,unsignedTx,addr, keyPass)
+		signedTx, err := ksw.SignStdTx(txBldr, unsignedTx, addr, keyPass)
 		if err != nil {
 			_ = os.RemoveAll(outDir)
 			return err
