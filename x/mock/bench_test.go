@@ -13,10 +13,10 @@ import (
 func getBenchmarkMockApp() (*App, error) {
 	mapp := NewApp()
 
-	// bank.RegisterCodec(mapp.Cdc)
-	// bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper)
-	// mapp.Router().AddRoute("bank", []*sdk.KVStoreKey{mapp.KeyAccount}, bank.NewHandler(bankKeeper))
-
+	//htdfservice.RegisterCodec(mapp.Cdc)
+	// bankKeeper := auth.NewAccountKeeper(mapp.AccountKeeper)
+	// //mapp.Router().AddRoute("htdfservice", []*sdk.KVStoreKey{mapp.KeyAccount}, htdfservice.NewHandler(bankKeeper))
+	// mapp.Router().AddRoute(msgRoute, func(ctx sdk.Context, msg sdk.Msg) (res sdk.Result) { return })
 	err := mapp.CompleteSetup()
 	return mapp, err
 }
