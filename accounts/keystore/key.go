@@ -145,14 +145,21 @@ func conversionPrivKey(strPrivateKey string) (crypto.PrivKey, bool, error) {
 		return nil, false, err
 	}
 
-	if len(tmpPrivKey) != 32 {
-		return nil, false, err
-	}
+	// if len(tmpPrivKey) != 32 {
+	// 	return nil, false, err
+	// }
 
-	privateKey32 := [32]byte{}
-	copy(privateKey32[32:], tmpPrivKey)
+	var privateKey32 [32]byte
+	setBytes(&privateKey32, tmpPrivKey)
 
 	privkey := secp256k1.PrivKeySecp256k1(privateKey32)
 
 	return privkey, true, nil
+}
+
+func setBytes(a *[32]byte, b []byte) {
+	if len(b) > len(a) {
+		b = b[len(b)-32:]
+	}
+	copy(a[32-len(b):], b)
 }
