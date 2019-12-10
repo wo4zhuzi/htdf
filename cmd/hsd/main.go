@@ -2,15 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/orientwalt/htdf/codec"
+	"github.com/orientwalt/htdf/params"
 	"io"
 
 	"github.com/orientwalt/htdf/server"
 	"github.com/orientwalt/htdf/store"
 	sdk "github.com/orientwalt/htdf/types"
-	"github.com/tendermint/tendermint/libs/cli"
-	"github.com/tendermint/tendermint/libs/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/log"
 
 	bam "github.com/orientwalt/htdf/app"
 	hsinit "github.com/orientwalt/htdf/init"
@@ -25,7 +28,10 @@ const (
 	flagOverwrite = "overwrite"
 )
 
-var invCheckPeriod uint
+var (
+	invCheckPeriod uint
+	GitCommit      = ""
+)
 
 func main() {
 	cobra.EnableCommandSorting = false
@@ -53,6 +59,7 @@ func main() {
 	rootCmd.AddCommand(hsinit.AddGenesisAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.ValidateGenesisCmd(ctx, cdc))
 	rootCmd.AddCommand(lite.Commands())
+	rootCmd.AddCommand(versionCmd(ctx, cdc))
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 
@@ -65,6 +72,18 @@ func main() {
 		// handle with #870
 		panic(err)
 	}
+}
+
+func versionCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+	cbCmd := &cobra.Command{
+		Use:   "version",
+		Short: "print version, api security level",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("GitCommit=%s|version=%s|versionMeta=%s|\n", GitCommit, params.Version, params.VersionMeta)
+		},
+	}
+
+	return cbCmd
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, config *cfg.InstrumentationConfig) abci.Application {
