@@ -123,12 +123,12 @@ func recoverKey(strPrivateKey string, passPhrase string) (*Key, error) {
 		return nil, err
 	}
 
-	address := pub.Address().String()
+	address := sdk.AccAddress(pub.Address().Bytes())
 
 	privArmor := mintkey.EncryptArmorPrivKey(privKey, passPhrase)
 
 	key := &Key{
-		Address: address,
+		Address: address.String(),
 		PubKey:  pubKey,
 		PrivKey: privArmor,
 	}
