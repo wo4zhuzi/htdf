@@ -46,12 +46,14 @@ update:
 	@rm -rf .vendor-new
 	@dep ensure -v -update
 
-build: unittest
+buildquick:
 	echo BUILD_FLAGS=$(BUILD_FLAGS)
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hsd ./cmd/hsd
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hscli ./cmd/hscli
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hsutils ./cmd/hsutil
 	@go build  $(BUILD_FLAGS) -o ./build/bin/hsinfo ./cmd/hsinfo
+
+build: unittest buildquick
 
 build-batchsend:
 	@build/env.sh go run build/ci.go install ./cmd/hsbatchsend
