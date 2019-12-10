@@ -23,7 +23,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router) {
 	r.HandleFunc("/validatorsets/latest", LatestValidatorSetRequestHandlerFn(cliCtx)).Methods("GET")
 	r.HandleFunc("/validatorsets/{height}", ValidatorSetRequestHandlerFn(cliCtx)).Methods("GET")
 	r.HandleFunc("/block_detail/{height}", GetBlockDetailFn(cliCtx, cdc)).Methods("GET")
-	// r.HandleFunc("/transaction/{hash}", GetTxFn(cdc, cliCtx)).Methods("GET") // junying-todo, 2019-12-07, duplicated
+	r.HandleFunc("/transaction/{hash}", GetTxFn(cdc, cliCtx)).Methods("GET")
 }
 
 // cli version REST handler endpoint
