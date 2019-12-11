@@ -57,11 +57,14 @@ func randomCycle() int64 {
 }
 
 //
-func calcReward(amp int64, cycle int64, step int64) float64 {
+func calcRewardFloat(amp int64, cycle int64, step int64) float64 {
+	if cycle == 0 {
+		return 0.0
+	}
 	radian := 2.0 * math.Pi * float64(step) / float64(cycle)
-	return float64(amp)*math.Sin(radian) + AvgBlkReward
+	return float64(amp)*math.Sin(radian) + AvgBlkRewardAsSatoshi
 }
 
 func calcRewardAsSatoshi(amp int64, cycle int64, step int64) int64 {
-	return int64(calcReward(amp, cycle, step))
+	return int64(calcRewardFloat(amp, cycle, step))
 }

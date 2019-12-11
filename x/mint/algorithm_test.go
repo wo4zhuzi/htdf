@@ -2,33 +2,34 @@ package mint
 
 import (
 	"math"
-	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func calcErrRate(lastblkindex int64) float64 {
-	var actual, expected int64
-	actual = CurrentProvisionsAsSatoshi
-	for blkindex := int64(1); blkindex < lastblkindex; blkindex++ {
-		expected = expectedtotalSupply(blkindex)
-		var real, estimated int64
-		if expected > actual {
-			estimated = expected - actual
-			real = rand.Int63n(int64(float64(estimated)*RATIO) + estimated)
+	var totalSupply = CurrentProvisionsAsSatoshi
+	var curBlkHeight int64
+	var curAmplitude, curCycle, curLastIndex int64
+	for curBlkHeight = 1; curBlkHeight < (lastblkindex + MAX_CYCLE/2); curBlkHeight++ {
+		// check if mined is greater than expected
+		if totalSupply >= TotalLiquidAsSatoshi {
+			break
 		}
-		actual += real
+		// check if it's time for new cycle
+		if curBlkHeight >= (curLastIndex + curCycle) {
+			curAmplitude = randomAmplitude()
+			curCycle = randomCycle()
+			curLastIndex = curBlkHeight
+		}
+		BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight)
+		totalSupply += BlockReward
 	}
-	return float64(actual-expected) / htdf2satoshi
+	return math.Abs(float64(curBlkHeight - lastblkindex))
 }
 
-func TestSimulate(t *testing.T) {
-	threshold := float64(AvgBlkReward * 20)
-	require.True(t, math.Abs(calcErrRate(1001)) < threshold)
-	require.True(t, math.Abs(calcErrRate(10001)) < threshold)
-	require.True(t, math.Abs(calcErrRate(100001)) < threshold)
-	require.True(t, math.Abs(calcErrRate(1000001)) < threshold)
-	require.True(t, math.Abs(calcErrRate(10000001)) < threshold)
-	require.True(t, math.Abs(calcErrRate(TotalMinableBlks)) < threshold)
+func TestRandomSine(t *testing.T) {
+	threshold := float64(MAX_CYCLE / 2)
+	actual := calcErrRate(TotalMinableBlks)
+	require.True(t, actual < threshold)
 }

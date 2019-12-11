@@ -46,10 +46,9 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 		k.sk.SetAmplitude(ctx, randomAmplitude())
 		k.sk.SetCycle(ctx, randomCycle())
 		k.sk.SetLastIndex(ctx, curBlkHeight)
-		return AnnualProvisionsDec, Inflation, sdk.NewDec(0)
 	}
 
-	BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight)
+	BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight-curLastIndex)
 	BlockProvision := sdk.NewDec(BlockReward)
 	fmt.Println("BlockProvision:", BlockReward)
 	fmt.Println("curAmplitude:", curAmplitude)
