@@ -31,7 +31,7 @@ func InitialPool() Pool {
 		NotBondedTokens:           sdk.ZeroInt(),
 		BondedTokens:              sdk.ZeroInt(),
 		LastZeroRewardBlockHeight: 1,
-		CycleAsBlocks:             0,
+		CycleAsBlocks:             1,
 		Amplitude:                 0,
 	}
 }
