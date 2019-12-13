@@ -18,6 +18,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+	newevmtypes "github.com/orientwalt/htdf/evm/types"
 )
 
 const (
@@ -60,6 +61,8 @@ type App struct {
 	KeyUpgrade  *sdk.KVStoreKey
 	KeyGuardian *sdk.KVStoreKey
 
+	KeyStorage  *sdk.KVStoreKey
+	KeyCode *sdk.KVStoreKey
 	// TODO: Abstract this out from not needing to be auth specifically
 	AccountKeeper auth.AccountKeeper
 	BankKeeper    bank.Keeper
@@ -81,6 +84,7 @@ func NewApp() *App {
 	auth.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	newevmtypes.RegisterCodec(cdc)
 
 	bApp := bam.NewBaseApp("mock", logger, db, auth.DefaultTxDecoder(cdc), bam.SetPruning("nothing"))
 
@@ -97,6 +101,8 @@ func NewApp() *App {
 		TkeyParams:       sdk.NewTransientStoreKey("transient_params"),
 		KeyUpgrade:       sdk.NewKVStoreKey("upgrade"),
 		KeyGuardian:      sdk.NewKVStoreKey("guardian"),
+		KeyStorage:		  sdk.NewKVStoreKey("keystore"),
+		KeyCode:		  sdk.NewKVStoreKey("KeyCode"),
 		TotalCoinsSupply: sdk.Coins{},
 	}
 	app.ParamsKeeper = params.NewKeeper(
@@ -141,7 +147,8 @@ func (app *App) CompleteSetup(newKeys ...sdk.StoreKey) error {
 	newKeys = append(newKeys, app.TkeyParams)
 	newKeys = append(newKeys, app.TkeyStake)
 	newKeys = append(newKeys, app.KeyGuardian)
-
+	newKeys = append(newKeys, app.KeyStorage)
+	newKeys = append(newKeys, app.KeyCode)
 	for _, key := range newKeys {
 		switch key.(type) {
 		case *sdk.KVStoreKey:
@@ -164,7 +171,8 @@ func (app *App) InitChainer(ctx sdk.Context, _ abci.RequestInitChain) abci.Respo
 	for _, genacc := range app.GenesisAccounts {
 		acc := app.AccountKeeper.NewAccountWithAddress(ctx, genacc.GetAddress())
 		acc.SetCoins(genacc.GetCoins())
-		app.AccountKeeper.SetGenesisAccount(ctx, acc)
+		evmacc := newevmtypes.NewAccount(acc)
+		app.AccountKeeper.SetGenesisAccount(ctx, evmacc)
 	}
 
 	auth.InitGenesis(ctx, app.AccountKeeper, app.FeeKeeper, auth.DefaultGenesisState())

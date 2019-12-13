@@ -43,7 +43,8 @@ func RandFromBigInterval(r *rand.Rand, intervals []BigInterval) sdk.Int {
 func CheckBalance(t *testing.T, app *App, addr sdk.AccAddress, exp sdk.Coins) {
 	ctxCheck := app.BaseApp.NewContext(true, abci.Header{})
 	res := app.AccountKeeper.GetAccount(ctxCheck, addr)
-
+	println("**********",res.GetCoins().String())
+	println("**********",exp.String())
 	require.Equal(t, exp, res.GetCoins())
 }
 
@@ -77,7 +78,7 @@ func SignCheckDeliver(
 	tx := GenTx(msgs, accNums, seq, priv...)
 	// Must simulate now as CheckTx doesn't run Msgs anymore
 	res := app.Simulate(tx)
-
+	
 	if expSimPass {
 		require.Equal(t, sdk.CodeOK, res.Code, res.Log)
 	} else {
@@ -87,15 +88,15 @@ func SignCheckDeliver(
 	// Simulate a sending a transaction and committing a block
 	app.BeginBlock(abci.RequestBeginBlock{})
 	res = app.Deliver(tx)
-
+	
 	if expPass {
 		require.Equal(t, sdk.CodeOK, res.Code, res.Log)
 	} else {
 		require.NotEqual(t, sdk.CodeOK, res.Code, res.Log)
 	}
-
+	
 	app.EndBlock(abci.RequestEndBlock{})
 	app.Commit()
-
+	
 	return res
 }
