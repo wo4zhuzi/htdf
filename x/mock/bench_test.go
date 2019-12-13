@@ -15,9 +15,7 @@ func getBenchmarkMockApp() (*App, error) {
 	mapp := NewApp()
 
 	htdfservice.RegisterCodec(mapp.Cdc)
-	// bankKeeper := auth.NewAccountKeeper(mapp.AccountKeeper)
 	mapp.Router().AddRoute("htdfservice", []*sdk.KVStoreKey{mapp.KeyAccount}, htdfservice.NewHandler(mapp.AccountKeeper, mapp.FeeKeeper, mapp.KeyStorage, mapp.KeyCode))
-	// mapp.Router().AddRoute(msgRoute, func(ctx sdk.Context, msg sdk.Msg) (res sdk.Result) { return })
 	err := mapp.CompleteSetup()
 	return mapp, err
 }

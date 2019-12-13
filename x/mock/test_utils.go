@@ -43,8 +43,6 @@ func RandFromBigInterval(r *rand.Rand, intervals []BigInterval) sdk.Int {
 func CheckBalance(t *testing.T, app *App, addr sdk.AccAddress, exp sdk.Coins) {
 	ctxCheck := app.BaseApp.NewContext(true, abci.Header{})
 	res := app.AccountKeeper.GetAccount(ctxCheck, addr)
-	println("**********",res.GetCoins().String())
-	println("**********",exp.String())
 	require.Equal(t, exp, res.GetCoins())
 }
 
