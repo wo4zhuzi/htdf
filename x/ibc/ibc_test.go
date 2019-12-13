@@ -63,7 +63,6 @@ func makeCodec() *codec.Codec {
 
 	// Register Msgs
 	cdc.RegisterInterface((*sdk.Msg)(nil), nil)
-	cdc.RegisterConcrete(bank.MsgSend{}, "test/ibc/Send", nil)
 	cdc.RegisterConcrete(MsgIBCTransfer{}, "test/ibc/MsgIBCTransfer", nil)
 	cdc.RegisterConcrete(MsgIBCReceive{}, "test/ibc/MsgIBCReceive", nil)
 

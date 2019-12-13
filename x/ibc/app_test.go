@@ -12,6 +12,7 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
+	newevmtypes "github.com/orientwalt/htdf/evm/types"
 )
 
 // initialize the mock application for this module
@@ -22,9 +23,9 @@ func getMockApp(t *testing.T) *mock.App {
 	keyIBC := sdk.NewKVStoreKey("ibc")
 	ibcMapper := NewMapper(mapp.Cdc, keyIBC, DefaultCodespace)
 	bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper,
-		mapp.ParamsKeeper.Subspace(bank.DefaultParamspace),
+		mapp.ParamsKeeper.Subspace("bank_test"),
 		bank.DefaultCodespace)
-	mapp.Router().AddRoute("ibc", NewHandler(ibcMapper, bankKeeper))
+	mapp.Router().AddRoute("ibc", []*sdk.KVStoreKey{mapp.KeyAccount},NewHandler(ibcMapper, bankKeeper))
 
 	require.NoError(t, mapp.CompleteSetup(keyIBC))
 	return mapp
@@ -41,18 +42,20 @@ func TestIBCMsgs(t *testing.T) {
 	coins := sdk.Coins{sdk.NewInt64Coin("foocoin", 10)}
 	var emptyCoins sdk.Coins
 
-	acc := &auth.BaseAccount{
+	acc :=&auth.BaseAccount{
 		Address: addr1,
 		Coins:   coins,
 	}
-	accs := []auth.Account{acc}
 
-	mock.SetGenesis(mapp, accs)
+	accs := newevmtypes.NewAccount(acc)
+	//accs := []auth.Account{acc}
+
+	mock.SetGenesis(mapp, []auth.Account{accs})
 
 	// A checkTx context (true)
 	ctxCheck := mapp.BaseApp.NewContext(true, abci.Header{})
 	res1 := mapp.AccountKeeper.GetAccount(ctxCheck, addr1)
-	require.Equal(t, acc, res1)
+	require.Equal(t, accs, res1)
 
 	packet := IBCPacket{
 		SrcAddr:   addr1,
@@ -72,17 +75,17 @@ func TestIBCMsgs(t *testing.T) {
 		Sequence:  0,
 	}
 
-	header := abci.Header{Height: mapp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, header, []sdk.Msg{transferMsg}, []uint64{0}, []uint64{0}, true, true, priv1)
+	//header := abci.Header{Height: mapp.LastBlockHeight() + 1}
+	mock.SignCheckDeliver(t,mapp.BaseApp,[]sdk.Msg{transferMsg}, []uint64{0}, []uint64{0}, true, true, priv1)
 	mock.CheckBalance(t, mapp, addr1, emptyCoins)
 
-	header = abci.Header{Height: mapp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, header, []sdk.Msg{transferMsg}, []uint64{0}, []uint64{1}, false, false, priv1)
+	//header = abci.Header{Height: mapp.LastBlockHeight() + 1}
+	mock.SignCheckDeliver(t,  mapp.BaseApp, []sdk.Msg{transferMsg}, []uint64{0}, []uint64{1}, false, false, priv1)
 
-	header = abci.Header{Height: mapp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, header, []sdk.Msg{receiveMsg}, []uint64{0}, []uint64{2}, true, true, priv1)
+	//header = abci.Header{Height: mapp.LastBlockHeight() + 1}
+	mock.SignCheckDeliver(t,  mapp.BaseApp, []sdk.Msg{receiveMsg}, []uint64{0}, []uint64{2}, true, true, priv1)
 	mock.CheckBalance(t, mapp, addr1, coins)
 
-	header = abci.Header{Height: mapp.LastBlockHeight() + 1}
-	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, header, []sdk.Msg{receiveMsg}, []uint64{0}, []uint64{2}, false, false, priv1)
+	//header = abci.Header{Height: mapp.LastBlockHeight() + 1}
+	mock.SignCheckDeliver(t,  mapp.BaseApp,  []sdk.Msg{receiveMsg}, []uint64{0}, []uint64{2}, false, false, priv1)
 }
