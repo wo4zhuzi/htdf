@@ -67,7 +67,7 @@ $ curl http://127.0.0.1:1317/hs/send \
             }'
 ```
 if /send success , will return txHash;
-query tx by txHash ( REST api /transaction ...), check the evm call return code ("code") and contract_address ("contract_address") in field "log"
+query tx by txHash ( REST api /txs/{hash}), check the evm call return code ("code") and contract_address ("contract_address") in field "log"
  
 
 ```
@@ -113,7 +113,7 @@ curl http://127.0.0.1:1317/hs/send \
 
 
 if /send success , will return txHash;
-query tx by txHash ( REST api /transaction ...), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
+query tx by txHash ( REST api /txs/{txHash}), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
  
 
 ```
@@ -157,7 +157,7 @@ curl http://127.0.0.1:1317/hs/send \
 
 
 if /send success , will return txHash;
-query tx by txHash ( REST api /transaction ...), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
+query tx by txHash ( REST api /txs/{txHash}), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
  
 
 ```
@@ -204,7 +204,7 @@ curl http://127.0.0.1:1317/hs/send \
 ```
 
 if /send success , will return txHash;
-query tx by txHash ( REST api /transaction ...), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
+query tx by txHash ( REST api /txs/{txHash}), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
  
 
 ```
@@ -249,7 +249,7 @@ curl http://127.0.0.1:1317/hs/send \
 
 
 if /send success , will return txHash;
-query tx by txHash ( REST api /transaction ...), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
+query tx by txHash ( REST api /txs/{txHash}), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
  
 
 ```
@@ -297,7 +297,7 @@ curl http://127.0.0.1:1317/hs/send \
 
 
 if /send success , will return txHash;
-query tx by txHash ( REST api /transaction ...), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
+query tx by txHash ( REST api /txs/{txHash}), check the evm call return code ("code") and evm_output ("evm_output") in field "log"
  
 
 ```
