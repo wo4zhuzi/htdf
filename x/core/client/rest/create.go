@@ -42,7 +42,7 @@ func CreateTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		req.BaseReq.Sequence = mreq.BaseReq.Sequence
 		// req.BaseReq.Fees = unit_convert.BigCoinsToDefaultCoins(mreq.BaseReq.Fees)
 		req.BaseReq.GasPrice = mreq.BaseReq.GasPrice
-		req.BaseReq.GasWanted = unit_convert.BigAmountToDefaultAmount(mreq.BaseReq.GasWanted)
+		req.BaseReq.GasWanted = mreq.BaseReq.GasWanted
 		req.BaseReq.GasAdjustment = mreq.BaseReq.GasAdjustment
 		req.BaseReq.Simulate = mreq.BaseReq.Simulate
 		req.To = mreq.To
