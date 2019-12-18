@@ -31,6 +31,7 @@ const (
 var (
 	invCheckPeriod uint
 	GitCommit      = ""
+	GitBranch      = ""
 )
 
 func main() {
@@ -79,7 +80,7 @@ func versionCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 		Use:   "version",
 		Short: "print version, api security level",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("GitCommit=%s|version=%s|versionMeta=%s|\n", GitCommit, params.Version, params.VersionMeta)
+			fmt.Printf("GitCommit=%s|version=%s|GitBranch=%s|\n", GitCommit, params.Version, GitBranch)
 		},
 	}
 

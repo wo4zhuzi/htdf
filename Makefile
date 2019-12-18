@@ -13,7 +13,8 @@ GO ?= latest
 DEBUGAPI=ON   # enable DEBUGAPI by default
 PACKAGES = $(shell go list ./... | grep -Ev 'vendor|importer')
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
-BUILD_FLAGS = -tags netgo -ldflags "-X github.com/orientwalt/htdf/version.GitCommit=${COMMIT_HASH} -X main.GitCommit=${COMMIT_HASH} -X main.DEBUGAPI=${DEBUGAPI}"
+GIT_BRANCH :=$(shell git branch 2>/dev/null | grep "^\*" | sed -e "s/^\*\ //")
+BUILD_FLAGS = -tags netgo -ldflags "-X github.com/orientwalt/htdf/version.GitCommit=${COMMIT_HASH} -X main.GitCommit=${COMMIT_HASH} -X main.DEBUGAPI=${DEBUGAPI} -X main.GitBranch=${GIT_BRANCH}"
 HTDFSERVICE_DAEMON_BINARY = hsd
 HTDFSERVICE_CLI_BINARY = hscli
 # tool checking

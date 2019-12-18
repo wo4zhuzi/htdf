@@ -51,6 +51,7 @@ const (
 var (
 	DEBUGAPI  = "OFF"
 	GitCommit = ""
+	GitBranch = ""
 )
 
 func main() {
@@ -127,7 +128,7 @@ func versionCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 		Use:   "version",
 		Short: "print version, api security level",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("GitCommit=%s|version=%s|versionMeta=%s|DEBUGAPI=%s|ApiSecurityLevel=%s\n", GitCommit, params.Version, params.VersionMeta, DEBUGAPI, svrConfig.ApiSecurityLevel)
+			fmt.Printf("GitCommit=%s|version=%s|GitBranch=%s|DEBUGAPI=%s|ApiSecurityLevel=%s\n", GitCommit, params.Version, GitBranch, DEBUGAPI, svrConfig.ApiSecurityLevel)
 		},
 	}
 
