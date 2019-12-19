@@ -23,6 +23,11 @@ func calcErrRate(lastblkindex int64) float64 {
 			curLastIndex = curBlkHeight
 		}
 		BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight)
+		// junying-todo, 2019-12-20
+		// avoid negative rewards
+		if BlockReward < 0 {
+			break
+		}
 		totalSupply += BlockReward
 	}
 	return math.Abs(float64(curBlkHeight - lastblkindex))

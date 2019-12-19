@@ -46,7 +46,7 @@ func expectedtotalSupply(blkindex int64) int64 {
 // rand(0.001,0.144676)
 // 0.144676 * rand(0.0,1,0) + 0.001
 func randomAmplitude() int64 {
-	ampf := float64(htdf2satoshi) * (MAX_AMPLITUDE*rand.Float64() + MIN_AMPLITUDE)
+	ampf := float64(htdf2satoshi) * ((MAX_AMPLITUDE-MIN_AMPLITUDE)*rand.Float64() + MIN_AMPLITUDE)
 	return int64(ampf)
 }
 
