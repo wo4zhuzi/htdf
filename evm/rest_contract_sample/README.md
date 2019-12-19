@@ -16,7 +16,6 @@ contractCode, get balance|strMinterAddress=htdf1l7spsv0lgx8npg3xvqfvsn8pdrpntv5d
 
 ```
 
-
 ## use curl to access smart contract
 use REST api /hs/send to access smart contract
 
@@ -36,7 +35,9 @@ use REST api /hs/send to access smart contract
 >> fields same like `create smart contract`
 
 
+## caution
 
+**when input param change(minter address, from address ,to address , send amount ... ) , must  `get byte code`  and fill out the folling "data" field again**
 
 ## create contract
  use curl to create
