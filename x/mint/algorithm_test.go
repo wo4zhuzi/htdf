@@ -18,8 +18,8 @@ func calcErrRate(lastblkindex int64) float64 {
 		}
 		// check if it's time for new cycle
 		if curBlkHeight >= (curLastIndex + curCycle) {
-			curAmplitude = randomAmplitude()
-			curCycle = randomCycle()
+			curAmplitude = randomAmplitude(curBlkHeight)
+			curCycle = randomCycle(curAmplitude)
 			curLastIndex = curBlkHeight
 		}
 		BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight-curLastIndex)
@@ -37,4 +37,12 @@ func TestRandomSine(t *testing.T) {
 	threshold := float64(MAX_CYCLE / 2)
 	actual := calcErrRate(TotalMinableBlks)
 	require.True(t, actual < threshold)
+}
+
+func TestRandomUint(t *testing.T) {
+	for i := 0; i < 65000; i++ {
+		randnum := randomUint(int64(i))
+		require.True(t, randnum < 128)
+		require.True(t, randnum == randomUint(int64(i)))
+	}
 }

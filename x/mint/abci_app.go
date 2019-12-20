@@ -43,8 +43,8 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	curLastIndex := k.sk.LastIndex(ctx)
 	// check if it's time for new cycle
 	if curBlkHeight >= (curLastIndex + curCycle) {
-		k.sk.SetAmplitude(ctx, randomAmplitude())
-		k.sk.SetCycle(ctx, randomCycle())
+		k.sk.SetAmplitude(ctx, randomAmplitude(curBlkHeight))
+		k.sk.SetCycle(ctx, randomCycle(curAmplitude))
 		k.sk.SetLastIndex(ctx, curBlkHeight)
 	}
 
