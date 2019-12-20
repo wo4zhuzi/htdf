@@ -2,11 +2,15 @@ package mint
 
 import (
 	"fmt"
-
 	sdk "github.com/orientwalt/htdf/types"
+	"math/big"
 )
 
 // junying-todo, 2019-07-17
+//	6,000,000	25
+//	6,000,000	12.5
+// 	6,000,000	6.25
+//	...
 //	BlksPerRound = 100
 //	rewards+commission+community-pool
 //	hscli query distr rewards htdf1zulqmaqlsgrgmagenaqf02p8kfgsuqkdwgwj80
@@ -16,49 +20,46 @@ import (
 //  hscli query distr commission cosmosvaloper1lwjmdnks33xwnmfayc64ycprww49n33mtm92ne
 // 	hscli query distr community-pool
 
+const (
+	// Block Reward of First Round
+	InitialReward = 25 * 100000000 //25htdf = 2500000000satoshi
+	// Block Count Per Round
+	BlksPerRound = 6000000 //10 //6,000,000
+	// Last Round Index with Block Rewards
+	LastRoundIndex = 31
+)
+
 // junying-todo, 2019-07-15
 // single node: 88.2 for delegators, 11.8 for validator(commission)
 // commission is validating fee
 // commission rate changes?
 func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	// fetch params
+	//params := k.GetParams(ctx)
+	//BlocksPerYear := params.BlocksPerYear
+	// recalculate inflation rate
 	totalSupply := k.sk.TotalTokens(ctx)
-	fmt.Println("totalSupply", totalSupply)
-	// block index
+	//
 	curBlkHeight := ctx.BlockHeight()
-	fmt.Println("curBlkHeight:", curBlkHeight)
-
-	// check terminate condition, junying-todo, 2019-12-05
-	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) { // || curBlkHeight > TotalMinableBlks {
-		return sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)
+	////fmt.Printf("current Blk Height: %d\n", curBlkHeight)
+	// roundIndex = curBlkHeight / BlkCountPerRound
+	roundIndex := new(big.Int).Div(big.NewInt(curBlkHeight), big.NewInt(BlksPerRound))
+	fmt.Print("curBlkHeight:", curBlkHeight, "\n")
+	fmt.Print("roundIndex:", roundIndex, "\n")
+	// BlockProvision = 25 / 2**roundIndex
+	BlockProvision := sdk.ZeroDec()
+	if roundIndex.Cmp(big.NewInt(LastRoundIndex)) == -1 {
+		division := new(big.Int).Exp(big.NewInt(2), roundIndex, nil)
+		divisionDec, err := sdk.NewDecFromStr(division.String())
+		if err == nil {
+			BlockProvision = sdk.NewDec(int64(InitialReward)).Quo(divisionDec)
+		}
 	}
-
-	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
+	// AnnualProvisions = fRatio * FirstRoundBlkReward
+	AnnualProvisions := BlockProvision.Mul(sdk.NewDec(int64(BlksPerRound)))
 	// Inflation = AnnualProvisions / totalSupply
-	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
-
-	// sine params
-	curAmplitude := k.sk.Amplitude(ctx)
-	curCycle := k.sk.Cycle(ctx)
-	curLastIndex := k.sk.LastIndex(ctx)
-	// check if it's time for new cycle
-	if curBlkHeight >= (curLastIndex + curCycle) {
-		k.sk.SetAmplitude(ctx, randomAmplitude())
-		k.sk.SetCycle(ctx, randomCycle())
-		k.sk.SetLastIndex(ctx, curBlkHeight)
-	}
-
-	BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight-curLastIndex)
-	if BlockReward < 0 {
-		panic(0)
-	}
-	BlockProvision := sdk.NewDec(BlockReward)
-	fmt.Println("BlockProvision:", BlockReward)
-	fmt.Println("curAmplitude:", curAmplitude)
-	fmt.Println("curCycle:", curCycle)
-	fmt.Println("curLastIndex:", curLastIndex)
-
-	return AnnualProvisionsDec, Inflation, BlockProvision
+	Inflation := AnnualProvisions.Quo(sdk.NewDecFromInt(totalSupply))
+	return AnnualProvisions, Inflation, BlockProvision
 }
 
 // Inflate every block, update inflation parameters once per hour
