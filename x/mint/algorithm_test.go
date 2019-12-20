@@ -22,7 +22,7 @@ func calcErrRate(lastblkindex int64) float64 {
 			curCycle = randomCycle()
 			curLastIndex = curBlkHeight
 		}
-		BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight)
+		BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight-curLastIndex)
 		// junying-todo, 2019-12-20
 		// avoid negative rewards
 		if BlockReward < 0 {

@@ -49,6 +49,9 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	}
 
 	BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight-curLastIndex)
+	if BlockReward < 0 {
+		panic(0)
+	}
 	BlockProvision := sdk.NewDec(BlockReward)
 	fmt.Println("BlockProvision:", BlockReward)
 	fmt.Println("curAmplitude:", curAmplitude)
