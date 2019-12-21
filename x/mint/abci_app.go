@@ -2,7 +2,6 @@ package mint
 
 import (
 	"fmt"
-
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -33,10 +32,6 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 		return sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)
 	}
 
-	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
-	// Inflation = AnnualProvisions / totalSupply
-	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
-
 	// sine params
 	curAmplitude := k.sk.Amplitude(ctx)
 	curCycle := k.sk.Cycle(ctx)
@@ -47,6 +42,22 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 		k.sk.SetCycle(ctx, randomCycle(curAmplitude))
 		k.sk.SetLastIndex(ctx, curBlkHeight)
 	}
+
+	AnnualProvisionsDec, Inflation, BlockProvision := GetMineToken(curBlkHeight, totalSupply, curAmplitude, curCycle, curLastIndex)
+
+	return AnnualProvisionsDec, Inflation, BlockProvision
+}
+
+func GetMineToken(curBlkHeight int64, totalSupply sdk.Int, curAmplitude int64, curCycle int64, curLastIndex int64) (sdk.Dec, sdk.Dec, sdk.Dec) {
+
+	// fetch params
+	fmt.Println("totalSupply", totalSupply)
+	// block index
+	fmt.Println("curBlkHeight:", curBlkHeight)
+
+	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
+	// Inflation = AnnualProvisions / totalSupply
+	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
 
 	BlockReward := calcRewardAsSatoshi(curAmplitude, curCycle, curBlkHeight-curLastIndex)
 	if BlockReward < 0 {
