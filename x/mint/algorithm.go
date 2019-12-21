@@ -2,7 +2,6 @@ package mint
 
 import (
 	"crypto/sha256"
-	"encoding/binary"
 	"math"
 	"strconv"
 )
@@ -46,12 +45,11 @@ func expectedtotalSupply(blkindex int64) int64 {
 
 func randomUint(seed int64) uint64 {
 	hash := sha256.Sum256([]byte(strconv.FormatInt(seed, 10)))
-	x, _ := binary.Uvarint(hash[:1])
-	return x
+	return uint64(hash[:1][0])
 }
 
 func randomFloat(seed int64) float64 {
-	return float64(randomUint(seed)) / 128.0
+	return float64(randomUint(seed)) / 256.0
 }
 
 // junying-todo, 2019-12-06

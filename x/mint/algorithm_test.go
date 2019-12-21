@@ -1,6 +1,7 @@
 package mint
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -40,9 +41,14 @@ func TestRandomSine(t *testing.T) {
 }
 
 func TestRandomUint(t *testing.T) {
-	for i := 0; i < 65000; i++ {
+	cnt := 0
+	for i := 0; i < 256; i++ {
 		randnum := randomUint(int64(i))
-		require.True(t, randnum < 128)
+		if randnum == 0 {
+			cnt++
+		}
+		require.True(t, randnum < 256)
 		require.True(t, randnum == randomUint(int64(i)))
 	}
+	fmt.Println(cnt)
 }
