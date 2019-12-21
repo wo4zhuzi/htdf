@@ -2,6 +2,7 @@ package mint
 
 import (
 	"fmt"
+	"github.com/magiconair/properties/assert"
 	"testing"
 
 	sdk "github.com/orientwalt/htdf/types"
@@ -21,5 +22,9 @@ func TestMineToken(t *testing.T) {
 	curLastIndex = 4
 
 	a, b, c := GetMineToken(curBlkHeight, totalSupply, curAmplitude, curCycle, curLastIndex)
-	fmt.Printf("a=%v|b=%v|c=%v", a, b, c)
+	fmt.Printf("a=%s|b=%s|c=%s", a.String(), b.String(), c.String())
+	assert.Equal(t, a.String() == "900000.000000000000000000", true)
+	assert.Equal(t, b.String() == "900.000000000000000000", true)
+	assert.Equal(t, c.String() == "14467592.000000000000000000", true)
+	//fmt.Printf("a=%s|b=%s|c=%s", a.String(), b.String(), c.String())
 }
