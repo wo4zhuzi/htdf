@@ -149,12 +149,15 @@ vals:
 	@hsd gentx $(ACC1)
 	@hsd collect-gentxs
 
-start:
+start: start.daemon start.rest
+
+start.daemon:
 	@echo starting daemon....
-	@hsd start
+	@nohup hsd start >> ${HOME}/.hsd/app.log  2>&1  &
 
 start.rest:
-	@hscli rest-server --chain-id=${CHAIN_ID} --trust-node=true --laddr=tcp://0.0.0.0:1317 
+	@echo starting rest server...
+	@nohup hscli rest-server --chain-id=${CHAIN_ID} --trust-node=true --laddr=tcp://0.0.0.0:1317 >> ${HOME}/.hsd/restServer.log  2>&1  &
 
 stop:
 	pkill -9 $(HTDFSERVICE_DAEMON_BINARY)

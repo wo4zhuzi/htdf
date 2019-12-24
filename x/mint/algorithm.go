@@ -1,8 +1,9 @@
 package mint
 
 import (
+	"crypto/sha256"
 	"math"
-	"math/rand"
+	"strconv"
 )
 
 const (
@@ -42,18 +43,27 @@ func expectedtotalSupply(blkindex int64) int64 {
 		int64(float64(blkindex)*AvgBlkRewardAsSatoshi)
 }
 
+func randomUint(seed int64) uint64 {
+	hash := sha256.Sum256([]byte(strconv.FormatInt(seed, 10)))
+	return uint64(hash[:1][0])
+}
+
+func randomFloat(seed int64) float64 {
+	return float64(randomUint(seed)) / 256.0
+}
+
 // junying-todo, 2019-12-06
 // rand(0.001,0.144676)
 // 0.144676 * rand(0.0,1,0) + 0.001
-func randomAmplitude() int64 {
-	ampf := float64(htdf2satoshi) * (MAX_AMPLITUDE*rand.Float64() + MIN_AMPLITUDE)
+func randomAmplitude(seed int64) int64 {
+	ampf := float64(htdf2satoshi) * ((MAX_AMPLITUDE-MIN_AMPLITUDE)*randomFloat(seed) + MIN_AMPLITUDE)
 	return int64(ampf)
 }
 
 // rand(100,3000)
 // rand(0,2900) + 100
-func randomCycle() int64 {
-	return rand.Int63n(MAX_CYCLE-MIN_CYCLE) + MIN_CYCLE
+func randomCycle(seed int64) int64 {
+	return int64(randomFloat(seed)*float64(MAX_CYCLE-MIN_CYCLE)) + MIN_CYCLE
 }
 
 //

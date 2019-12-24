@@ -15,23 +15,16 @@ func GetExportPivKeyCmd() *cobra.Command {
 		Use:   "export",
 		Short: "Export all private key list",
 		Long:  "export private key from .hscli/keystores",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
 
-			accounts, err := ksw.Accounts()
+			priv, err := getPrivateKey(ksw, args[0], args[1])
 			if err != nil {
 				return err
 			}
-
-			for _, account := range accounts {
-				priv, err := getPrivateKey(ksw, account.Address, args[0])
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s	%s\n", account.Address, priv)
-			}
+			fmt.Printf("%s	%s\n", args[0], priv)
 			return nil
 		},
 	}
