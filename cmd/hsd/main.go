@@ -22,6 +22,7 @@ import (
 	cfg "github.com/tendermint/tendermint/config"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	tmtypes "github.com/tendermint/tendermint/types"
+	guardian "github.com/orientwalt/htdf/x/guardian/client/cli"
 )
 
 const (
@@ -58,6 +59,7 @@ func main() {
 	rootCmd.AddCommand(hsinit.TestnetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.GenTxCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.AddGenesisAccountCmd(ctx, cdc))
+	rootCmd.AddCommand(guardian.AddGuardianAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.ValidateGenesisCmd(ctx, cdc))
 	rootCmd.AddCommand(lite.Commands())
 	rootCmd.AddCommand(versionCmd(ctx, cdc))
