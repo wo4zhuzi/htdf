@@ -59,7 +59,7 @@ build: unittest buildquick
 build-batchsend:
 	@build/env.sh go run build/ci.go install ./cmd/hsbatchsend
 
-install: build
+install: buildquick
 	@if [ -d build/bin ]; then cp build/bin/* $(GOPATH)/bin; fi
 	@$(MAKE) -sC . clean
 
@@ -160,7 +160,8 @@ start.rest:
 	@nohup hscli rest-server --chain-id=${CHAIN_ID} --trust-node=true --laddr=tcp://0.0.0.0:1317 >> ${HOME}/.hsd/restServer.log  2>&1  &
 
 stop:
-	pkill -9 $(HTDFSERVICE_DAEMON_BINARY)
+	@pkill hsd
+	@pkill hscli
 
 # clean part
 clean:
@@ -349,4 +350,5 @@ loadtest:
 
 .PHONY: build install build- install- \
 		test clean clean-t \
-		testnet livenet
+		testnet livenet \
+		stop

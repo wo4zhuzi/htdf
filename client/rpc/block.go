@@ -167,6 +167,7 @@ type DisplayTx struct {
 	Amount []sdk.BigCoin
 	Hash   string
 	Memo   string
+	Data   string
 }
 
 type DisplayBlock struct {
