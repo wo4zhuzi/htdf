@@ -8,12 +8,13 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/orientwalt/htdf/client/context"
+	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/types/rest"
 	"github.com/orientwalt/htdf/version"
 )
 
 // Register REST endpoints
-func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router) {
+func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
 	r.HandleFunc("/version", CLIVersionRequestHandler).Methods("GET")
 	r.HandleFunc("/node_version", NodeVersionRequestHandler(cliCtx)).Methods("GET")
 	r.HandleFunc("/node_info", NodeInfoRequestHandlerFn(cliCtx)).Methods("GET")

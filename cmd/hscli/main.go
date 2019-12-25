@@ -112,7 +112,7 @@ func main() {
 
 func registerRoutes(rs *lcd.RestServer) {
 	rs.CliCtx = rs.CliCtx.WithAccountDecoder(rs.Cdc)
-	rpc.RegisterRoutes(rs.CliCtx, rs.Mux)
+	rpc.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	hsrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, storeHS)
 	accrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
