@@ -21,9 +21,6 @@ import (
 const (
 	flagOverwrite    = "overwrite"
 	flagClientHome   = "home-client"
-	flagVestingStart = "vesting-start-time"
-	flagVestingEnd   = "vesting-end-time"
-	flagVestingAmt   = "vesting-amount"
 )
 
 // AddGenesisAccountCmd returns add-genesis-account cobra Command.
@@ -106,6 +103,6 @@ func addGenesisAccount(
 		appState.GuardianData.Profilers =  append(appState.GuardianData.Profilers, guardian)
 		appState.GuardianData.Trustees = append(appState.GuardianData.Trustees, guardian)
 	}
-	
+
 	return appState, nil
 }
