@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	iris "github.com/orientwalt/htdf/app"
+	htdf "github.com/orientwalt/htdf/app"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	"github.com/tendermint/tendermint/crypto"
@@ -28,13 +28,13 @@ func init() {
 
 var RootCmd = &cobra.Command{
 	Use:          "debug",
-	Short:        "Iris debug tool",
+	Short:        "htdf debug tool",
 	SilenceUsage: true,
 }
 
 var txCmd = &cobra.Command{
 	Use:   "tx",
-	Short: "Decode a iris tx from hex or base64",
+	Short: "Decode a htdf tx from hex or base64",
 	RunE:  runTxCmd,
 }
 
@@ -130,7 +130,7 @@ func runPubKeyCmd(cmd *cobra.Command, args []string) error {
 		pubkeyBytes = pubKey[:]
 	}
 
-	cdc := iris.MakeLatestCodec()
+	cdc := htdf.MakeLatestCodec()
 	pubKeyJSONBytes, err := cdc.MarshalJSON(pubKey)
 	if err != nil {
 		return err
@@ -222,7 +222,7 @@ func runTxCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	var tx = auth.StdTx{}
-	cdc := iris.MakeLatestCodec()
+	cdc := htdf.MakeLatestCodec()
 
 	err = cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 	if err != nil {

@@ -42,7 +42,7 @@ const (
 )
 
 var (
-	IrisCt = types.NewDefaultCoinType(stakeTypes.StakeTokenName)
+	HtdfCt = types.NewDefaultCoinType(stakeTypes.StakeTokenName)
 )
 */
 // App extends an ABCI application, but with most of its parameters exported.

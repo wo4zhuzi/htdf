@@ -129,7 +129,7 @@ func (app *HtdfServiceApp) ExportOrReplay(replayHeight int64) (replay bool, heig
 
 }
 
-// export the state of iris for a genesis file
+// export the state of htdf for a genesis file
 func (app *HtdfServiceApp) ExportAppStateAndValidators(forZeroHeight bool) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 	ctx := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
 	return app.Engine.GetCurrentProtocol().ExportAppStateAndValidators(ctx, forZeroHeight, []string{})

@@ -14,7 +14,7 @@ func GetCmdQueryProfilers(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "profilers",
 		Short:   "Query for all profilers",
-		Example: "iriscli guardian profilers",
+		Example: "hscli guardian profilers",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
@@ -40,7 +40,7 @@ func GetCmdQueryTrustees(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "trustees",
 		Short:   "Query for all trustees",
-		Example: "iriscli guardian trustees",
+		Example: "hsccli guardian trustees",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
