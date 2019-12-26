@@ -23,7 +23,7 @@ const (
 	flagClientHome   = "home-client"
 )
 
-// AddGenesisAccountCmd returns add-genesis-account cobra Command.
+// AddGuardianAccountCmd returns add-guardian-account cobra Command.
 func AddGuardianAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-guardian-account [address]",
