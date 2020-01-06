@@ -14,9 +14,9 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	authtxb "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 
+	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 	"github.com/orientwalt/htdf/x/distribution/client/common"
 	"github.com/orientwalt/htdf/x/distribution/types"
-	hscorecli "github.com/orientwalt/htdf/x/core/client/cli"
 )
 
 var (
@@ -47,8 +47,8 @@ func GetCmdWithdrawRewards(cdc *codec.Codec) *cobra.Command {
 		Short: "witdraw rewards from a given delegation address, and optionally withdraw validator commission if the delegation address given is a validator operator",
 		Long: strings.TrimSpace(`witdraw rewards from a given delegation address, and optionally withdraw validator commission if the delegation address given is a validator operator:
 
-$ hscli tx distr withdraw-rewards cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 cosmosvaloper1gghjut3ccd8ay0zduzj64hwre2fxs9ldmqhffj
-$ hscli tx distr withdraw-rewards cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 cosmosvaloper1gghjut3ccd8ay0zduzj64hwre2fxs9ldmqhffj --commission
+$ hscli tx distr withdraw-rewards htdf1keyvaa4u5rcjwq3gncvct4hrmq553fpkremp5v htdfvaloper1keyvaa4u5rcjwq3gncvct4hrmq553fpkfqrcr8
+$ hscli tx distr withdraw-rewards htdf1keyvaa4u5rcjwq3gncvct4hrmq553fpkremp5v htdfvaloper1keyvaa4u5rcjwq3gncvct4hrmq553fpkfqrcr8 --commission
 `),
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -83,7 +83,7 @@ func GetCmdWithdrawAllRewards(cdc *codec.Codec, queryRoute string) *cobra.Comman
 		Short: "withdraw all delegations rewards for a delegator",
 		Long: strings.TrimSpace(`Withdraw all rewards for a single delegator:
 
-$ hscli tx distr withdraw-all-rewards cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4
+$ hscli tx distr withdraw-all-rewards htdf1keyvaa4u5rcjwq3gncvct4hrmq553fpkremp5v
 `),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -113,7 +113,7 @@ func GetCmdSetWithdrawAddr(cdc *codec.Codec) *cobra.Command {
 		Short: "change the default withdraw address for rewards associated with an address",
 		Long: strings.TrimSpace(`Set the withdraw address for rewards associated with a delegator address:
 
-$ hscli tx set-withdraw-addr cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 cosmos1gghjut3ccd8ay0zduzj64hwre2fxs9ld75ru9p
+$ hscli tx set-withdraw-addr htdf1keyvaa4u5rcjwq3gncvct4hrmq553fpkremp5v htdf14psya76ttdx5qvqq5zzz2q6v63k2g3h2k599zd
 `),
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
