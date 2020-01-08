@@ -2,6 +2,7 @@ package mint
 
 import (
 	"fmt"
+
 	sdk "github.com/orientwalt/htdf/types"
 )
 
@@ -28,7 +29,7 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	fmt.Println("curBlkHeight:", curBlkHeight)
 
 	// check terminate condition, junying-todo, 2019-12-05
-	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) { // || curBlkHeight > TotalMinableBlks {
+	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) { // || curBlkHeight > TotalMineableBlks {
 		return sdk.NewDec(0), sdk.NewDec(0), sdk.NewDec(0)
 	}
 
