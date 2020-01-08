@@ -7,7 +7,7 @@ import (
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
 	// Not Register mint codec in app, deprecated now
-	//cdc.RegisterConcrete(Minter{}, "irishub/mint/Minter", nil)
+	//cdc.RegisterConcrete(Minter{}, "htdf/mint/Minter", nil)
 	cdc.RegisterConcrete(&Params{}, "htdf/mint/Params", nil)
 }
 

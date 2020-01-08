@@ -101,8 +101,8 @@ func TestInitGenesisLargeValidatorSet(t *testing.T) {
 	vals, err := InitGenesis(ctx, keeper, genesisState)
 	require.NoError(t, err)
 
-	abcivals := make([]abci.ValidatorUpdate, 100)
-	for i, val := range validators[:100] {
+	abcivals := make([]abci.ValidatorUpdate, 50)
+	for i, val := range validators[:50] {
 		abcivals[i] = val.ABCIValidatorUpdate()
 	}
 

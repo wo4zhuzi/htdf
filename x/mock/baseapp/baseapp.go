@@ -143,12 +143,12 @@ func (app *BaseApp) MountStore(key sdk.StoreKey, typ sdk.StoreType) {
 	app.cms.MountStoreWithDB(key, typ, nil)
 }
 
-////////////////////  iris/cosmos-sdk begin  ///////////////////////////
+////////////////////  htdf/cosmos-sdk begin  ///////////////////////////
 func (app *BaseApp) GetKVStore(key sdk.StoreKey) sdk.KVStore {
 	return app.cms.GetKVStore(key)
 }
 
-////////////////////  iris/cosmos-sdk end  ///////////////////////////
+////////////////////  htdf/cosmos-sdk end  ///////////////////////////
 
 func (app *BaseApp) SetRunMsg(runMsg RunMsg) {
 	app.runMsg = runMsg
@@ -190,7 +190,7 @@ func (app *BaseApp) initFromStore(mainKey sdk.StoreKey) error {
 	if main == nil {
 		return errors.New("baseapp expects MultiStore with 'main' KVStore")
 	}
-	// Needed for `iris export`, which inits from store but never calls initchain
+	// Needed for `htdf export`, which inits from store but never calls initchain
 	app.setCheckState(abci.Header{})
 
 	app.Seal()
@@ -458,7 +458,7 @@ func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 	// Decode the Tx.
 	var result sdk.Result
 
-	////////////////////  iris/cosmos-sdk begin ///////////////////////////
+	////////////////////  htdf/cosmos-sdk begin ///////////////////////////
 
 	upgradeKey := sdk.NewKVStoreKey("upgrade")
 	store := app.cms.GetStore(upgradeKey)
@@ -483,7 +483,7 @@ func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 		}
 	}
 
-	////////////////////  iris/cosmos-sdk end ///////////////////////////
+	////////////////////  htdf/cosmos-sdk end ///////////////////////////
 
 	// Decode the Tx.
 

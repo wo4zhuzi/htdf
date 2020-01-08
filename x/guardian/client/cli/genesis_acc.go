@@ -21,12 +21,9 @@ import (
 const (
 	flagOverwrite    = "overwrite"
 	flagClientHome   = "home-client"
-	flagVestingStart = "vesting-start-time"
-	flagVestingEnd   = "vesting-end-time"
-	flagVestingAmt   = "vesting-amount"
 )
 
-// AddGenesisAccountCmd returns add-genesis-account cobra Command.
+// AddGuardianAccountCmd returns add-guardian-account cobra Command.
 func AddGuardianAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-guardian-account [address]",
@@ -89,16 +86,23 @@ func AddGuardianAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command
 func addGenesisAccount(
 	cdc *codec.Codec, appState v0.GenesisState, addr sdk.AccAddress,
 ) (v0.GenesisState, error) {
-
+	var genAcc sdk.AccAddress
 	for _, stateAcc := range appState.GuardianData.Profilers {
 		if stateAcc.Address.Equals(addr) {
 			return appState, fmt.Errorf("the application state already contains account %v", addr)
 		}
+		genAcc = stateAcc.Address
 	}
+
 	guardian := guardian.NewGuardian("genesis",guardian.Genesis,addr,addr)
-	
-	appState.GuardianData.Profilers =  append(appState.GuardianData.Profilers, guardian)
-	appState.GuardianData.Trustees = append(appState.GuardianData.Trustees, guardian)
+
+	if genAcc.Empty() {
+		appState.GuardianData.Profilers[0] = guardian
+		appState.GuardianData.Trustees[0] = guardian
+	} else {
+		appState.GuardianData.Profilers =  append(appState.GuardianData.Profilers, guardian)
+		appState.GuardianData.Trustees = append(appState.GuardianData.Trustees, guardian)
+	}
 
 	return appState, nil
 }

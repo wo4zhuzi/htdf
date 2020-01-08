@@ -20,7 +20,7 @@ const (
 	DefaultUnbondingTime time.Duration = time.Second * 60 * 60 * 24 * 14 // 3 to 7,junying-todo, 2019-11-20
 
 	// Default maximum number of bonded validators
-	DefaultMaxValidators uint16 = 100
+	DefaultMaxValidators uint16 = 50
 
 	// Default maximum entries in a UBD/RED pair
 	DefaultMaxEntries uint16 = 7
@@ -189,8 +189,8 @@ func validateUnbondingTime(v time.Duration) sdk.Error {
 }
 
 func validateMaxValidators(v uint16) sdk.Error {
-	if v < 100 || v > 200 {
-		return sdk.NewError(params.DefaultCodespace, params.CodeInvalidMaxValidators, fmt.Sprintf("Invalid MaxValidators [%d] should be between [100, 200]", v))
+	if v < 50 || v > 200 {
+		return sdk.NewError(params.DefaultCodespace, params.CodeInvalidMaxValidators, fmt.Sprintf("Invalid MaxValidators [%d] should be between [50, 200]", v))
 	}
 	return nil
 }

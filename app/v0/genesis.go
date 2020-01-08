@@ -132,9 +132,9 @@ func (ga *GenesisAccount) ToAccount() (acc *auth.BaseAccount) {
 	}
 }
 
-// Create the core parameters for genesis initialization for iris
+// Create the core parameters for genesis initialization for htdf
 // note that the pubkey input is this machines pubkey
-func IrisAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
+func HtdfAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
 	genesisState GenesisState, err error) {
 	fmt.Print("--------genDoc.AppState--------	", genDoc.AppState, "\n")
 	fmt.Print("	-----genesisState---	", genesisState, "\n")
@@ -180,11 +180,11 @@ func IrisAppGenState(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []js
 	return genesisState, nil
 }
 
-// IrisValidateGenesisState ensures that the genesis state obeys the expected invariants
+// HtdfValidateGenesisState ensures that the genesis state obeys the expected invariants
 // TODO: No validators are both bonded and jailed (#2088)
 // TODO: Error if there is a duplicate validator (#1708)
 // TODO: Ensure all state machine parameters are in genesis (#1704)
-func IrisValidateGenesisState(genesisState GenesisState) (err error) {
+func HtdfValidateGenesisState(genesisState GenesisState) (err error) {
 	err = validateGenesisStateAccounts(genesisState.Accounts)
 	if err != nil {
 		return
@@ -210,12 +210,12 @@ func validateGenesisStateAccounts(accs []GenesisAccount) (err error) {
 	return
 }
 
-// IrisAppGenState but with JSON
-func IrisAppGenStateJSON(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
+// HtdfAppGenState but with JSON
+func HtdfAppGenStateJSON(cdc *codec.Codec, genDoc tmtypes.GenesisDoc, appGenTxs []json.RawMessage) (
 	appState json.RawMessage, err error) {
 	fmt.Println("BBBBBBBBBBBBBB")
 	// create the final app state
-	genesisState, err := IrisAppGenState(cdc, genDoc, appGenTxs)
+	genesisState, err := HtdfAppGenState(cdc, genDoc, appGenTxs)
 	if err != nil {
 		return nil, err
 	}
@@ -543,7 +543,7 @@ func NewGenesisFileState(accounts []GenesisFileAccount, authData auth.GenesisSta
 	}
 }
 
-// NewDefaultGenesisState generates the default state for iris.
+// NewDefaultGenesisState generates the default state for htdf.
 func NewDefaultGenesisFileState() GenesisFileState {
 	return GenesisFileState{
 		Accounts:     nil,

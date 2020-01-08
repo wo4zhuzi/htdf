@@ -7,26 +7,28 @@ import (
 )
 
 const (
-	BlkTime          = 5
-	AvgDaysPerMonth  = 30
-	DayinSecond      = 24 * 3600
-	AvgBlksPerMonth  = AvgDaysPerMonth * DayinSecond / BlkTime
-	Period           = AvgBlksPerMonth
-	TotalMinableBlks = 40 * 12 * AvgBlksPerMonth
-	BlkRadianIntv    = 2.0 * math.Pi / float64(Period)
+	BlkTime             = 5
+	AvgDaysPerMonth     = 30
+	DayinSecond         = 24 * 3600
+	AvgBlksPerMonth     = AvgDaysPerMonth * DayinSecond / BlkTime
+	Period              = AvgBlksPerMonth
+	DefaultMineableBlks = 40 * 12 * AvgBlksPerMonth // 40 years mining
+	TestMineableBlks    = 2 * 3600 / BlkTime        // 2 hours mining
+	TotalMineableBlks   = DefaultMineableBlks
+	BlkRadianIntv       = 2.0 * math.Pi / float64(Period)
 
 	MonthProvisions            = float64(75000)                          // 75000 per month
 	AnnualProvisions           = 12 * MonthProvisions                    // 900000 per year
-	TotalProvisions            = 40 * AnnualProvisions                   // 36,000,000 for 40 years
+	MineTotalProvisions        = 40 * AnnualProvisions                   // 36,000,000 for 40 years
 	CurrentProvisions          = float64(60000000)                       // 60,000,000 at genesis
 	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi) // 60,000,000 at genesis
-	TotalLiquid                = TotalProvisions + CurrentProvisions     // 96,000,000
+	TotalLiquid                = MineTotalProvisions + CurrentProvisions // 96,000,000
 	TotalLiquidAsSatoshi       = int64(TotalLiquid * htdf2satoshi)       // 96,000,000 * 100,000,000
 
 	htdf2satoshi = 100000000 // 1 htdf = 10 ** 8 satoshi
 
 	// junying-todo, 2019-12-05
-	AvgBlkReward          = MonthProvisions / AvgBlksPerMonth
+	AvgBlkReward          = MineTotalProvisions / TotalMineableBlks
 	AvgBlkRewardAsSatoshi = htdf2satoshi * AvgBlkReward
 	RATIO                 = 0.5
 	// junying-todo, 2019-12-06

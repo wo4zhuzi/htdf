@@ -27,7 +27,7 @@ const (
 
 var (
 	MinimumGasPrice    = sdk.ZeroInt()
-	MaximumGasPrice    = sdk.NewIntWithDecimal(1, 18) //1iris, 10^18iris-atto
+	MaximumGasPrice    = sdk.NewIntWithDecimal(1, 18) //1htdf, 10^18satoshi
 	MinimumTxSizeLimit = uint64(500)
 	MaximumTxSizeLimit = uint64(1500)
 )
@@ -109,7 +109,7 @@ func (p *Params) Validate(key string, value string) (interface{}, sdk.Error) {
 			return nil, params.ErrInvalidString(value)
 		}
 		if !threshold.GT(MinimumGasPrice) || threshold.GT(MaximumGasPrice) {
-			return nil, sdk.NewError(params.DefaultCodespace, params.CodeInvalidGasPriceThreshold, fmt.Sprintf("Gas price threshold (%s) should be (0, 10^18iris-atto]", value))
+			return nil, sdk.NewError(params.DefaultCodespace, params.CodeInvalidGasPriceThreshold, fmt.Sprintf("Gas price threshold (%s) should be (0, 10^18satoshi]", value))
 		}
 		return threshold, nil
 	case string(KeyTxSizeLimit):

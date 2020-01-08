@@ -114,7 +114,7 @@ func genAppStateFromConfig(
 
 	cfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 	fmt.Println(0000000000000)
-	appState, err = v0.IrisAppGenStateJSON(cdc, genDoc, genTxs)
+	appState, err = v0.HtdfAppGenStateJSON(cdc, genDoc, genTxs)
 	if err != nil {
 		return
 	}
@@ -158,7 +158,7 @@ func genAppStateFromConfigEx(
 
 	cfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 
-	appState, err = v0.IrisAppGenStateJSON(cdc, genDoc, genTxs)
+	appState, err = v0.HtdfAppGenStateJSON(cdc, genDoc, genTxs)
 	if err != nil {
 		return
 	}

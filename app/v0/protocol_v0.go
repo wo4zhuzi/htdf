@@ -406,7 +406,7 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 	upgrade.InitGenesis(ctx, p.upgradeKeeper, genesisState.UpgradeData)
 
 	// validate genesis state
-	if err := IrisValidateGenesisState(genesisState); err != nil {
+	if err := HtdfValidateGenesisState(genesisState); err != nil {
 		panic(err) // TODO find a way to do this w/o panics
 	}
 
@@ -429,7 +429,7 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 	return validators
 }
 
-// custom logic for iris initialization
+// custom logic for htdf initialization
 // just 0 version need Initchainer
 func (p *ProtocolV0) InitChainer(ctx sdk.Context, DeliverTx sdk.DeliverTx, req abci.RequestInitChain) abci.ResponseInitChain {
 	stateJSON := req.AppStateBytes

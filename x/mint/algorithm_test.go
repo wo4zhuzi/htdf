@@ -36,7 +36,7 @@ func calcErrRate(lastblkindex int64) float64 {
 
 func TestRandomSine(t *testing.T) {
 	threshold := float64(MAX_CYCLE / 2)
-	actual := calcErrRate(TotalMinableBlks)
+	actual := calcErrRate(TotalMineableBlks)
 	require.True(t, actual < threshold)
 }
 
