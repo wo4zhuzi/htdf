@@ -1,45 +1,75 @@
+# junying-todo, 2020-01-13
+# hscli config text format based
+# ex: 
+# $ hscli query distr rewards htdf1j9fhvpfrhlmx2m3xn487qpuyhe56x7wfptssqz
+# $ 271771554720.370000000000000000satoshi
+
 DELEGATOR_CNTS = $$(findstr delegator_address ~/.hsd/config/genesis.json | linecount)
+VALIDATOR_CNTS = $$(findstr validator_address ~/.hsd/config/genesis.json | linecount)
+
+clean:
+	@rm -rf htdf*
 
 initialize:
 	@for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
 	 do \
-	 validator=$$(findstr validator_address ~/.hsd/config/genesis.json | sed -n '${i}p' | fromstr ': "'|endstr '"');\
-	 if [ -d "$$validator" ]; then rm -rf $$validator; mkdir $$validator; fi;\
-	 delegator=$$(findstr delegator_address ~/.hsd/config/genesis.json | sed -n '${i}p' | fromstr ': "'|endstr '"');\
+	 validator=$$(findstr validator_address ~/.hsd/config/genesis.json|row $$(($$i+1))|fromstr ': "'|endstr '"');\
+	 if [ -d "$$validator" ]; then rm -rf $$validator; mkdir $$validator; else mkdir $$validator;fi;\
+	 delegator=$$(findstr delegator_address ~/.hsd/config/genesis.json|row $$(($$i+1))|fromstr ': "'|endstr '"');\
 	 echo $$delegator >> $$validator/delegators.list;\
 	 done
 
-VALIDATOR_CNTS = $$(ls|grep htdf|linecount)
+# VALIDATOR_CNTS = $$(ls|grep htdf|linecount)
 
-validator.rewards:
-	@rewards=$$(echo Vrewards:);\
-	 for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
+print.validator.rewards:
+	@for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
 	 do \
-	 validator=$$(ls|grep htdf|sed -n '${i}p');\
-	 echo $$validator;\
-	 reward=$$(hscli query distr commission $$validator  | sed -n '4p' | fromstr ': "'|endstr '"');\
-	 rewards=$$(echo $$rewards $$reward);\
-	 done;\
-	 echo $$rewards;
+	 validator=$$(ls|grep htdf|row $$(($$i+1)));\
+	 echo V$$i:$$validator;\
+	 reward=$$(hscli query distr commission $$validator);\
+	 echo VRewards:$$reward;\
+	 done;
 
-delegator.rewards:
-	@rewards=$$(echo Drewards:);\
-	 for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
+print.delegator.rewards:
+	@for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
 	 do \
-	 validator=$$(ls|grep htdf|sed -n '${i}p');\
+	 rewards=$$(echo DRewards:);\
+	 validator=$$(ls|grep htdf|row $$(($$i+1)));\
 	 echo ------------------------------------------------------;\
 	 echo V$$i:$$validator;\
 	 delcnts=$$(linecount $$validator/delegators.list);\
 	 for j in $$(python -c "print ' '.join(str(item) for item in range($$delcnts))"); \
 	 do \
-	 delegator=$$(cat $$validator/delegators.list | sed -n '${j}p');\
+	 delegator=$$(cat $$validator/delegators.list |row $$(($$j+1)));\
 	 echo D$$j:$$delegator;\
-	 reward=$$(hscli query distr rewards $$delegator  | sed -n '4p' | fromstr ': "'|endstr '"');\
+	 reward=$$(hscli query distr rewards $$delegator $$validator);\
 	 rewards=$$(echo $$rewards $$reward);\
 	 done;\
 	 echo $$rewards;\
-	 done;\
+	 done;
 	 
+print.all:
+	@for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
+	 do \
+	 drewards=$$(echo );\
+	 validator=$$(ls|grep htdf|row $$(($$i+1)));\
+	 echo ------------------------------------------------------;\
+	 vreward=$$(hscli query distr commission $$validator);\
+	 echo V$$(($$i+1)): $$validator, $$vreward;\
+	 delcnts=$$(linecount $$validator/delegators.list);\
+	 dsum=0;\
+	 for j in $$(python -c "print ' '.join(str(item) for item in range($$delcnts))"); \
+	 do \
+	 delegator=$$(cat $$validator/delegators.list|row $$(($$j+1)));\
+	 echo D$$(($$j+1)): tgg$$delegator;\
+	 dreward=$$(hscli query distr rewards $$delegator $$validator|excludestr satoshi|endstr .);\
+	 drewards=$$(echo $$drewards $$dreward);\
+	 dsum=$$(python -c "print $$dsum+int($$dreward);");\
+	 done;\
+	 echo DR-$$dsum $$drewards;\
+	 dsum=0;\
+	 done;
+
 community.pool:
 	@reward=$$(hscli query distr community-pool  | sed -n '4p' | fromstr ': "'|endstr '"');\
 	 echo $$reward;
@@ -80,5 +110,5 @@ print.rewards:
 	 echo delta:$$height:$$num_txs:$$total_txs--- $$d1 $$d2 $$d3 $$mr $$(python -c "print $$mr-$$num_txs_old*3000000");\
 	 num_txs_old=$$num_txs;total_txs_old=$$total_txs;\
 	 echo ratio:$$height:$$num_txs:$$total_txs--- $$(python -c "print '%.2f'%($$d1/$$mr)") $$(python -c "print '%.2f'%($$d2/$$mr)") $$(python -c "print '%.2f'%($$d3/$$mr)");\
-	 sleep 4;\
+	 sleep 5;\
 	 done\

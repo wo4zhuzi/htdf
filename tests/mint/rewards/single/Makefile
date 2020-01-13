@@ -1,4 +1,13 @@
-
+# junying-todo, 2020-01-13
+# hscli config json format based
+# ex: 
+# $ hscli query distr rewards htdf1gjtlth85y2ucym7rncrz5y6jcxp77vaz6drjuz htdfvaloper1gjtlth85y2ucym7rncrz5y6j
+# [
+#  {
+#    "denom": "satoshi",
+#    "amount": "3175575109510898.808000000000000000"
+#  }
+# ]
 acc.rewards:
 	@acc=$(shell hscli accounts list| sed -n '1p');\
 	 reward=$$(hscli query distr rewards $${acc}  | sed -n '4p' | fromstr ': "'|endstr '"');\

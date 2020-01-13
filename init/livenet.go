@@ -280,13 +280,28 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 			},
 		})
 
+		// junying-todo, 2020-01-13
+		// commission rate change
+		rate, err := sdk.NewDecFromStr("0.1")
+		if err != nil {
+			return err
+		}
+		maxRate, err := sdk.NewDecFromStr("0.2")
+		if err != nil {
+			return err
+		}
+		maxChangeRrate, err := sdk.NewDecFromStr("0.01")
+		if err != nil {
+			return err
+		}
+
 		valTokens := sdk.TokensFromTendermintPower(100)
 		msg := staking.NewMsgCreateValidator(
 			sdk.ValAddress(accaddr),
 			valPubKeys[i],
 			sdk.NewCoin(sdk.DefaultBondDenom, valTokens),
 			staking.NewDescription(nodeDirName, "", "", ""),
-			staking.NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+			staking.NewCommissionMsg(rate, maxRate, maxChangeRrate), // junying-todo, 2020-01-13, commission rate change
 			sdk.OneInt(),
 		)
 		// make unsigned transaction
