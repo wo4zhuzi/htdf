@@ -44,7 +44,7 @@ func GetCmdSubmitProposal(cdc *codec.Codec) *cobra.Command {
 		Long: strings.TrimSpace(`
 Submit a proposal along with an initial deposit. Proposal title, description, type and deposit can be given directly or through a proposal JSON file. For example:
 
-$ gaiacli gov submit-proposal cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 --proposal="path/to/proposal.json" --from mykey
+$ hscli gov submit-proposal cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 --proposal="path/to/proposal.json" --from mykey
 
 where proposal.json contains:
 
@@ -154,7 +154,7 @@ func GetCmdDeposit(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		Short: "Deposit tokens for activing proposal",
 		Long: strings.TrimSpace(`
-Submit a deposit for an acive proposal. You can find the proposal-id by running gaiacli query gov proposals:
+Submit a deposit for an acive proposal. You can find the proposal-id by running hscli query gov proposals:
 
 $ hscli tx gov deposit cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 1 10stake
 `),
@@ -215,7 +215,7 @@ func GetCmdVote(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		Short: "Vote for an active proposal, options: yes/no/no_with_veto/abstain",
 		Long: strings.TrimSpace(`
-Submit a vote for an acive proposal. You can find the proposal-id by running gaiacli query gov proposals:
+Submit a vote for an acive proposal. You can find the proposal-id by running hscli query gov proposals:
 
 $ hscli tx gov vote cosmos1tq7zajghkxct4al0yf44ua9rjwnw06vdusflk4 1 yes --from mykey
 `),

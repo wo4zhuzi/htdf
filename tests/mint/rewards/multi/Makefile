@@ -11,28 +11,35 @@ initialize:
 
 VALIDATOR_CNTS = $$(ls|grep htdf|linecount)
 
-delegator.rewards:
-	@rewards=$$(echo delegator-rewards:);\
-	 for i in $$(python -c "print ' '.join(str(item) for item in range(${DELEGATOR_CNTS}))"); \
-	 do \
-	 delegator=$$(findstr delegator_address ~/.hsd/config/genesis.json | sed -n '${i}p' | fromstr ': "'|endstr '"');\
-	 echo $$delegator;\
-	 reward=$$(hscli query distr rewards $$delegator  | sed -n '4p' | fromstr ': "'|endstr '"');\
-	 rewards=$$(echo $$rewards $$reward);\
-	 done;\
-	 echo $$rewards;
-
 validator.rewards:
-	@rewards=$$(echo validator-rewards:);\
+	@rewards=$$(echo Vrewards:);\
 	 for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
 	 do \
-	 validator=$$(findstr validator_address ~/.hsd/config/genesis.json | sed -n '${i}p' | fromstr ': "'|endstr '"');\
+	 validator=$$(ls|grep htdf|sed -n '${i}p');\
 	 echo $$validator;\
 	 reward=$$(hscli query distr commission $$validator  | sed -n '4p' | fromstr ': "'|endstr '"');\
 	 rewards=$$(echo $$rewards $$reward);\
 	 done;\
 	 echo $$rewards;
 
+delegator.rewards:
+	@rewards=$$(echo Drewards:);\
+	 for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
+	 do \
+	 validator=$$(ls|grep htdf|sed -n '${i}p');\
+	 echo ------------------------------------------------------;\
+	 echo V$$i:$$validator;\
+	 delcnts=$$(linecount $$validator/delegators.list);\
+	 for j in $$(python -c "print ' '.join(str(item) for item in range($$delcnts))"); \
+	 do \
+	 delegator=$$(cat $$validator/delegators.list | sed -n '${j}p');\
+	 echo D$$j:$$delegator;\
+	 reward=$$(hscli query distr rewards $$delegator  | sed -n '4p' | fromstr ': "'|endstr '"');\
+	 rewards=$$(echo $$rewards $$reward);\
+	 done;\
+	 echo $$rewards;\
+	 done;\
+	 
 community.pool:
 	@reward=$$(hscli query distr community-pool  | sed -n '4p' | fromstr ': "'|endstr '"');\
 	 echo $$reward;
