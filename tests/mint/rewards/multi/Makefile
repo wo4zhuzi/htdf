@@ -3,7 +3,15 @@
 # ex: 
 # $ hscli query distr rewards htdf1j9fhvpfrhlmx2m3xn487qpuyhe56x7wfptssqz
 # $ 271771554720.370000000000000000satoshi
-
+# [metrics]
+# commission rate, community pool rate
+# [checkpoints]
+# mining rewards = fixed mining rewards +  tx fees
+# mining rewards = validator rewards(commission) + delegator rewards + community pool
+# validator_reward = validator rewards + delegator rewards
+# 
+# 
+# 
 DELEGATOR_CNTS = $$(findstr delegator_address ~/.hsd/config/genesis.json | linecount)
 VALIDATOR_CNTS = $$(findstr validator_address ~/.hsd/config/genesis.json | linecount)
 
@@ -51,22 +59,22 @@ print.delegator.rewards:
 print.all:
 	@for i in $$(python -c "print ' '.join(str(item) for item in range(${VALIDATOR_CNTS}))"); \
 	 do \
-	 drewards=$$(echo );\
-	 validator=$$(ls|grep htdf|row $$(($$i+1)));\
 	 echo ------------------------------------------------------;\
-	 vreward=$$(hscli query distr commission $$validator);\
+	 validator=$$(ls|grep htdf|row $$(($$i+1)));\
+	 vreward=$$(hscli query distr commission $$validator|excludestr satoshi|endstr .);\
+	 drewards=$$(echo );\
 	 echo V$$(($$i+1)): $$validator, $$vreward;\
 	 delcnts=$$(linecount $$validator/delegators.list);\
 	 dsum=0;\
 	 for j in $$(python -c "print ' '.join(str(item) for item in range($$delcnts))"); \
 	 do \
 	 delegator=$$(cat $$validator/delegators.list|row $$(($$j+1)));\
-	 echo D$$(($$j+1)): tgg$$delegator;\
+	 echo D$$(($$j+1)): $$delegator;\
 	 dreward=$$(hscli query distr rewards $$delegator $$validator|excludestr satoshi|endstr .);\
 	 drewards=$$(echo $$drewards $$dreward);\
 	 dsum=$$(python -c "print $$dsum+int($$dreward);");\
 	 done;\
-	 echo DR-$$dsum $$drewards;\
+	 echo $$vreward $$dsum $$drewards;\
 	 dsum=0;\
 	 done;
 

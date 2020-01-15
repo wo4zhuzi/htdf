@@ -17,11 +17,14 @@ const (
 	TotalMineableBlks   = DefaultMineableBlks
 	BlkRadianIntv       = 2.0 * math.Pi / float64(Period)
 
-	MonthProvisions            = float64(75000)                          // 75000 per month
-	AnnualProvisions           = 12 * MonthProvisions                    // 900000 per year
-	MineTotalProvisions        = 40 * AnnualProvisions                   // 36,000,000 for 40 years
-	CurrentProvisions          = float64(60000000)                       // 60,000,000 at genesis
-	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi) // 60,000,000 at genesis
+	ValidatorProvisions = float64(4000) // 4000 for validators
+
+	MineTotalProvisions = float64(36000000) - ValidatorProvisions // ~36,000,000 for 40 years
+	AnnualProvisions    = MineTotalProvisions / 40                // ~900000 per year
+	MonthProvisions     = AnnualProvisions / 12                   // ~75000 per month
+
+	CurrentProvisions          = float64(60000000) + ValidatorProvisions // ~60,000,000 at genesis
+	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi) // ~60,000,000 at genesis
 	TotalLiquid                = MineTotalProvisions + CurrentProvisions // 96,000,000
 	TotalLiquidAsSatoshi       = int64(TotalLiquid * htdf2satoshi)       // 96,000,000 * 100,000,000
 
