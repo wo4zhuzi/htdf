@@ -5,3 +5,12 @@ genesis2accs:
 
 checksum:
 	@printkey accounts genesis_old.json address amount denom|repl "[u'" ""|repl "']" ""|deline stake|rowcnt 2|column 2|sumup
+
+export:
+	@linecnt=$$(cat accounts.list|linecount)
+	 for i in $$(python -c "print ' '.join(str(item) for item in range($$linecnt))"); \
+	 do \
+	 address=$$(cat accounts.list|row $$(($$i+1))|column 1);\
+	 balance=$$(cat accounts.list|row $$(($$i+1))|column 2);\
+	 hsd add-genesis-account $$address ${balance}satoshi --home ${HOME}/.hsd;\
+	 done;
