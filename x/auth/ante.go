@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/orientwalt/htdf/codec"
 	txparam "github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -26,6 +28,20 @@ func init() {
 	// This decodes a valid hex string into a sepc256k1Pubkey for use in transaction simulation
 	bz, _ := hex.DecodeString("035AD6810A47F073553FF30D2FCC7E0D3B1C0B74B61A1AAA2582344037151E143A")
 	copy(simSecp256k1Pubkey[:], bz)
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "trace" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
 }
 
 // Check if EVM Tx exists
@@ -52,13 +68,13 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 	) (newCtx sdk.Context, res sdk.Result, abort bool) {
 		// all transactions must be of type auth.StdTx
 		stdTx, ok := tx.(StdTx)
-		fmt.Println("NewAnteHandler:tx", tx)
-		fmt.Println("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
-		fmt.Println("NewAnteHandler:stdTx.Memo", stdTx.Memo)
-		fmt.Println("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount())
-		fmt.Println("NewAnteHandler:stdTx.Fee.GasWanted", stdTx.Fee.GasWanted)
-		fmt.Println("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrice)
-		fmt.Println("NewAnteHandler:stdTx.Fee", stdTx.Fee)
+		log.Debugln("NewAnteHandler:tx", tx)
+		log.Debugln("NewAnteHandler:stdTx.Msgs", stdTx.Msgs)
+		log.Debugln("NewAnteHandler:stdTx.Memo", stdTx.Memo)
+		log.Debugln("NewAnteHandler:stdTx.Fee.Amount", stdTx.Fee.Amount())
+		log.Debugln("NewAnteHandler:stdTx.Fee.GasWanted", stdTx.Fee.GasWanted)
+		log.Debugln("NewAnteHandler:stdTx.Fee.GasPrices", stdTx.Fee.GasPrice)
+		log.Debugln("NewAnteHandler:stdTx.Fee", stdTx.Fee)
 		if !ok {
 			// Set a gas meter with limit 0 as to prevent an infinite gas meter attack
 			// during runTx.
@@ -169,7 +185,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 					return newCtx, res, true
 				}
 			}
-			fmt.Println("&&&&&&&&&&&&&&&&&&&&", newCtx.ChainID())
+			log.Debugln("&&&&&&&&&&&&&&&&&&&&", newCtx.ChainID())
 			// check signature, return account with incremented nonce
 			signBytes := GetSignBytes(newCtx.ChainID(), stdTx, signerAccs[i], isGenesis)
 			signerAccs[i], res = processSig(newCtx, signerAccs[i], stdSigs[i], signBytes, simulate, params)
@@ -181,7 +197,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// TODO: tx tags (?)
-		fmt.Println("NewAnteHandler:----------FINISHED")
+		log.Debugln("NewAnteHandler:----------FINISHED")
 		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted}, false //, GasUsed: newCtx.GasMeter().GasConsumed()}, false // continue...
 	}
 }
@@ -232,7 +248,7 @@ func processSig(
 		// StdSignature (Amino encoding) and simulate gas consumption
 		// (assuming a SECP256k1 simulation key).
 		consumeSimSigGas(ctx.GasMeter(), pubKey, sig, params)
-		// fmt.Println("NewAnteHandler.processSig:simulated in")
+		// log.Debugln("NewAnteHandler.processSig:simulated in")
 	}
 
 	if res := consumeSigVerificationGas(ctx.GasMeter(), sig.Signature, pubKey, params); !res.IsOK() {
@@ -392,7 +408,7 @@ func DeductFees(blockTime time.Time, acc Account, fee StdFee) (Account, sdk.Resu
 // consensus.
 func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 	minGasPrices := ctx.MinGasPrices()
-	fmt.Println("EnsureSufficientMempoolFees:minGasPrices", minGasPrices)
+	log.Debugln("EnsureSufficientMempoolFees:minGasPrices", minGasPrices)
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
 
@@ -403,8 +419,8 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee StdFee) sdk.Result {
 			fee := gp.Amount.Mul(gaslimit)
 			requiredFees[i] = sdk.NewCoin(gp.Denom, fee)
 		}
-		fmt.Println("EnsureSufficientMempoolFees:requiredFees", requiredFees)
-		fmt.Println("EnsureSufficientMempoolFees:stdFee", stdFee)
+		log.Debugln("EnsureSufficientMempoolFees:requiredFees", requiredFees)
+		log.Debugln("EnsureSufficientMempoolFees:stdFee", stdFee)
 		if !stdFee.Amount().IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(

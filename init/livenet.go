@@ -16,6 +16,7 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
+	"github.com/orientwalt/htdf/x/mint"
 	"github.com/orientwalt/htdf/x/staking"
 
 	"github.com/spf13/cobra"
@@ -86,11 +87,11 @@ hsd livenet --chain-id testchain --v 4 -o output --validator-ip-addresses ip.lis
 }
 
 var (
-	// issuer allocation amount
-	issuerAccTokens = sdk.TokensFromTendermintPower(59996000) // 59996000(*10**8)
-
 	// validator stake alloc amount
-	validatorStakingTokens = sdk.TokensFromTendermintPower(1000) // 4000(*10**8)
+	validatorStakingTokens = sdk.TokensFromTendermintPower(int64(mint.ValidatorProvisions)) // 100(*10**8)
+	// issuer allocation amount
+	issuerAccTokens = sdk.TokensFromTendermintPower(int64(mint.UserProvisions)).Sub(validatorStakingTokens.Mul(sdk.NewInt(mint.ValidatorNumbers))) // 59999600(*10**8)
+
 )
 
 func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
