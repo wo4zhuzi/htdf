@@ -36,7 +36,8 @@ FIRST_ROW_INDEX = 2
 CHAIN_ID = mainchain
 MINIMUM_GAS_PRICES = 100satoshi
 GUARDIAN_ADDRESS = htdf172n2nj7z0purlg8dnc6pkd6xgmljr3c7wt94c5
-# ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3
+ISSUER_ADDRESS = htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3
+ISSUER_AMOUNT = $$(python -c "print 1000000*10**8")
 # STAKER_ADDRESS = htdf1t2sdt07ztzf77pj7uheep582l9pn8cn4lapag8
 DEFAULT_PORT = 26656
 ## setup
@@ -68,6 +69,9 @@ install: clean pre vals genesis.json config.toml refine distr.config start
 ############################################################################################
 create.accounts.list:
 	@printkey accounts ${CONFIGDIR}/genesis.json address amount denom|repl "[u'" ""|repl "']" ""|rowcnt 2|deline stake|colex 3 > ${CONFIGDIR}/accounts.list
+
+add.issuer:
+	@echo ${ISSUER_ADDRESS}	${ISSUER_AMOUNT}>> ${CONFIGDIR}/accounts.list
 
 chk.var: pre mk.acc.file
 	@echo ${CONFIGDIR}

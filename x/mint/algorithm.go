@@ -21,16 +21,18 @@ const (
 	ValidatorProvisions      = float64(100)                           // 100 for each validator
 	ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 100 for each validator
 
+	IssuerAmount = float64(1000000) // this is for test. 0 for production, 1000000 for test
+
 	FixedMineProvision  = float64(36000000)
-	MineTotalProvisions = FixedMineProvision - ValidatorTotalProvisions // ~36,000,000 for 40 years
-	AnnualProvisions    = MineTotalProvisions / 40                      // ~900000 per year
-	MonthProvisions     = AnnualProvisions / 12                         // ~75000 per month
+	MineTotalProvisions = FixedMineProvision - ValidatorTotalProvisions - IssuerAmount // ~36,000,000 for 40 years
+	AnnualProvisions    = MineTotalProvisions / 40                                     // ~900000 per year
+	MonthProvisions     = AnnualProvisions / 12                                        // ~75000 per month
 
 	UserProvisions             = float64(60000000)
-	CurrentProvisions          = UserProvisions + ValidatorTotalProvisions // ~60,000,000 at genesis
-	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi)   // ~60,000,000 at genesis
-	TotalLiquid                = MineTotalProvisions + CurrentProvisions   // 96,000,000
-	TotalLiquidAsSatoshi       = int64(TotalLiquid * htdf2satoshi)         // 96,000,000 * 100,000,000
+	CurrentProvisions          = UserProvisions + ValidatorTotalProvisions + IssuerAmount // ~60,000,000 at genesis
+	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi)                  // ~60,000,000 at genesis
+	TotalLiquid                = MineTotalProvisions + CurrentProvisions                  // 96,000,000
+	TotalLiquidAsSatoshi       = int64(TotalLiquid * htdf2satoshi)                        // 96,000,000 * 100,000,000
 
 	htdf2satoshi = 100000000 // 1 htdf = 10 ** 8 satoshi
 
