@@ -73,6 +73,9 @@ create.accounts.list:
 add.issuer:
 	@echo ${ISSUER_ADDRESS}	${ISSUER_AMOUNT}>> ${CONFIGDIR}/accounts.list
 
+check.issuer:
+	@row $$(cat ${CONFIGDIR}/accounts.list |linecount) ${CONFIGDIR}/accounts.list
+
 chk.var: pre mk.acc.file
 	@echo ${CONFIGDIR}
 	@if [ -f ${SERVER_INFO} ]; then echo servers.info exists; fi
