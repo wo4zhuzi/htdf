@@ -1,13 +1,31 @@
 package params
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 
 	"github.com/orientwalt/htdf/x/params/subspace"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
+}
 
 const (
 	// StoreKey is the string key for the params store
@@ -53,7 +71,7 @@ func (k Keeper) Subspace(spacename string) Subspace {
 	}
 
 	space := subspace.NewSubspace(k.cdc, k.key, k.tkey, spacename)
-	fmt.Print("=======k.key=======", k.key, "	k.tkey	", k.tkey, "\n")
+	log.Traceln("=======k.key=======", k.key, "	k.tkey	", k.tkey)
 	k.spaces[spacename] = &space
 
 	return space

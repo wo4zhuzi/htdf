@@ -2,9 +2,28 @@ package types
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/orientwalt/htdf/codec"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
+}
 
 const (
 	AppVersionTag = "app_version"
@@ -89,16 +108,16 @@ func (pk ProtocolKeeper) GetUpgradeConfigByStore(store KVStore) (upgradeConfig U
 
 func (pk ProtocolKeeper) GetCurrentVersion(ctx Context) uint64 {
 	store := ctx.KVStore(pk.storeKey)
-	fmt.Println("!------1--------GetCurrentVersion---------------------!")
+	log.Debugln("!------1--------GetCurrentVersion---------------------!")
 	bz := store.Get(CurrentVersionKey)
-	fmt.Println("!------2--------GetCurrentVersion---------------------!")
+	log.Debugln("!------2--------GetCurrentVersion---------------------!")
 	if bz == nil {
 		return 0
 	}
-	fmt.Println("!------3--------GetCurrentVersion---------------------!")
+	log.Debugln("!------3--------GetCurrentVersion---------------------!")
 	var currentVersion uint64
 	pk.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &currentVersion)
-	fmt.Println("!------4--------GetCurrentVersion---------------------!", currentVersion)
+	log.Debugln("!------4--------GetCurrentVersion---------------------!", currentVersion)
 	return currentVersion
 }
 
@@ -147,7 +166,7 @@ func (pk ProtocolKeeper) ClearUpgradeConfig(ctx Context) {
 }
 
 func (pk ProtocolKeeper) IsValidVersion(ctx Context, version uint64) bool {
-	fmt.Println("2--------------handleMsgSubmitSoftwareUpgradeProposal---------------------")
+	log.Debugln("2--------------handleMsgSubmitSoftwareUpgradeProposal---------------------")
 	currentVersion := pk.GetCurrentVersion(ctx)
 
 	lastFailedVersion := pk.GetLastFailedVersion(ctx)

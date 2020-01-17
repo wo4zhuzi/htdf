@@ -2,13 +2,32 @@ package auth
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/tendermint/tendermint/crypto"
 
 	codec "github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/params"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
+}
 
 const (
 	// StoreKey is string representation of the store key for auth
@@ -282,7 +301,7 @@ func (am AccountKeeper) IncreaseTotalLoosenToken(ctx sdk.Context, coins sdk.Coin
 	store := ctx.KVStore(am.key)
 	store.Set(TotalLoosenTokenKey, bzNew)
 
-	ctx.Logger().Info("Execute IncreaseTotalLoosenToken Successed",
+	log.Infoln("Execute IncreaseTotalLoosenToken Successed",
 		"increaseCoins", coins.String(), "totalLoosenToken", totalLoosenToken.String())
 }
 
@@ -303,7 +322,7 @@ func (am AccountKeeper) DecreaseTotalLoosenToken(ctx sdk.Context, coins sdk.Coin
 	store := ctx.KVStore(am.key)
 	store.Set(TotalLoosenTokenKey, bzNew)
 
-	ctx.Logger().Info("Execute DecreaseTotalLoosenToken Successed",
+	log.Infoln("Execute DecreaseTotalLoosenToken Successed",
 		"decreaseCoins", coins.String(), "totalLoosenToken", totalLoosenToken.String())
 }
 

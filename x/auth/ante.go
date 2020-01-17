@@ -32,7 +32,7 @@ func init() {
 	lvl, ok := os.LookupEnv("LOG_LEVEL")
 	// LOG_LEVEL not set, let's default to debug
 	if !ok {
-		lvl = "trace" //trace/debug/info/warn/error/parse/fatal/panic
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
 	}
 	// parse string, this is built-in feature of logrus
 	ll, err := log.ParseLevel(lvl)
@@ -197,7 +197,7 @@ func NewAnteHandler(ak AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		}
 
 		// TODO: tx tags (?)
-		log.Debugln("NewAnteHandler:----------FINISHED")
+		log.Debugln("NewAnteHandler:FINISHED")
 		return newCtx, sdk.Result{GasWanted: stdTx.Fee.GasWanted}, false //, GasUsed: newCtx.GasMeter().GasConsumed()}, false // continue...
 	}
 }

@@ -2,9 +2,28 @@ package protocol
 
 import (
 	"fmt"
+	"os"
 
 	sdk "github.com/orientwalt/htdf/types"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
+}
 
 type ProtocolEngine struct {
 	protocols      map[uint64]Protocol
@@ -27,7 +46,7 @@ func (pe *ProtocolEngine) LoadCurrentProtocol(kvStore sdk.KVStore) (bool, uint64
 	// find the current version from store
 	current := pe.ProtocolKeeper.GetCurrentVersionByStore(kvStore)
 	p, flag := pe.protocols[current]
-	fmt.Print("/---------flag1----------/", flag, "\n")
+	log.Infoln("/---------flag1----------/", flag)
 	if flag == true {
 		p.Load()
 		pe.current = current
@@ -38,7 +57,7 @@ func (pe *ProtocolEngine) LoadCurrentProtocol(kvStore sdk.KVStore) (bool, uint64
 // To be used for Protocol with version > 0
 func (pe *ProtocolEngine) Activate(version uint64) bool {
 	p, flag := pe.protocols[version]
-	fmt.Print("/---------flag2----------/", flag, "\n")
+	log.Infoln("/---------flag2----------/", flag)
 	if flag == true {
 		p.Load()
 		p.Init()

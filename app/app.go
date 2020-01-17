@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/orientwalt/htdf/app/protocol"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"github.com/tendermint/tendermint/libs/log"
@@ -27,6 +28,23 @@ import (
 	cfg "github.com/tendermint/tendermint/config"
 	cmn "github.com/tendermint/tendermint/libs/common"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := logrus.ParseLevel(lvl)
+	if err != nil {
+		ll = logrus.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	logrus.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
+}
 
 const (
 	appName = "HtdfServiceApp"
@@ -71,7 +89,7 @@ func NewHtdfServiceApp(logger log.Logger, config *cfg.InstrumentationConfig, db 
 		invCheckPeriod: invCheckPeriod,
 	}
 	protocolKeeper := sdk.NewProtocolKeeper(protocol.KeyMain)
-	fmt.Print("/---------protocolKeeper----------/", protocolKeeper, "\n")
+	logrus.Traceln("/---------protocolKeeper----------/", protocolKeeper)
 	engine := protocol.NewProtocolEngine(protocolKeeper)
 	app.SetProtocolEngine(&engine)
 	app.MountStoresIAVL(engine.GetKVStoreKeys())
@@ -94,14 +112,14 @@ func NewHtdfServiceApp(logger log.Logger, config *cfg.InstrumentationConfig, db 
 	engine.Add(v0.NewProtocolV0(0, logger, protocolKeeper, app.invCheckPeriod, &appPrometheusConfig))
 	//engine.Add(v0.NewProtocolV0(1, logger, protocolKeeper, app.invCheckPeriod, &appPrometheusConfig))
 	//engine.Add(v2.NewProtocolV1(2, ...))
-	fmt.Print("KeyMain----->	", app.GetKVStore(protocol.KeyMain), "\n")
+	logrus.Traceln("KeyMain----->	", app.GetKVStore(protocol.KeyMain))
 	loaded, current := engine.LoadCurrentProtocol(app.GetKVStore(protocol.KeyMain))
 	if !loaded {
 		cmn.Exit(fmt.Sprintf("Your software doesn't support the required protocol (version %d)!", current))
 	}
 	app.BaseApp.txDecoder = auth.DefaultTxDecoder(engine.GetCurrentProtocol().GetCodec())
 	engine.GetCurrentProtocol().InitMetrics(app.cms)
-	fmt.Print("keystorage----->	", app.GetKVStore(protocol.KeyStorage), "\n")
+	logrus.Traceln("keystorage----->	", app.GetKVStore(protocol.KeyStorage))
 	return app
 }
 

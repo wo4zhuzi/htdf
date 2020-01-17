@@ -3,13 +3,32 @@ package keeper
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"sort"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/staking/types"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	// log.SetFormatter(&log.JSONFormatter{})
+}
 
 // Apply and return accumulated updates to the bonded validator set. Also,
 // * Updates the active valset as keyed by LastValidatorPowerKey.
@@ -178,7 +197,7 @@ func (k Keeper) bondValidator(ctx sdk.Context, validator types.Validator) types.
 
 	// set the status
 	pool := k.GetPool(ctx)
-	fmt.Println("bondValidator=====================", pool)
+	log.Infoln("bondValidator=====================", pool)
 	validator, pool = validator.UpdateStatus(pool, sdk.Bonded)
 	k.SetPool(ctx, pool)
 
@@ -210,7 +229,7 @@ func (k Keeper) beginUnbondingValidator(ctx sdk.Context, validator types.Validat
 
 	// set the status
 	pool := k.GetPool(ctx)
-	fmt.Println("beginUnbondingValidator=====================", pool)
+	log.Infoln("beginUnbondingValidator=====================", pool)
 	validator, pool = validator.UpdateStatus(pool, sdk.Unbonding)
 	k.SetPool(ctx, pool)
 
@@ -234,7 +253,7 @@ func (k Keeper) beginUnbondingValidator(ctx sdk.Context, validator types.Validat
 // perform all the store operations for when a validator status becomes unbonded
 func (k Keeper) completeUnbondingValidator(ctx sdk.Context, validator types.Validator) types.Validator {
 	pool := k.GetPool(ctx)
-	fmt.Println("completeUnbondingValidator=====================", pool)
+	log.Infoln("completeUnbondingValidator=====================", pool)
 	validator, pool = validator.UpdateStatus(pool, sdk.Unbonded)
 	k.SetPool(ctx, pool)
 	k.SetValidator(ctx, validator)
