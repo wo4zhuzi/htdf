@@ -42,7 +42,7 @@ func init() {
 	}
 	// set global log level
 	logrus.SetLevel(ll)
-	// log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.TextFormatter{}) //&log.JSONFormatter{})
 }
 
 // Key to store the consensus params in the main store.

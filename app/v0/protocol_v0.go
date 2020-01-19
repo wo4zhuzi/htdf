@@ -49,7 +49,7 @@ func init() {
 	}
 	// set global log level
 	logrus.SetLevel(ll)
-	// log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.TextFormatter{}) //&log.JSONFormatter{})
 }
 
 type ProtocolV0 struct {

@@ -22,7 +22,7 @@ func init() {
 	}
 	// set global log level
 	log.SetLevel(ll)
-	// log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.TextFormatter{}) //&log.JSONFormatter{})
 }
 
 const (
