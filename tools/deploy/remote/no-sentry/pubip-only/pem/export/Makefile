@@ -230,4 +230,12 @@ run.cmd:
 	 passwd=${PEMDIR}/$$(row $$index ${SERVER_LIST} 1|column ${PEM_COL_INDEX});\
 	 ssh -i $$passwd root@$$ipaddr ${cmd}; done
 
+to=$(HOME)
+from=/root/.hsd/config/g.tar.gz
+transfer:
+	@index=1;\
+	 ipaddr=$$(row $$index ${SERVER_LIST}|column ${PUB_COL_INDEX});\
+	 passwd=${PEMDIR}/$$(row $$index ${SERVER_LIST}|column ${PEM_COL_INDEX});\
+	 scp -i $$passwd root@$$ipaddr:${from} ${to}; 
+
 .PHONY: clean
