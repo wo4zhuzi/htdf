@@ -29,6 +29,7 @@ import (
 	dist "github.com/orientwalt/htdf/x/distribution/client/rest"
 	gv "github.com/orientwalt/htdf/x/gov"
 	gov "github.com/orientwalt/htdf/x/gov/client/rest"
+	mint "github.com/orientwalt/htdf/x/mint/client/rest"
 	sl "github.com/orientwalt/htdf/x/slashing"
 	slashing "github.com/orientwalt/htdf/x/slashing/client/rest"
 	st "github.com/orientwalt/htdf/x/staking"
@@ -38,6 +39,7 @@ import (
 	distcmd "github.com/orientwalt/htdf/x/distribution"
 	hsdistClient "github.com/orientwalt/htdf/x/distribution/client"
 	hsgovClient "github.com/orientwalt/htdf/x/gov/client"
+	hsmintClient "github.com/orientwalt/htdf/x/mint/client/cli"
 	hslashingClient "github.com/orientwalt/htdf/x/slashing/client"
 	hstakingClient "github.com/orientwalt/htdf/x/staking/client"
 	upgradecmd "github.com/orientwalt/htdf/x/upgrade/client/cli"
@@ -121,6 +123,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	staking.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	mint.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 }
 
 func versionCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
@@ -149,6 +152,7 @@ func queryCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 		tx.QueryTxCmd(cdc),
 		client.LineBreak,
 		authcmd.GetAccountCmd(storeAcc, cdc),
+		hsmintClient.GetCmdQueryBlockRewards(cdc),
 		upgradecmd.GetInfoCmd("upgrade", cdc),
 		upgradecmd.GetCmdQuerySignals("upgrade", cdc),
 	)

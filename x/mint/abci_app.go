@@ -64,10 +64,12 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	}
 
 	AnnualProvisionsDec, Inflation, BlockProvision := GetMineToken(curBlkHeight, totalSupply, curAmplitude, curCycle, curLastIndex)
-
+	// junying-todo, 2020-02-04
+	k.SetReward(ctx, curBlkHeight, BlockProvision.TruncateInt64())
 	return AnnualProvisionsDec, Inflation, BlockProvision
 }
 
+// GetMineToken...
 func GetMineToken(curBlkHeight int64, totalSupply sdk.Int, curAmplitude int64, curCycle int64, curLastIndex int64) (sdk.Dec, sdk.Dec, sdk.Dec) {
 
 	// fetch params
