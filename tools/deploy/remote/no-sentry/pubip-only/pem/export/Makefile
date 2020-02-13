@@ -70,6 +70,9 @@ install: clean pre vals genesis.json config.toml refine distr.config start
 create.accounts.list:
 	@printkey accounts ${CONFIGDIR}/genesis.json address amount denom|repl "[u'" ""|repl "']" ""|rowcnt 2|deline stake|colex 3 > ${CONFIGDIR}/accounts.list
 
+# junying-todo, 2020-02-13
+# caution: tab insert doesn't work well. it needs manual works on some condition
+# htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3	100000000000000
 add.issuer:
 	@echo ${ISSUER_ADDRESS}	${ISSUER_AMOUNT}>> ${CONFIGDIR}/accounts.list
 
@@ -223,7 +226,7 @@ ssh.vals:
 	 ssh -i $$passwd root@$$ipaddr
 
 # temp zone
-cmd = apt install make
+cmd = mv /root/.hsd /root/.hsd_2_wave#apt install make
 run.cmd:
 	@for index in $(VALS_INDEX); do \
 	 ipaddr=$$(row $$index ${SERVER_LIST} 1|column ${PUB_COL_INDEX});\

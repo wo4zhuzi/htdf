@@ -72,12 +72,10 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 // GetMineToken...
 func GetMineToken(curBlkHeight int64, totalSupply sdk.Int, curAmplitude int64, curCycle int64, curLastIndex int64) (sdk.Dec, sdk.Dec, sdk.Dec) {
 
-	// fetch params
-	log.Infoln("totalSupply", totalSupply)
 	// block index
 	log.Infoln("curBlkHeight:", curBlkHeight)
 
-	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
+	AnnualProvisionsDec := sdk.NewDec(AnnualProvisionAsSatoshi)
 	// Inflation = AnnualProvisions / totalSupply
 	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
 

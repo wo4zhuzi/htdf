@@ -23,10 +23,11 @@ const (
 
 	IssuerAmount = float64(1000000) // this is for test. 0 for production, 1000000 for test
 
-	FixedMineProvision  = float64(36000000)
-	MineTotalProvisions = FixedMineProvision - ValidatorTotalProvisions - IssuerAmount // ~36,000,000 for 40 years
-	AnnualProvisions    = MineTotalProvisions / 40                                     // ~900000 per year
-	MonthProvisions     = AnnualProvisions / 12                                        // ~75000 per month
+	FixedMineProvision       = float64(36000000)
+	MineTotalProvisions      = FixedMineProvision - ValidatorTotalProvisions - IssuerAmount // ~36,000,000 for 40 years
+	AnnualProvisions         = MineTotalProvisions / 40.0                                   // ~900000 per year
+	AnnualProvisionAsSatoshi = int64(AnnualProvisions * htdf2satoshi)
+	MonthProvisions          = AnnualProvisions / 12.0 // ~75000 per month
 
 	UserProvisions             = float64(60000000)
 	CurrentProvisions          = UserProvisions + ValidatorTotalProvisions + IssuerAmount // ~60,000,000 at genesis
