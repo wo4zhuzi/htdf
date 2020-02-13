@@ -17,7 +17,7 @@ const (
 	TotalMineableBlks   = DefaultMineableBlks
 	BlkRadianIntv       = 2.0 * math.Pi / float64(Period)
 
-	ValidatorNumbers         = 4                                      // the number of validators
+	ValidatorNumbers         = 7                                      // the number of validators
 	ValidatorProvisions      = float64(100)                           // 100 for each validator
 	ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 100 for each validator
 
