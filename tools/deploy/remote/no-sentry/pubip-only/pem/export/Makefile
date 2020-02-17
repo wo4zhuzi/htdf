@@ -241,4 +241,11 @@ transfer:
 	 passwd=${PEMDIR}/$$(row $$index ${SERVER_LIST}|column ${PEM_COL_INDEX});\
 	 scp -i $$passwd root@$$ipaddr:${from} ${to}; 
 
+distr.exe.specific:
+	@index=3;\
+	 ipaddr=$$(row $$index ${SERVER_LIST}|column ${PUB_COL_INDEX});\
+	 passwd=${PEMDIR}/$$(row $$index ${SERVER_LIST}|column ${PEM_COL_INDEX});\
+	 scp -i $$passwd  $$(which hsd) root@$$ipaddr:/usr/local/bin;\
+	 scp -i $$passwd  $$(which hscli) root@$$ipaddr:/usr/local/bin; done
+
 .PHONY: clean
