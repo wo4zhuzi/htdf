@@ -258,7 +258,7 @@ func initRealNet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
-		valTokens := sdk.TokensFromTendermintPower(100)
+		valTokens := validatorStakingTokens //sdk.TokensFromTendermintPower(100)
 		msg := staking.NewMsgCreateValidator(
 			sdk.ValAddress(accaddr),
 			valPubKeys[i],

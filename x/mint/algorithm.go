@@ -18,8 +18,8 @@ const (
 	BlkRadianIntv       = 2.0 * math.Pi / float64(Period)
 
 	ValidatorNumbers         = 7                                      // the number of validators
-	ValidatorProvisions      = float64(100)                           // 100 for each validator
-	ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 100 for each validator
+	ValidatorProvisions      = float64(1)                             // 1 for each validator
+	ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 1 for each validator
 
 	IssuerAmount = float64(1000000) // this is for test. 0 for production, 1000000 for test
 

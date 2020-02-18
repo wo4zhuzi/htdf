@@ -226,7 +226,7 @@ ssh.vals:
 	 ssh -i $$passwd root@$$ipaddr
 
 # temp zone
-cmd = mv /root/.hsd /root/.hsd_2_wave#apt install make
+cmd = $(MAKE) -sC /root stop-rest  #apt install make
 run.cmd:
 	@for index in $(VALS_INDEX); do \
 	 ipaddr=$$(row $$index ${SERVER_LIST} 1|column ${PUB_COL_INDEX});\
