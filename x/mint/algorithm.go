@@ -17,9 +17,13 @@ const (
 	TotalMineableBlks   = DefaultMineableBlks
 	BlkRadianIntv       = 2.0 * math.Pi / float64(Period)
 
-	ValidatorNumbers         = 7                                      // the number of validators
-	ValidatorProvisions      = float64(1)                             // 1 for each validator
-	ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 1 for each validator
+	ValidatorNumbers    = 7          // the number of validators
+	ValidatorProvisions = float64(1) // 1 for each validator
+	// Ignore validaotorProvisin because it is set as small as enough to be neglected.
+	// if you want to set it bigger as your , you should care about this part again.
+	// Including this part will decrease interoperability of the source code.
+	// ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 1 for each validator
+	ValidatorTotalProvisions = 0
 
 	IssuerAmount = float64(1000000) // this is for test. 0 for production, 1000000 for test
 

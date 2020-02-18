@@ -1,4 +1,15 @@
 # junying-todo, 2020-02-10
+# you should prepare the following files.
+# 1. /etc/ansible/hosts
+# >>>
+# [observers]
+# observer1 ansible_host=192.168.5.11 ansible_user=root ansible_ssh_private_key_file=/tmp/192.168.5.11.pem
+# observer2 ansible_host=192.168.5.12 ansible_user=root ansible_ssh_private_key_file=/tmp/192.168.5.12.pem
+# observer3 ansible_host=192.168.5.13 ansible_user=root ansible_ssh_private_key_file=/tmp/192.168.5.13.pem
+# observer4 ansible_host=192.168.5.14 ansible_user=root ansible_ssh_private_key_file=/tmp/192.168.5.14.pem
+#
+# 2. config.toml, genesis.json, hsd, hscli, Makefile
+#################################################################
 CONFIG_DIR=/home/ubuntu/config/nosentry/htdf/observation
 
 all: init copy run

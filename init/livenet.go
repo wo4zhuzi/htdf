@@ -90,7 +90,8 @@ var (
 	// validator stake alloc amount
 	validatorStakingTokens = sdk.TokensFromTendermintPower(int64(mint.ValidatorProvisions)) // 100(*10**8)
 	// issuer allocation amount
-	issuerAccTokens = sdk.TokensFromTendermintPower(int64(mint.UserProvisions)).Sub(validatorStakingTokens.Mul(sdk.NewInt(mint.ValidatorNumbers))) // 59999400(*10**8)
+	// issuerAccTokens = sdk.TokensFromTendermintPower(int64(mint.UserProvisions)).Sub(validatorStakingTokens.Mul(sdk.NewInt(mint.ValidatorNumbers))) // 59999400(*10**8)
+	issuerAccTokens = sdk.TokensFromTendermintPower(int64(mint.CurrentProvisions)) // 61000000(*10**8)
 
 )
 
