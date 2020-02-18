@@ -129,11 +129,11 @@ clear:
 distr.val: refine distr.mkfile distr.exe distr.config
 
 distr.mkfile:
-	@ansible observers -m copy -a "src=$(CONFIGDIR)/Makefile dest=/root force=yes"	
+	@ansible nodes -m copy -a "src=$(CONFIGDIR)/Makefile dest=/root force=yes"	
 
 distr.exe:
-	@ansible observers -m copy -a "src=/home/ubuntu/go/bin/hsd dest=/usr/local/bin force=yes mode=755"
-	@ansible observers -m copy -a "src=/home/ubuntu/go/bin/hscli dest=/usr/local/bin force=yes mode=755"
+	@ansible nodes -m copy -a "src=/home/ubuntu/go/bin/hsd dest=/usr/local/bin force=yes mode=755"
+	@ansible nodes -m copy -a "src=/home/ubuntu/go/bin/hscli dest=/usr/local/bin force=yes mode=755"
 
 distr.config:
 	@for index in $(VALS_INDEX); do \
@@ -173,7 +173,7 @@ confirm.validators:
 	@ansible servers -m shell -a "curl http://localhost:26657/validators|grep address"
 
 confirm.height:
-	@ansible servers -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
+	@ansible observers -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
 
 ssh.vals:
 	@read -p "Enter Server Index To Check: " index; \
