@@ -170,10 +170,10 @@ start.rest:start.setconfig
 
 # check servers
 confirm.validators:
-	@ansible servers -m shell -a "curl http://localhost:26657/validators|grep address"
+	@ansible nodes -m shell -a "curl http://localhost:26657/validators|grep address"
 
 confirm.height:
-	@ansible observers -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
+	@ansible nodes -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
 
 ssh.vals:
 	@read -p "Enter Server Index To Check: " index; \
