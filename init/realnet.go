@@ -36,7 +36,7 @@ func RealNetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "realnet",
-		Short: "Initialize files for a hsd testnet",
+		Short: "Initialize files for a hsd mainnet with exported accounts",
 		Long: `realnet will create "v" number of directories and populate each with
 necessary files (private validator, genesis, config, etc.).
 

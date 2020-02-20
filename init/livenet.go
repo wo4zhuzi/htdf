@@ -37,7 +37,7 @@ func LiveNetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "livenet",
-		Short: "Initialize files for a hsd testnet",
+		Short: "Initialize files for a hsd testnet with distributing scripts",
 		Long: `livenet will create "v" number of directories and populate each with
 necessary files (private validator, genesis, config, etc.).
 

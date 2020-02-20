@@ -25,7 +25,8 @@ const (
 	// ValidatorTotalProvisions = ValidatorProvisions * ValidatorNumbers // 1 for each validator
 	ValidatorTotalProvisions = 0
 
-	IssuerAmount = float64(1000000) // this is for test. 0 for production, 1000000 for test
+	// IssuerAmount = float64(1000000) // this is for test. 0 for production, 1000000 for test
+	IssuerAmount = 0 // 0 for production
 
 	FixedMineProvision       = float64(36000000)
 	MineTotalProvisions      = FixedMineProvision - ValidatorTotalProvisions - IssuerAmount // ~36,000,000 for 40 years

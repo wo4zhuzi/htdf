@@ -28,6 +28,12 @@ cp.hscli:
 cp.Makefile:
 	@ansible observers -m copy -a "src=/home/ubuntu/config/nosentry/htdf/observation/Makefile dest=/root force=yes"	
 
-run:
+start:
 	@ansible observers -m shell -a "make start-daemon start-rest"
 
+# checking part
+confirm.validators:
+	@ansible nodes -m shell -a "curl http://localhost:26657/validators|grep address"
+
+confirm.height:
+	@ansible nodes -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
