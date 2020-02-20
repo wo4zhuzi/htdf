@@ -2,6 +2,7 @@ package mint
 
 import (
 	"fmt"
+	"strconv"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -91,7 +92,7 @@ func queryBlockRewards(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([
 
 	reward := keeper.GetReward(ctx, params.Height)
 	if reward < 0 {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", params.Height))
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", strconv.FormatInt(params.Height, 10)))
 	}
 
 	res, err := codec.MarshalJSONIndent(keeper.cdc, reward)

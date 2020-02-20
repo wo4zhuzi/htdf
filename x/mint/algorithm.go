@@ -34,7 +34,9 @@ const (
 	AnnualProvisionAsSatoshi = int64(AnnualProvisions * htdf2satoshi)
 	MonthProvisions          = AnnualProvisions / 12.0 // ~75000 per month
 
-	UserProvisions             = float64(60000000)
+	// this is for export case,that's,this is activated if there exporting accounts exist.
+	UserProvisions = float64(60000000) // if not, this should be set as zero
+
 	CurrentProvisions          = UserProvisions + ValidatorTotalProvisions + IssuerAmount // ~60,000,000 at genesis
 	CurrentProvisionsAsSatoshi = int64(CurrentProvisions * htdf2satoshi)                  // ~60,000,000 at genesis
 	TotalLiquid                = MineTotalProvisions + CurrentProvisions                  // 96,000,000
