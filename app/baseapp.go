@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"io"
+	"os"
 	"reflect"
 	"runtime/debug"
 	"strconv"
@@ -23,8 +24,26 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/version"
 	"github.com/orientwalt/htdf/x/auth"
+	"github.com/sirupsen/logrus"
 	tmstate "github.com/tendermint/tendermint/state"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := logrus.ParseLevel(lvl)
+	if err != nil {
+		ll = logrus.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	logrus.SetLevel(ll)
+	logrus.SetFormatter(&logrus.TextFormatter{}) //&log.JSONFormatter{})
+}
 
 // Key to store the consensus params in the main store.
 var mainConsensusParamsKey = []byte("consensus_params")
@@ -396,7 +415,7 @@ func (app *BaseApp) InitChain(req abci.RequestInitChain) (res abci.ResponseInitC
 	// add block gas meter for any genesis transactions (allow infinite gas)
 	app.deliverState.ctx = app.deliverState.ctx.
 		WithBlockGasMeter(sdk.NewInfiniteGasMeter())
-	fmt.Println("88888888888888888")
+	logrus.Traceln("88888888888888888")
 	res = initChainer(app.deliverState.ctx, app.DeliverTx, req)
 
 	// NOTE: We don't commit, but BeginBlock for block 1 starts from this
@@ -640,7 +659,7 @@ func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeg
 func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 	var result sdk.Result
 	tx, err := app.txDecoder(txBytes)
-	fmt.Println("CheckTx88888888888888888888:tx", tx)
+	logrus.Traceln("CheckTx88888888888888888888:tx", tx)
 	if err != nil {
 		result = err.Result()
 	} else {
@@ -662,13 +681,13 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 	var result sdk.Result
 
 	tx, err := app.txDecoder(txBytes)
-	fmt.Println("DeliverTx1111111111111", tx)
+	logrus.Traceln("DeliverTx1111111111111", tx)
 	if err != nil {
 		result = err.Result()
 	} else {
 		result = app.runTx(runTxModeDeliver, txBytes, tx)
 	}
-	fmt.Println("DeliverTx1111111111111", result.Data, result.Log, result.Tags)
+	logrus.Traceln("DeliverTx1111111111111", result.Data, result.Log, result.Tags)
 	// junying-todo, 2019-10-18
 	// this return value is written to database(blockchain)
 	return abci.ResponseDeliverTx{
@@ -691,7 +710,7 @@ func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 // 		return sdk.ErrInternal("tx must be StdTx")
 // 	}
 // 	// skip gentxs
-// 	fmt.Println("Current BlockHeight:", ctx.BlockHeight())
+// 	logrus.Traceln("Current BlockHeight:", ctx.BlockHeight())
 // 	if ctx.BlockHeight() < 1 {
 // 		return nil
 // 	}
@@ -731,11 +750,11 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 	var codespace sdk.CodespaceType
 	// var gasUsed uint64
 
-	fmt.Println("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
+	logrus.Traceln("runMsgs	begin~~~~~~~~~~~~~~~~~~~~~~~~")
 	for msgIdx, msg := range msgs {
 		// match message route
 		msgRoute := msg.Route()
-		fmt.Println("999999999999", msgRoute)
+		logrus.Traceln("999999999999", msgRoute)
 		//handler := app.router.Route(msgRoute)
 		handler := app.Engine.GetCurrentProtocol().GetRouter().Route(msgRoute)
 		if handler == nil {
@@ -745,12 +764,12 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		var msgResult sdk.Result
 		// skip actual execution for CheckTx mode
 		if mode != runTxModeCheck {
-			fmt.Println("runMsgs/msgResult.IsOK()~~~~~~~~~~~~~~~~~~~~~~~~", msgRoute)
+			logrus.Traceln("runMsgs/msgResult.IsOK()~~~~~~~~~~~~~~~~~~~~~~~~", msgRoute)
 			msgResult = handler(ctx, msg)
 
 		}
 
-		fmt.Println("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
+		logrus.Traceln("runMsgs:msgResult.GasUsed=", msgResult.GasUsed)
 		// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
 
 		// Result.Data must be length prefixed in order to separate each result
@@ -790,7 +809,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		GasUsed:   ctx.GasMeter().GasConsumed(),
 		Tags:      tags,
 	}
-	fmt.Println("runMsgs	end~~~~~~~~~~~~~~~~~~~~~~~~")
+	logrus.Traceln("runMsgs	end~~~~~~~~~~~~~~~~~~~~~~~~")
 	return result
 }
 
@@ -835,7 +854,7 @@ func (app *BaseApp) ValidateTx(ctx sdk.Context, txBytes []byte, tx sdk.Tx) sdk.E
 
 	// // ValidateBasic
 	// if err := ValidateBasic(ctx, tx); err != nil {
-	// 	fmt.Println("1runTx!!!!!!!!!!!!!!!!!")
+	// 	logrus.Traceln("1runTx!!!!!!!!!!!!!!!!!")
 	// 	return err
 	// }
 
@@ -886,7 +905,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	if mode == runTxModeDeliver {
 		startingGas = ctx.BlockGasMeter().GasConsumed()
 	}
-	fmt.Println("runTx:startingGas", startingGas)
+	logrus.Traceln("runTx:startingGas", startingGas)
 	if mode == runTxModeDeliver {
 		app.deliverState.ctx = app.deliverState.ctx.WithCheckValidNum(app.deliverState.ctx.CheckValidNum() + 1)
 	}
@@ -905,7 +924,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 				log := fmt.Sprintf("recovered: %v\nstack:\n%v", r, string(debug.Stack()))
 				result = sdk.ErrInternal(log).Result()
 			}
-			fmt.Println("2runTx!!!!!!!!!!!!!!!!!", r)
+			logrus.Traceln("2runTx!!!!!!!!!!!!!!!!!", r)
 		}
 
 		result.GasWanted = gasWanted
@@ -915,7 +934,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		result.GasUsed = ctx.GasMeter().GasConsumed() // commented before
 
 	}()
-	fmt.Println("runTx:result.GasUsed", result.GasUsed)
+	logrus.Traceln("runTx:result.GasUsed", result.GasUsed)
 	// Add cache in fee refund. If an error is returned or panic happes during refund,
 	// no value will be written into blockchain state.
 	defer func() {
@@ -939,7 +958,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 			refundCache.Write()
 		}
 	}()
-	fmt.Println("3runTx!!!!!!!!!!!!!!!!!")
+	logrus.Traceln("3runTx!!!!!!!!!!!!!!!!!")
 	// If BlockGasMeter() panics it will be caught by the above recover and will
 	// return an error - in any case BlockGasMeter will consume gas past the limit.
 	//
@@ -959,7 +978,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 			}
 		}
 	}()
-	fmt.Println("4runTx!!!!!!!!!!!!!!!!!")
+	logrus.Traceln("4runTx!!!!!!!!!!!!!!!!!")
 	// feePreprocessHandler := app.Engine.GetCurrentProtocol().GetFeePreprocessHandler()
 	// // run the fee handler
 	// if feePreprocessHandler != nil && ctx.BlockHeight() != 0 {
@@ -969,7 +988,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// 		return err.Result()
 	// 	}
 	// }
-	fmt.Println("5runTx!!!!!!!!!!!!!!!!!")
+	logrus.Traceln("5runTx!!!!!!!!!!!!!!!!!")
 	anteHandler := app.Engine.GetCurrentProtocol().GetAnteHandler()
 	if anteHandler != nil {
 		var anteCtx sdk.Context
@@ -985,7 +1004,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		anteCtx, msCache = app.cacheTxContext(ctx, txBytes)
 
 		newCtx, result, abort := anteHandler(anteCtx, tx, mode == runTxModeSimulate)
-		fmt.Println("anteHandler", result.GasUsed, result.GasWanted, result.Log)
+		logrus.Traceln("anteHandler", result.GasUsed, result.GasWanted, result.Log)
 		if !newCtx.IsZero() {
 			// At this point, newCtx.MultiStore() is cache-wrapped, or something else
 			// replaced by the ante handler. We want the original multistore, not one
@@ -1006,23 +1025,23 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 		msCache.Write()
 	}
-	fmt.Println("6runTx!!!!!!!!!!!!!!!!!")
+	logrus.Traceln("6runTx!!!!!!!!!!!!!!!!!")
 	if mode == runTxModeCheck {
 		return
 	}
-	fmt.Println("7runTx!!!!!!!!!!!!!!!!!")
+	logrus.Traceln("7runTx!!!!!!!!!!!!!!!!!")
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
-	fmt.Println("8runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs(), mode)
+	logrus.Traceln("8runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs(), mode)
 	result = app.runMsgs(runMsgCtx, tx.GetMsgs(), mode)
-	fmt.Println("9runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs())
+	logrus.Traceln("9runTx!!!!!!!!!!!!!!!!!", tx.GetMsgs())
 	result.GasWanted = gasWanted
 
 	if mode == runTxModeSimulate {
 		return
 	}
-	fmt.Println("10runTx!!!!!!!!!!!!!!!!!", result.IsOK(), result.GasUsed, result.GasWanted)
+	logrus.Traceln("10runTx!!!!!!!!!!!!!!!!!", result.IsOK(), result.GasUsed, result.GasWanted)
 	// only update state if all messages pass
 	// junying-todo, 2019-11-05
 	// wondering if should add some condition for evm failure
@@ -1030,7 +1049,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// result.Code = 0: Success
 	// result.Code = 1,2: EVM ERROR
 	if result.Code < 3 {
-		fmt.Println("11runTx!!!!!!!!!!!!!!!!!")
+		logrus.Traceln("11runTx!!!!!!!!!!!!!!!!!")
 		msCache.Write()
 	}
 

@@ -10,7 +10,7 @@ GOBIN = $(shell pwd)/build/bin
 GO ?= latest
 
 # variables
-DEBUGAPI=ON   # enable DEBUGAPI by default
+DEBUGAPI=OFF  # disable DEBUGAPI by default
 PACKAGES = $(shell go list ./... | grep -Ev 'vendor|importer')
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
 GIT_BRANCH :=$(shell git branch 2>/dev/null | grep "^\*" | sed -e "s/^\*\ //")
@@ -123,9 +123,9 @@ GENESIS_ACCOUNT_PASSWORD = 12345678
 GENESIS_ACCOUNT_BALANCE = 3000000000000000satoshi
 MINIMUM_GAS_PRICES = 100satoshi
 
-new: install clear hsinit accs conf vals start
+new: install clear hsinit accs conf vals
 
-new.pure: clear hsinit accs conf vals start
+new.pure: clear hsinit accs conf vals
 
 hsinit:
 	@hsd init yjy --chain-id $(CHAIN_ID)

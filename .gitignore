@@ -13,3 +13,6 @@ build
 utils/keystores
 accounts/keystore/keystores
 tests/evm/*.template
+
+*.list
+*.tmp

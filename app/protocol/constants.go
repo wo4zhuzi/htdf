@@ -32,6 +32,7 @@ const (
 	ServiceRoute  = ServiceStore
 	GuardianRoute = GuardianStore
 	UpgradeRoute  = UpgradeStore
+	MintRoute = MintStore // junying-todo, 2020-02-05
 )
 
 var (

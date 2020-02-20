@@ -40,6 +40,7 @@
     hscli query distr rewards <delegator_address> <validator_address>
     hscli query distr commission <validator_address>
     hscli query distr community-pool
+    hscli query rewards 1
 
     [withdraw]
     hscli tx distr withdraw-rewards [delegator-addr] [validator-addr] --gas-adjustment 1.5 --gas-price=20

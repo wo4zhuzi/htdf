@@ -18,13 +18,13 @@ import (
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
 	"github.com/orientwalt/htdf/x/staking"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/types"
 	tmtime "github.com/tendermint/tendermint/types/time"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/orientwalt/htdf/accounts/keystore"
 	v0 "github.com/orientwalt/htdf/app/v0"
@@ -41,6 +41,7 @@ var (
 	flagStartingIPAddress      = "starting-ip-address"
 	flagValidatorIPAddressList = "validator-ip-addresses"
 	flagIssuerBechAddress      = "issuer-bech-address"
+	flagAccountsFilePath       = "accounts-file-path"
 	flagStakerBechAddress      = "staker-bech-address"
 	flagPasswordFromFile       = "password-from-file"
 )
@@ -236,7 +237,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 		addr := sdk.AccAddress.String(accaddr)
 		ksw := keystore.NewKeyStoreWallet(keystore.DefaultKeyStoreHome())
-		signedTx, err :=ksw.SignStdTx(txBldr,unsignedTx,addr, keyPass)
+		signedTx, err := ksw.SignStdTx(txBldr, unsignedTx, addr, keyPass)
 		if err != nil {
 			_ = os.RemoveAll(outDir)
 			return err

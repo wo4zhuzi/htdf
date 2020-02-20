@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/orientwalt/htdf/app"
@@ -16,7 +17,6 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
 	authtx "github.com/orientwalt/htdf/x/auth/client/txbuilder"
-	"github.com/orientwalt/htdf/x/mint"
 	"github.com/orientwalt/htdf/x/staking"
 
 	"github.com/spf13/cobra"
@@ -24,7 +24,6 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
 	cmn "github.com/tendermint/tendermint/libs/common"
-	tmtime "github.com/tendermint/tendermint/types/time"
 
 	"github.com/orientwalt/htdf/accounts/keystore"
 	v0 "github.com/orientwalt/htdf/app/v0"
@@ -33,22 +32,22 @@ import (
 )
 
 // get cmd to initialize all files for tendermint testnet and application
-func LiveNetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+func RealNetFilesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 
 	cmd := &cobra.Command{
-		Use:   "livenet",
-		Short: "Initialize files for a hsd testnet with distributing scripts",
-		Long: `livenet will create "v" number of directories and populate each with
+		Use:   "realnet",
+		Short: "Initialize files for a hsd mainnet with exported accounts",
+		Long: `realnet will create "v" number of directories and populate each with
 necessary files (private validator, genesis, config, etc.).
 
 Note, strict routability for addresses is turned off in the config file.
 
 Example:
-hsd livenet --chain-id testchain --v 4 -o output --validator-ip-addresses ip.list --minimum-gas-prices 100satoshi --issuer-bech-address htdf1sh8d3h0nn8t4e83crcql80wua7u3xtlfj5dej3 --password-from-file password.list
+	hsd realnet --chain-id testchain --v 4 -o output --validator-ip-addresses ip.list --minimum-gas-prices 100satoshi --accounts-file-path accounts.list --password-from-file password.list
 	`,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			config := ctx.Config
-			return initLiveNet(config, cdc)
+			return initRealNet(config, cdc)
 		},
 	}
 
@@ -80,22 +79,12 @@ hsd livenet --chain-id testchain --v 4 -o output --validator-ip-addresses ip.lis
 		server.FlagMinGasPrices, fmt.Sprintf("100%s", sdk.DefaultBondDenom),
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 100satoshi)",
 	)
-	cmd.Flags().String(flagIssuerBechAddress, "", "issuer bech address")
-	// cmd.Flags().String(flagStakerBechAddress, "", "staker bech address") // blocked by junying, 2019-08-27, reason: stake doesn't exist anymore
+	cmd.Flags().String(flagAccountsFilePath, "", "issuer bech address")
 	cmd.Flags().String(flagPasswordFromFile, "", "input password from file")
 	return cmd
 }
 
-var (
-	// validator stake alloc amount
-	validatorStakingTokens = sdk.TokensFromTendermintPower(int64(mint.ValidatorProvisions)) // 100(*10**8)
-	// issuer allocation amount
-	// issuerAccTokens = sdk.TokensFromTendermintPower(int64(mint.UserProvisions)).Sub(validatorStakingTokens.Mul(sdk.NewInt(mint.ValidatorNumbers))) // 59999400(*10**8)
-	issuerAccTokens = sdk.TokensFromTendermintPower(int64(mint.CurrentProvisions)) // 61000000(*10**8)
-
-)
-
-func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
+func initRealNet(config *tmconfig.Config, cdc *codec.Codec) error {
 	var chainID string
 	outDir := viper.GetString(flagOutputDir)
 	numValidators := viper.GetInt(flagNumValidators)
@@ -116,52 +105,27 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 		accs     []v0.GenesisAccount
 		genFiles []string
 	)
-	// add issuer address
-	issuerBechAddr := viper.GetString(flagIssuerBechAddress)
-	var err error
-	if issuerBechAddr == "" {
-		buffer := client.BufferStdin()
-		issuerBechAddr, err = client.GetString("Issuer Address: ", buffer)
+	// read accounts from account.list
+	accFilePath := viper.GetString(flagAccountsFilePath)
+	accounts, balances, err := hsutils.ReadAccounts(accFilePath)
+
+	for index, acc := range accounts {
+		issuerAccAddr, err := sdk.AccAddressFromBech32(acc)
+		if err != nil {
+			return err
+		}
+
+		balance, ok := sdk.NewIntFromString(strconv.Itoa(balances[index]))
+		if !ok {
+			continue
+		}
+		accs = append(accs, v0.GenesisAccount{
+			Address: issuerAccAddr,
+			Coins: sdk.Coins{
+				sdk.NewCoin(DefaultDenom, balance),
+			},
+		})
 	}
-
-	issuerAccAddr, err := sdk.AccAddressFromBech32(issuerBechAddr)
-	if err != nil {
-		return err
-	}
-
-	accs = append(accs, v0.GenesisAccount{
-		Address: issuerAccAddr,
-		Coins: sdk.Coins{
-			sdk.NewCoin(DefaultDenom, issuerAccTokens),
-		},
-	})
-
-	// blocked by junying, 2019-10-16
-	// reason: stake doesn't exist anymore
-	// add staker address
-	// blocked by junying, 2019-09-11
-	// reasone: no stake at present
-	// stakerBechAddr := viper.GetString(flagStakerBechAddress)
-	// if stakerBechAddr == "" {
-	// 	buffer := client.BufferStdin()
-	// 	stakerBechAddr, err = client.GetString("Staker Address: ", buffer)
-	// }
-
-	// blocked by junying, 2019-08-27
-	// reason: stake doesn't exist anymore
-	// stakerAccAddr, err := sdk.AccAddressFromBech32(stakerBechAddr)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// blocked by junying, 2019-08-27
-	// reason: stake doesn't exist anymore
-	// accs = append(accs, v0.GenesisAccount{
-	// 	Address: stakerAccAddr,
-	// 	Coins: sdk.Coins{
-	// 		sdk.NewCoin(sdk.DefaultBondDenom, stakerStakingTokens),
-	// 	},
-	// })
 
 	// generate private keys, node IDs, and initial transactions
 	for i := 0; i < numValidators; i++ {
@@ -192,9 +156,6 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 		ip := viper.GetString(flagStartingIPAddress)
 		ipconfigfile := viper.GetString(flagValidatorIPAddressList)
 		if ipconfigfile != "" {
-			// buffer := client.BufferStdin()
-			// prompt := fmt.Sprintf("IP Address for account '%s':", nodeDirName)
-			// ip, err = client.GetString(prompt, buffer)
 			ip, _, err = hsutils.ReadString(ipconfigfile, i+1)
 		} else {
 			ip, err = getIP(i, ip)
@@ -297,10 +258,11 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
+		valTokens := validatorStakingTokens //sdk.TokensFromTendermintPower(100)
 		msg := staking.NewMsgCreateValidator(
 			sdk.ValAddress(accaddr),
 			valPubKeys[i],
-			sdk.NewCoin(sdk.DefaultBondDenom, validatorStakingTokens),
+			sdk.NewCoin(sdk.DefaultBondDenom, valTokens),
 			staking.NewDescription(nodeDirName, "", "", ""),
 			staking.NewCommissionMsg(rate, maxRate, maxChangeRrate), // junying-todo, 2020-01-13, commission rate change
 			sdk.OneInt(),
@@ -348,52 +310,5 @@ func initLiveNet(config *tmconfig.Config, cdc *codec.Codec) error {
 	}
 
 	fmt.Printf("Successfully initialized %d node directories\n", numValidators)
-	return nil
-}
-
-func collectGenFilesEx(
-	cdc *codec.Codec, config *tmconfig.Config, chainID string,
-	monikers, nodeIDs []string, valPubKeys []crypto.PubKey,
-	numValidators int, outDir, nodeDirPrefix, nodeDaemonHomeName string,
-) error {
-
-	var appState json.RawMessage
-	genTime := tmtime.Now()
-
-	for i := 0; i < numValidators; i++ {
-		nodeDirName := fmt.Sprintf("%s%d", nodeDirPrefix, i)
-		nodeDir := filepath.Join(outDir, nodeDirName, nodeDaemonHomeName)
-		gentxsDir := filepath.Join(outDir, "gentxs")
-		moniker := monikers[i]
-		config.Moniker = nodeDirName
-
-		config.SetRoot(nodeDir)
-
-		nodeID, valPubKey := nodeIDs[i], valPubKeys[i]
-		initCfg := newInitConfig(chainID, gentxsDir, moniker, nodeID, valPubKey)
-
-		genDoc, err := LoadGenesisDoc(cdc, config.GenesisFile())
-		if err != nil {
-			return err
-		}
-
-		nodeAppState, err := genAppStateFromConfigEx(cdc, config, initCfg, genDoc)
-		if err != nil {
-			return err
-		}
-
-		if appState == nil {
-			// set the canonical application state (they should not differ)
-			appState = nodeAppState
-		}
-		genFile := config.GenesisFile()
-
-		// overwrite each validator's genesis file to have a canonical genesis time
-		err = ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }

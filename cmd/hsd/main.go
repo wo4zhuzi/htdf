@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+
 	"github.com/orientwalt/htdf/codec"
 	"github.com/orientwalt/htdf/params"
-	"io"
 
 	"github.com/orientwalt/htdf/server"
 	"github.com/orientwalt/htdf/store"
@@ -18,11 +19,11 @@ import (
 	bam "github.com/orientwalt/htdf/app"
 	hsinit "github.com/orientwalt/htdf/init"
 	lite "github.com/orientwalt/htdf/lite/cmd"
+	guardian "github.com/orientwalt/htdf/x/guardian/client/cli"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cfg "github.com/tendermint/tendermint/config"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	tmtypes "github.com/tendermint/tendermint/types"
-	guardian "github.com/orientwalt/htdf/x/guardian/client/cli"
 )
 
 const (
@@ -56,6 +57,7 @@ func main() {
 	rootCmd.AddCommand(hsinit.InitCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.CollectGenTxsCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.LiveNetFilesCmd(ctx, cdc))
+	rootCmd.AddCommand(hsinit.RealNetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.TestnetFilesCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.GenTxCmd(ctx, cdc))
 	rootCmd.AddCommand(hsinit.AddGenesisAccountCmd(ctx, cdc))

@@ -63,7 +63,7 @@ $ hscli query staking validators
 				return err
 			}
 
-			var validators staking.Validators
+			var validators types.Validators // changed by junying, 2020-02-04, origin:staking.Validators
 			for _, kv := range resKVs {
 				validators = append(validators, types.MustUnmarshalValidator(cdc, kv.Value))
 			}
@@ -211,7 +211,7 @@ $ hscli query staking delegations htdf1u329vz5ysu9dud0q6cuyhy9dmzmvntw00s00e2
 				return err
 			}
 
-			var delegations staking.Delegations
+			var delegations types.Delegations // changed by junying, 2020-02-04, origin:staking.Delegations
 			for _, kv := range resKVs {
 				delegations = append(delegations, types.MustUnmarshalDelegation(cdc, kv.Value))
 			}
@@ -317,7 +317,7 @@ $ hscli query staking unbonding-delegation htdf1u329vz5ysu9dud0q6cuyhy9dmzmvntw0
 				return err
 			}
 
-			var ubds staking.UnbondingDelegations
+			var ubds types.UnbondingDelegations // changed by junying, 2020-02-04, origin:staking.UnbondingDelegations
 			for _, kv := range resKVs {
 				ubds = append(ubds, types.MustUnmarshalUBD(cdc, kv.Value))
 			}

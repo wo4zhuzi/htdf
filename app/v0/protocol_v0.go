@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"os"
 	"sort"
 
 	"github.com/orientwalt/htdf/app/protocol"
@@ -21,6 +22,7 @@ import (
 	"github.com/orientwalt/htdf/x/slashing"
 	stake "github.com/orientwalt/htdf/x/staking"
 	"github.com/orientwalt/htdf/x/upgrade"
+	"github.com/sirupsen/logrus"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/log"
@@ -32,6 +34,23 @@ const (
 )
 
 var _ protocol.Protocol = (*ProtocolV0)(nil)
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := logrus.ParseLevel(lvl)
+	if err != nil {
+		ll = logrus.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	logrus.SetLevel(ll)
+	logrus.SetFormatter(&logrus.TextFormatter{}) //&log.JSONFormatter{})
+}
 
 type ProtocolV0 struct {
 	version        uint64
@@ -146,7 +165,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 			serviceMsgNum++
 		}
 	}
-	// fmt.Println("1111111111@@@@@@@@@@@@@!!!!!!!!!")
+	// logrus.Traceln("1111111111@@@@@@@@@@@@@!!!!!!!!!")
 	if serviceMsgNum != 0 && serviceMsgNum != len(msgs) {
 		return sdk.ErrServiceTxLimit("Can't mix service msgs with other types of msg in one transaction!")
 	}
@@ -155,12 +174,12 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 		subspace, found := p.paramsKeeper.GetSubspace(auth.DefaultParamspace)
 		var txSizeLimit uint64
 		if found {
-			// fmt.Println("22222222222@@@@@@@@@@@@@!!!!!!!!!", subspace)
+			// logrus.Traceln("22222222222@@@@@@@@@@@@@!!!!!!!!!", subspace)
 			subspace.Get(ctx, auth.KeySigVerifyCostSecp256k1, &txSizeLimit)
 		} else {
 			panic("The subspace " + auth.DefaultParamspace + " cannot be found!")
 		}
-		// fmt.Println("33333333333@@@@@@@@@@@@@!!!!!!!!!")
+		// logrus.Traceln("33333333333@@@@@@@@@@@@@!!!!!!!!!")
 		if uint64(len(txBytes)) > txSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), txSizeLimit))
 		}
@@ -306,7 +325,8 @@ func (p *ProtocolV0) configRouters() {
 		AddRoute(protocol.DistrRoute, distr.NewQuerier(p.distrKeeper)).
 		AddRoute(protocol.GuardianRoute, guardian.NewQuerier(p.guardianKeeper)).
 		AddRoute(protocol.ServiceRoute, service.NewQuerier(p.serviceKeeper)).
-		AddRoute(protocol.ParamsRoute, params.NewQuerier(p.paramsKeeper))
+		AddRoute(protocol.ParamsRoute, params.NewQuerier(p.paramsKeeper)).
+		AddRoute(protocol.MintRoute, mint.NewQuerier(p.mintKeeper))
 }
 
 // configure all Stores
@@ -351,7 +371,7 @@ func (p *ProtocolV0) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	distr.BeginBlocker(ctx, req, p.distrKeeper)
 
 	tags := slashing.BeginBlocker(ctx, req, p.slashingKeeper)
-	fmt.Println("------------------BeginBlocker---------------------")
+	logrus.Infoln("------------------BeginBlocker---------------------")
 	return abci.ResponseBeginBlock{
 		Tags: tags.ToKVPairs(),
 	}
@@ -368,7 +388,7 @@ func (p *ProtocolV0) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 	if p.invCheckPeriod != 0 && ctx.BlockHeight()%int64(p.invCheckPeriod) == 0 {
 		p.assertRuntimeInvariants(ctx)
 	}
-	fmt.Println("------------------EndBlocker---------------------")
+	logrus.Info("------------------EndBlocker---------------------")
 	return abci.ResponseEndBlock{
 		ValidatorUpdates: validatorUpdates,
 		Tags:             tags,
@@ -425,7 +445,7 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 		}
 		validators = p.StakeKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 	}
-	fmt.Println("999999999999999")
+	logrus.Traceln("999999999999999")
 	return validators
 }
 
@@ -433,14 +453,14 @@ func (p *ProtocolV0) initFromGenesisState(ctx sdk.Context, DeliverTx sdk.Deliver
 // just 0 version need Initchainer
 func (p *ProtocolV0) InitChainer(ctx sdk.Context, DeliverTx sdk.DeliverTx, req abci.RequestInitChain) abci.ResponseInitChain {
 	stateJSON := req.AppStateBytes
-	fmt.Println("################	", stateJSON)
+	logrus.Traceln("################	", stateJSON)
 	var genesisState GenesisState
 	err := p.cdc.UnmarshalJSON(stateJSON, &genesisState)
 	if err != nil {
 		panic(err) // TODO https://github.com/cosmos/cosmos-sdk/issues/468
 		// return sdk.ErrGenesisParse("").TraceCause(err, "")
 	}
-	fmt.Println("@@@@@@@@@@@@@@@@	", genesisState.Accounts)
+	logrus.Traceln("@@@@@@@@@@@@@@@@	", genesisState.Accounts)
 	validators := p.initFromGenesisState(ctx, DeliverTx, genesisState)
 
 	// sanity check
@@ -460,7 +480,7 @@ func (p *ProtocolV0) InitChainer(ctx sdk.Context, DeliverTx sdk.DeliverTx, req a
 
 	// assert runtime invariants
 	p.assertRuntimeInvariants(ctx)
-	fmt.Println("------------------InitChainer---------------------")
+	logrus.Traceln("------------------InitChainer---------------------")
 	return abci.ResponseInitChain{
 		Validators: validators,
 	}

@@ -6,5 +6,5 @@
     hscli tx send [fromaddr] [toaddr] [amount] --gas-price=20
     hscli tx send [fromaddr] [toaddr] [amount] --gas-wanted=30000 --gas-price=20
 ### references
-#### [client cmd: fee & gas](https://cosmos.network/docs/gaia/gaiacli.html#fees-gas)
+#### [client cmd: fee & gas](https://cosmos.network/docs/gaia/hscli.html#fees-gas)
 #### [gaiad.toml: minimum-gas-prices](https://cosmos.network/docs/gaia/join-mainnet.html#set-minimum-gas-prices)

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -85,6 +86,46 @@ func GetCmdQueryAnnualProvisions(cdc *codec.Codec) *cobra.Command {
 			}
 
 			return cliCtx.PrintOutput(inflation)
+		},
+	}
+}
+
+// GetCmdQueryAnnualProvisions implements a command to return the current minting
+// annual provisions value.
+func GetCmdQueryBlockRewards(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "rewards [block height]",
+		Short: "Get verified data for a the block reward at given height",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+
+			// route := fmt.Sprintf("custom/%s/%s", mint.QuerierRoute, args[0])
+
+			height, err := strconv.ParseInt(args[0], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("height:=", height)
+			bz, err := cliCtx.Codec.MarshalJSON(mint.NewQueryBlockRewardParams(height))
+			if err != nil {
+				return err
+			}
+
+			route := fmt.Sprintf("custom/%s/%s", mint.QuerierRoute, mint.QueryBlockRewards)
+			res, err := cliCtx.QueryWithData(route, bz)
+			if err != nil {
+				return err
+			}
+
+			var reward int64
+			if err := cliCtx.Codec.UnmarshalJSON(res, &reward); err != nil {
+				return err
+			}
+			// reward = sdk.NewDec(mint.BytesToInt64(res))
+
+			return cliCtx.PrintOutput(sdk.NewDec(reward))
 		},
 	}
 }

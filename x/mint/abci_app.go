@@ -1,10 +1,29 @@
 package mint
 
 import (
-	"fmt"
+	"os"
 
 	sdk "github.com/orientwalt/htdf/types"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// This decodes a valid hex string into a sepc256k1Pubkey for use in transaction simulation
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	log.SetFormatter(&log.TextFormatter{}) //&log.JSONFormatter{})
+}
 
 // junying-todo, 2019-07-17
 //	BlksPerRound = 100
@@ -23,10 +42,10 @@ import (
 func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	// fetch params
 	totalSupply := k.sk.TotalTokens(ctx)
-	fmt.Println("totalSupply", totalSupply)
+	log.Infoln("totalSupply", totalSupply)
 	// block index
 	curBlkHeight := ctx.BlockHeight()
-	fmt.Println("curBlkHeight:", curBlkHeight)
+	log.Infoln("curBlkHeight:", curBlkHeight)
 
 	// check terminate condition, junying-todo, 2019-12-05
 	if totalSupply.GT(sdk.NewInt(TotalLiquidAsSatoshi)) { // || curBlkHeight > TotalMineableBlks {
@@ -45,18 +64,18 @@ func calcParams(ctx sdk.Context, k Keeper) (sdk.Dec, sdk.Dec, sdk.Dec) {
 	}
 
 	AnnualProvisionsDec, Inflation, BlockProvision := GetMineToken(curBlkHeight, totalSupply, curAmplitude, curCycle, curLastIndex)
-
+	// junying-todo, 2020-02-04
+	k.SetReward(ctx, curBlkHeight, BlockProvision.TruncateInt64())
 	return AnnualProvisionsDec, Inflation, BlockProvision
 }
 
+// GetMineToken...
 func GetMineToken(curBlkHeight int64, totalSupply sdk.Int, curAmplitude int64, curCycle int64, curLastIndex int64) (sdk.Dec, sdk.Dec, sdk.Dec) {
 
-	// fetch params
-	fmt.Println("totalSupply", totalSupply)
 	// block index
-	fmt.Println("curBlkHeight:", curBlkHeight)
+	log.Infoln("curBlkHeight:", curBlkHeight)
 
-	AnnualProvisionsDec := sdk.NewDec(int64(AnnualProvisions))
+	AnnualProvisionsDec := sdk.NewDec(AnnualProvisionAsSatoshi)
 	// Inflation = AnnualProvisions / totalSupply
 	Inflation := AnnualProvisionsDec.Quo(sdk.NewDecFromInt(totalSupply))
 
@@ -65,10 +84,10 @@ func GetMineToken(curBlkHeight int64, totalSupply sdk.Int, curAmplitude int64, c
 		panic(0)
 	}
 	BlockProvision := sdk.NewDec(BlockReward)
-	fmt.Println("BlockProvision:", BlockReward)
-	fmt.Println("curAmplitude:", curAmplitude)
-	fmt.Println("curCycle:", curCycle)
-	fmt.Println("curLastIndex:", curLastIndex)
+	log.Infoln("BlockProvision:", BlockReward)
+	log.Infoln("curAmplitude:", curAmplitude)
+	log.Infoln("curCycle:", curCycle)
+	log.Infoln("curLastIndex:", curLastIndex)
 
 	return AnnualProvisionsDec, Inflation, BlockProvision
 }

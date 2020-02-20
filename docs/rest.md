@@ -441,5 +441,10 @@
       ]
     }
 
+### block reward
+```
+curl -X GET "http://localhost:1317/minting/rewards/2" -H "accept: application/json"
+>
+"14065554"
 
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"os"
 
 	vmcore "github.com/orientwalt/htdf/evm/core"
 	"github.com/orientwalt/htdf/evm/state"
@@ -12,7 +13,25 @@ import (
 	appParams "github.com/orientwalt/htdf/params"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/auth"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// junying-todo,2020-01-17
+	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	// LOG_LEVEL not set, let's default to debug
+	if !ok {
+		lvl = "info" //trace/debug/info/warn/error/parse/fatal/panic
+	}
+	// parse string, this is built-in feature of logrus
+	ll, err := log.ParseLevel(lvl)
+	if err != nil {
+		ll = log.FatalLevel //TraceLevel/DebugLevel/InfoLevel/WarnLevel/ErrorLevel/ParseLevel/FatalLevel/PanicLevel
+	}
+	// set global log level
+	log.SetLevel(ll)
+	log.SetFormatter(&log.TextFormatter{}) //&log.JSONFormatter{})
+}
 
 //
 type SendTxResp struct {
@@ -52,7 +71,7 @@ func NewHandler(accountKeeper auth.AccountKeeper,
 // junying-todo, 2019-08-26
 func HandleUnknownMsg(msg sdk.Msg) sdk.Result {
 	var sendTxResp SendTxResp
-	fmt.Printf("msgType error|mstType=%v\n", msg.Type())
+	log.Debugf("msgType error|mstType=%v\n", msg.Type())
 	sendTxResp.ErrCode = sdk.ErrCode_Param
 	return sdk.Result{Code: sendTxResp.ErrCode, Log: sendTxResp.String()}
 }
@@ -95,10 +114,10 @@ func FeeCollecting(ctx sdk.Context,
 	gasused uint64,
 	gasprice *big.Int) {
 	gasUsed := new(big.Int).Mul(new(big.Int).SetUint64(gasused), gasprice)
-	fmt.Printf("FeeCollecting:gasUsed=%s\n", gasUsed.String())
+	log.Debugf("FeeCollecting:gasUsed=%s\n", gasUsed.String())
 	feeCollectionKeeper.AddCollectedFees(ctx, sdk.Coins{sdk.NewCoin(sdk.DefaultDenom, sdk.NewIntFromBigInt(gasUsed))})
 	stateDB.Commit(false)
-	fmt.Println("FeeCollecting:stateDB commited!")
+	log.Debugln("FeeCollecting:stateDB commited!")
 }
 
 // junying-todo, 2019-08-26
@@ -109,8 +128,8 @@ func HandleOpenContract(ctx sdk.Context,
 	keyCode *sdk.KVStoreKey,
 	msg MsgSend) (evmOutput string, gasUsed uint64, err error) {
 
-	fmt.Printf("Handling MsgSend with No Contract.\n")
-	fmt.Println(" HandleOpenContract0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
+	log.Debugf("Handling MsgSend with No Contract.\n")
+	log.Debugln(" HandleOpenContract0:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	stateDB, err := state.NewCommitStateDB(ctx, &accountKeeper, keyStorage, keyCode)
 	if err != nil {
 		evmOutput = fmt.Sprintf("newStateDB error\n")
@@ -120,11 +139,11 @@ func HandleOpenContract(ctx sdk.Context,
 	fromAddress := sdk.ToEthAddress(msg.From)
 	toAddress := sdk.ToEthAddress(msg.To)
 
-	fmt.Printf("fromAddr|appFormat=%s|ethFormat=%s|\n", msg.From.String(), fromAddress.String())
-	fmt.Printf("toAddress|appFormat=%s|ethFormat=%s|\n", msg.To.String(), toAddress.String())
+	log.Debugf("fromAddr|appFormat=%s|ethFormat=%s|\n", msg.From.String(), fromAddress.String())
+	log.Debugf("toAddress|appFormat=%s|ethFormat=%s|\n", msg.To.String(), toAddress.String())
 
-	fmt.Printf("fromAddress|testBalance=%v\n", stateDB.GetBalance(fromAddress))
-	fmt.Printf("fromAddress|nonce=%d\n", stateDB.GetNonce(fromAddress))
+	log.Debugf("fromAddress|testBalance=%v\n", stateDB.GetBalance(fromAddress))
+	log.Debugf("fromAddress|nonce=%d\n", stateDB.GetNonce(fromAddress))
 
 	config := appParams.MainnetChainConfig
 	logConfig := vm.LogConfig{}
@@ -141,14 +160,14 @@ func HandleOpenContract(ctx sdk.Context,
 		return
 	}
 
-	fmt.Printf("inputCode=%s\n", hex.EncodeToString(inputCode))
+	log.Debugf("inputCode=%s\n", hex.EncodeToString(inputCode))
 
 	transferAmount := msg.Amount.AmountOf(sdk.DefaultDenom).BigInt()
 
-	fmt.Printf("transferAmount: %d\n", transferAmount)
+	log.Debugf("transferAmount: %d\n", transferAmount)
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gasPrice=%d|gasWanted=%d\n", msg.GasPrice, msg.GasWanted)
+	log.Debugf("gasPrice=%d|gasWanted=%d\n", msg.GasPrice, msg.GasWanted)
 
 	// commented by junying, 2019-08-22
 	// subtract GasWanted*gasprice from sender
@@ -163,7 +182,7 @@ func HandleOpenContract(ctx sdk.Context,
 	// default non-contract tx gas: 21000
 	// default contract tx gas: 53000 + f(tx.data)
 	itrsGas, err := IntrinsicGas(inputCode, true)
-	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
+	log.Debugf("itrsGas|gas=%d\n", itrsGas)
 	// commented by junying, 2019-08-22
 	// check if tx.gas >= calculated gas
 	err = st.useGas(itrsGas)
@@ -176,11 +195,11 @@ func HandleOpenContract(ctx sdk.Context,
 	// 1. cantransfer check
 	// 2. create receiver account if no exists
 	// 3. execute contract & calculate gas
-	fmt.Println(" HandleOpenContract1:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
+	log.Debugln(" HandleOpenContract1:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	outputs, gasLeftover, err := evm.Call(contractRef, toAddress, inputCode, st.gas, transferAmount)
-	fmt.Println(" HandleOpenContract2:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
+	log.Debugln(" HandleOpenContract2:ctx.GasMeter().GasConsumed()", ctx.GasMeter().GasConsumed())
 	if err != nil {
-		fmt.Printf("evm call error|err=%s\n", err)
+		log.Debugf("evm call error|err=%s\n", err)
 		// junying-todo, 2019-11-05
 		gasUsed = msg.GasWanted
 		evmOutput = fmt.Sprintf("evm call error|err=%s\n", err)
@@ -189,7 +208,7 @@ func HandleOpenContract(ctx sdk.Context,
 		// junying-todo, 2019-08-22
 		// refund(add) remaining to sender
 		st.refundGas()
-		fmt.Printf("gasUsed=%d\n", st.gasUsed())
+		log.Debugf("gasUsed=%d\n", st.gasUsed())
 		gasUsed = st.gasUsed()
 		evmOutput = hex.EncodeToString(outputs)
 	}
@@ -213,22 +232,22 @@ func HandleCreateContract(ctx sdk.Context,
 	fromAddress := sdk.ToEthAddress(msg.From)
 	toAddress := sdk.ToEthAddress(msg.To)
 
-	fmt.Printf("fromAddr|appFormat=%s|ethFormat=%s|\n", msg.From.String(), fromAddress.String())
-	fmt.Printf("toAddress|appFormat=%s|ethFormat=%s|\n", msg.To.String(), toAddress.String())
-	fmt.Printf("fromAddress|Balance=%v\n", stateDB.GetBalance(fromAddress))
+	log.Debugf("fromAddr|appFormat=%s|ethFormat=%s|\n", msg.From.String(), fromAddress.String())
+	log.Debugf("toAddress|appFormat=%s|ethFormat=%s|\n", msg.To.String(), toAddress.String())
+	log.Debugf("fromAddress|Balance=%v\n", stateDB.GetBalance(fromAddress))
 
 	config := appParams.MainnetChainConfig
 	logConfig := vm.LogConfig{}
 	structLogger := vm.NewStructLogger(&logConfig)
 	vmConfig := vm.Config{Debug: true, Tracer: structLogger /*, JumpTable: vm.NewByzantiumInstructionSet()*/}
 
-	fmt.Printf("fromAddress|nonce=%d\n", stateDB.GetNonce(fromAddress))
+	log.Debugf("fromAddress|nonce=%d\n", stateDB.GetNonce(fromAddress))
 
 	evmCtx := vmcore.NewEVMContext(msg, &fromAddress, uint64(ctx.BlockHeight()))
 	evm := vm.NewEVM(evmCtx, stateDB, config, vmConfig)
 	contractRef := vm.AccountRef(fromAddress)
 
-	fmt.Printf("blockHeight=%d|IsHomestead=%v|IsDAOFork=%v|IsEIP150=%v|IsEIP155=%v|IsEIP158=%v|IsByzantium=%v\n", ctx.BlockHeight(), evm.ChainConfig().IsHomestead(evm.BlockNumber),
+	log.Debugf("blockHeight=%d|IsHomestead=%v|IsDAOFork=%v|IsEIP150=%v|IsEIP155=%v|IsEIP158=%v|IsByzantium=%v\n", ctx.BlockHeight(), evm.ChainConfig().IsHomestead(evm.BlockNumber),
 		evm.ChainConfig().IsDAOFork(evm.BlockNumber), evm.ChainConfig().IsEIP150(evm.BlockNumber),
 		evm.ChainConfig().IsEIP155(evm.BlockNumber), evm.ChainConfig().IsEIP158(evm.BlockNumber),
 		evm.ChainConfig().IsByzantium(evm.BlockNumber))
@@ -239,11 +258,11 @@ func HandleCreateContract(ctx sdk.Context,
 		return
 	}
 
-	fmt.Printf("inputCode=%s\n", hex.EncodeToString(inputCode))
+	log.Debugf("inputCode=%s\n", hex.EncodeToString(inputCode))
 
 	st := NewStateTransition(evm, msg, stateDB)
 
-	fmt.Printf("gasPrice=%d|GasWanted=%d\n", msg.GasPrice, msg.GasWanted)
+	log.Debugf("gasPrice=%d|GasWanted=%d\n", msg.GasPrice, msg.GasWanted)
 
 	err = st.buyGas()
 	if err != nil {
@@ -253,7 +272,7 @@ func HandleCreateContract(ctx sdk.Context,
 
 	//Intrinsic gas calc
 	itrsGas, err := IntrinsicGas(inputCode, true)
-	fmt.Printf("itrsGas|gas=%d\n", itrsGas)
+	log.Debugf("itrsGas|gas=%d\n", itrsGas)
 	err = st.useGas(itrsGas)
 	if err != nil {
 		evmOutput = fmt.Sprintf("useGas error|err=%s\n", err)
@@ -262,7 +281,7 @@ func HandleCreateContract(ctx sdk.Context,
 
 	_, contractAddr, gasLeftover, err := evm.Create(contractRef, inputCode, st.gas, big.NewInt(0))
 	if err != nil {
-		fmt.Printf("evm Create error|err=%s\n", err)
+		log.Debugf("evm Create error|err=%s\n", err)
 		// junying-todo, 2019-11-05
 		gasUsed = msg.GasWanted
 		evmOutput = fmt.Sprintf("evm Create error|err=%s\n", err)
@@ -273,7 +292,7 @@ func HandleCreateContract(ctx sdk.Context,
 		evmOutput = sdk.ToAppAddress(contractAddr).String()
 	}
 
-	fmt.Printf("Create contract ok,contractAddr|appFormat=%s|ethFormat=%s\n", sdk.ToAppAddress(contractAddr).String(), contractAddr.String())
+	log.Debugf("Create contract ok,contractAddr|appFormat=%s|ethFormat=%s\n", sdk.ToAppAddress(contractAddr).String(), contractAddr.String())
 	FeeCollecting(ctx, feeCollectionKeeper, stateDB, gasUsed, st.gasPrice)
 	return
 }

@@ -1,6 +1,8 @@
 package mint
 
 import (
+	"encoding/binary"
+
 	"github.com/orientwalt/htdf/codec"
 	sdk "github.com/orientwalt/htdf/types"
 	"github.com/orientwalt/htdf/x/params"
@@ -91,4 +93,32 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 // set inflation params from the global param store
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	k.paramSpace.Set(ctx, ParamStoreKeyParams, &params)
+}
+
+func Int64ToBytes(i int64) []byte {
+	var buf = make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(i))
+	return buf
+}
+
+func BytesToInt64(buf []byte) int64 {
+	return int64(binary.BigEndian.Uint64(buf))
+}
+
+// junying-todo, 2020-02-04
+// get the block rewards
+func (k Keeper) GetReward(ctx sdk.Context, blkheight int64) int64 {
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(Int64ToBytes(blkheight))
+	if b == nil {
+		return 0
+	}
+	reward := BytesToInt64(b)
+	return reward
+}
+
+// set the block reward
+func (k Keeper) SetReward(ctx sdk.Context, blkheight int64, reward int64) {
+	store := ctx.KVStore(k.storeKey)
+	store.Set(Int64ToBytes(blkheight), Int64ToBytes(reward))
 }
