@@ -12,7 +12,7 @@
 #################################################################
 CONFIG_DIR=/home/ubuntu/config/nosentry/htdf/observation
 
-all: init copy run
+all: init cp.config start
 
 init:
 	@ansible observers -m shell -a "if ! [ -d ' /root/.hsd/config' ];then mkdir -p /root/.hsd/config; fi"
@@ -31,9 +31,15 @@ cp.Makefile:
 start:
 	@ansible observers -m shell -a "make start-daemon start-rest"
 
+stop:
+	@ansible observers -m shell -a "make stop-daemon stop-rest"
+
+clear:
+	@@ansible observers -m shell -a "make clean"
+
 # checking part
 confirm.validators:
-	@ansible nodes -m shell -a "curl http://localhost:26657/validators|grep address"
+	@ansible observers -m shell -a "curl http://localhost:26657/validators|grep address"
 
 confirm.height:
-	@ansible nodes -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
+	@ansible observers -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
