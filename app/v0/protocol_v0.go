@@ -371,7 +371,6 @@ func (p *ProtocolV0) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	distr.BeginBlocker(ctx, req, p.distrKeeper)
 
 	tags := slashing.BeginBlocker(ctx, req, p.slashingKeeper)
-	logrus.Infoln("------------------BeginBlocker---------------------")
 	return abci.ResponseBeginBlock{
 		Tags: tags.ToKVPairs(),
 	}
@@ -388,7 +387,7 @@ func (p *ProtocolV0) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.
 	if p.invCheckPeriod != 0 && ctx.BlockHeight()%int64(p.invCheckPeriod) == 0 {
 		p.assertRuntimeInvariants(ctx)
 	}
-	logrus.Info("------------------EndBlocker---------------------")
+
 	return abci.ResponseEndBlock{
 		ValidatorUpdates: validatorUpdates,
 		Tags:             tags,
