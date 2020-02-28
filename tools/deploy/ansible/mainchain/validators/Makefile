@@ -149,10 +149,7 @@ refine:
 	@find ${VALDIR} -name "ip.conf" |xargs rm -f
 
 clear:
-	@for index in $(VALS_INDEX); do \
-	 ipaddr=$$(row $$index ${SERVER_LIST} 1|column ${PUB_COL_INDEX});\
-	 passwd=${PEMDIR}/$$(row $$index ${SERVER_LIST} 1|column ${PEM_COL_INDEX});\
-	 ssh -i $$passwd root@$$ipaddr $(MAKE) -sC /root clean ; done
+	@@ansible servers -m shell -a "make clean"
 
 # distribute
 distr.val: refine distr.mkfile distr.exe distr.config
