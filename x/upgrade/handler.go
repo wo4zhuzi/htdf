@@ -23,8 +23,7 @@ func EndBlocker(ctx sdk.Context, uk Keeper) (tags sdk.Tags) {
 		if !found {
 			panic(fmt.Sprintf("validator with consensus-address %s not found", (sdk.ConsAddress)(ctx.BlockHeader().ProposerAddress).String()))
 		}
-		fmt.Print("---------blocker header version.app-------", ctx.BlockHeader().Version.App, "\n")
-		fmt.Print("---------upgradeConfig.Protocol.Version-------", upgradeConfig.Protocol.Version, "\n")
+
 		if ctx.BlockHeader().Version.App == upgradeConfig.Protocol.Version {
 			uk.SetSignal(ctx, upgradeConfig.Protocol.Version, validator.ConsAddress().String())
 			uk.metrics.Signal.With(ValidatorLabel, validator.ConsAddress().String(), VersionLabel, versionIDstr).Set(1)
@@ -42,13 +41,10 @@ func EndBlocker(ctx sdk.Context, uk Keeper) (tags sdk.Tags) {
 					"validator", validator.GetOperator().String(), "version", upgradeConfig.Protocol.Version)
 			}
 		}
-		fmt.Print("-----------------upgrade height-----------------	", upgradeConfig.Protocol.Height, "\n")
-		fmt.Print("-----------------upgrade version-----------------	", upgradeConfig.Protocol.Version, "\n")
-		fmt.Print("-----------------upgradeConfig.Protocol.Threshold-----------------	", upgradeConfig.Protocol.Threshold, "\n")
+
 		if uint64(ctx.BlockHeight())+1 == upgradeConfig.Protocol.Height {
 			success := tally(ctx, upgradeConfig.Protocol.Version, uk, upgradeConfig.Protocol.Threshold)
-			fmt.Print("-----------------upgrade status-----------------	", success, "\n")
-			fmt.Print("-----------------upgrade version-----------------	", upgradeConfig.Protocol.Version, "\n")
+
 			if success {
 				ctx.Logger().Info("Software Upgrade is successful.", "version", upgradeConfig.Protocol.Version)
 				uk.protocolKeeper.SetCurrentVersion(ctx, upgradeConfig.Protocol.Version)

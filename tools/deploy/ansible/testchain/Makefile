@@ -165,11 +165,27 @@ start.rest:start.setconfig
 	@ansible nodes -m shell -a "make start-rest"
 
 # check servers
-confirm.validators:
-	@ansible nodes -m shell -a "curl http://localhost:26657/validators|grep address"
+confirm.validator.address:
+	@ansible node1 -m shell -a "hscli query staking validators|grep 'Operator Address'"|grep 'Operator Address'|column 3
 
 confirm.height:
-	@ansible nodes -m shell -a "curl http://localhost:26657/status|grep latest_block_height"
+	@ansible nodes -m shell -a "curl http://localhost:26657/status|grep latest_block_height"|grep latest_block_height
+
+confirm.delegator.share:
+	@ansible node1 -m shell -a "hscli query staking validators|grep 'Delegator Shares'"
+
+confirm.validating.power:
+	@ansible node1 -m shell -a "hscli query tendermint-validator-set|grep VotingPower"
+
+confirm.validator.commission:
+	@if ! [ -f "$(CONFIGDIR)/validators.list" ]; then make -sC confirm.validator.address > $(CONFIGDIR)/validators.list;fi
+	@for index in $(VALS_INDEX); do \
+	 valaddr=$$(row $$index $(CONFIGDIR)/validators.list 1);\
+	 echo $$valaddr;\
+	 ansible node1 -m shell -a "hscli query distr commission $$valaddr"|grep satoshi; done
+
+confirm.community-pool:
+	@ansible node1 -m shell -a "hscli query distr community-pool"
 
 ssh.vals:
 	@read -p "Enter Server Index To Check: " index; \
