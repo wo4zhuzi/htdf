@@ -32,7 +32,7 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Co
 
 	r.HandleFunc(
 		"/minting/total-provisions",
-		queryAnnualProvisionsHandlerFn(cdc, cliCtx),
+		queryTotalProvisionsHandlerFn(cdc, cliCtx),
 	).Methods("GET")
 
 	r.HandleFunc(

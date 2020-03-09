@@ -10,7 +10,9 @@ func RegisterCodec(cdc *codec.Codec) {
 	// Not Register mint codec in app, deprecated now
 	//cdc.RegisterConcrete(Minter{}, "htdf/mint/Minter", nil)
 	cdc.RegisterConcrete(&Params{}, "htdf/mint/Params", nil)
-	cdc.RegisterConcrete(&sdk.Dec{}, "htdf/mint/rewards", nil)
+	cdc.RegisterConcrete(&QueryBlockRewardParams{}, "htdf/mint/rewards", nil)
+	cdc.RegisterConcrete(&sdk.Dec{}, "htdf/mint/annual-provisions", nil)
+	cdc.RegisterConcrete(&sdk.Int{}, "htdf/mint/total-provisions", nil)
 }
 
 var msgCdc = codec.New()
