@@ -16,6 +16,7 @@ const (
 	QueryInflation        = "inflation"
 	QueryAnnualProvisions = "annual_provisions"
 	QueryBlockRewards     = "rewards"
+	QueryTotalProvisions  = "total_provisions"
 )
 
 // NewQuerier returns a minting Querier handler.
@@ -30,6 +31,9 @@ func NewQuerier(k Keeper) sdk.Querier {
 
 		case QueryAnnualProvisions:
 			return queryAnnualProvisions(ctx, k)
+
+		case QueryTotalProvisions:
+			return queryTotalProvisions(ctx, k)
 
 		case QueryBlockRewards:
 			return queryBlockRewards(ctx, req, k)
@@ -73,11 +77,23 @@ func queryAnnualProvisions(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
 	return res, nil
 }
 
+// junying-todo, 2020-03-09
+func queryTotalProvisions(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+
+	res, err := codec.MarshalJSONIndent(k.cdc, k.sk.TotalTokens(ctx))
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to marshal JSON", err.Error()))
+	}
+
+	return res, nil
+}
+
 // defines the params for query: "custom/mint/rewards"
 type QueryBlockRewardParams struct {
 	Height int64
 }
 
+//
 func NewQueryBlockRewardParams(h int64) QueryBlockRewardParams {
 	return QueryBlockRewardParams{
 		Height: h,

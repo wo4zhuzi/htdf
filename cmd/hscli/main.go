@@ -153,6 +153,7 @@ func queryCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
 		client.LineBreak,
 		authcmd.GetAccountCmd(storeAcc, cdc),
 		hsmintClient.GetCmdQueryBlockRewards(cdc),
+		hsmintClient.GetCmdQueryTotalProvisions(cdc),
 		upgradecmd.GetInfoCmd("upgrade", cdc),
 		upgradecmd.GetCmdQuerySignals("upgrade", cdc),
 	)
