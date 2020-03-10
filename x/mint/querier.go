@@ -93,11 +93,25 @@ type QueryBlockRewardParams struct {
 	Height int64
 }
 
-//
+type BlockReward struct {
+	Reward int64
+}
+
+// constructors
 func NewQueryBlockRewardParams(h int64) QueryBlockRewardParams {
 	return QueryBlockRewardParams{
 		Height: h,
 	}
+}
+
+func NewBlockReward(r int64) BlockReward {
+	return BlockReward{
+		Reward: r,
+	}
+}
+
+func (br BlockReward) String() string {
+	return strconv.FormatInt(int64(br.Reward), 10)
 }
 
 func queryBlockRewards(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
@@ -108,10 +122,10 @@ func queryBlockRewards(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([
 
 	reward := keeper.GetReward(ctx, params.Height)
 	if reward < 0 {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", strconv.FormatInt(params.Height, 10)))
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("height %s does not exist", strconv.FormatInt(params.Height, 10)))
 	}
 
-	res, err := codec.MarshalJSONIndent(keeper.cdc, reward)
+	res, err := codec.MarshalJSONIndent(keeper.cdc, sdk.NewInt(reward))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to marshal JSON", err.Error()))
 	}

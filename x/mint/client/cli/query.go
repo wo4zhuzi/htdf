@@ -131,7 +131,6 @@ func GetCmdQueryBlockRewards(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			fmt.Println("height:=", height)
 			bz, err := cliCtx.Codec.MarshalJSON(mint.NewQueryBlockRewardParams(height))
 			if err != nil {
 				return err
@@ -143,13 +142,12 @@ func GetCmdQueryBlockRewards(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var reward int64
+			var reward sdk.Int
 			if err := cliCtx.Codec.UnmarshalJSON(res, &reward); err != nil {
 				return err
 			}
-			// reward = sdk.NewDec(mint.BytesToInt64(res))
 
-			return cliCtx.PrintOutput(sdk.NewDec(reward))
+			return cliCtx.PrintOutput(reward)
 		},
 	}
 }

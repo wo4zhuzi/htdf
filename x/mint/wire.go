@@ -5,14 +5,14 @@ import (
 	sdk "github.com/orientwalt/htdf/types"
 )
 
-// Register concrete types on codec codec
+// Register concrete types on codec
 func RegisterCodec(cdc *codec.Codec) {
 	// Not Register mint codec in app, deprecated now
 	//cdc.RegisterConcrete(Minter{}, "htdf/mint/Minter", nil)
-	cdc.RegisterConcrete(&Params{}, "htdf/mint/Params", nil)
-	cdc.RegisterConcrete(&QueryBlockRewardParams{}, "htdf/mint/rewards", nil)
-	cdc.RegisterConcrete(&sdk.Dec{}, "htdf/mint/annual-provisions", nil)
-	cdc.RegisterConcrete(&sdk.Int{}, "htdf/mint/total-provisions", nil)
+	cdc.RegisterConcrete(&Params{}, "mint/Params", nil)
+	cdc.RegisterConcrete(&BlockReward{}, "mint/BlockReward", nil)
+	cdc.RegisterConcrete(&sdk.Dec{}, "types/Dec", nil)
+	cdc.RegisterConcrete(&sdk.Int{}, "types/Int", nil)
 }
 
 var msgCdc = codec.New()
