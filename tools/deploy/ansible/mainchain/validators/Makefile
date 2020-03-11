@@ -149,7 +149,8 @@ refine:
 	@find ${VALDIR} -name "ip.conf" |xargs rm -f
 
 clear:
-	@@ansible servers -m shell -a "make clean"
+	@read -p "Are you sure to delete all in servers?(Y/N): " answer; \
+	 if [ "$$answer" = "Y" ]; then ansible servers -m shell -a "make -sC /root clean";fi
 
 # distribute
 distr.val: refine distr.mkfile distr.exe distr.config

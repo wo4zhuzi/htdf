@@ -120,7 +120,8 @@ refine:
 	@find ${VALDIR} -name "ip.conf" |xargs rm -f
 
 clear:
-	@ansible nodes -m shell -a "make -sC /root clean"
+	@read -p "Are you sure to delete all in nodes?(Y/N): " answer; \
+	 if [ "$$answer" = "Y" ]; then ansible nodes -m shell -a "make -sC /root clean";fi
 # distribute
 distr.val: refine distr.mkfile distr.exe distr.config
 

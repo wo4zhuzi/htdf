@@ -16,6 +16,7 @@ const (
 	QueryInflation        = "inflation"
 	QueryAnnualProvisions = "annual_provisions"
 	QueryBlockRewards     = "rewards"
+	QueryTotalProvisions  = "total_provisions"
 )
 
 // NewQuerier returns a minting Querier handler.
@@ -30,6 +31,9 @@ func NewQuerier(k Keeper) sdk.Querier {
 
 		case QueryAnnualProvisions:
 			return queryAnnualProvisions(ctx, k)
+
+		case QueryTotalProvisions:
+			return queryTotalProvisions(ctx, k)
 
 		case QueryBlockRewards:
 			return queryBlockRewards(ctx, req, k)
@@ -73,15 +77,41 @@ func queryAnnualProvisions(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
 	return res, nil
 }
 
+// junying-todo, 2020-03-09
+func queryTotalProvisions(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+
+	res, err := codec.MarshalJSONIndent(k.cdc, k.sk.TotalTokens(ctx))
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to marshal JSON", err.Error()))
+	}
+
+	return res, nil
+}
+
 // defines the params for query: "custom/mint/rewards"
 type QueryBlockRewardParams struct {
 	Height int64
 }
 
+type BlockReward struct {
+	Reward int64
+}
+
+// constructors
 func NewQueryBlockRewardParams(h int64) QueryBlockRewardParams {
 	return QueryBlockRewardParams{
 		Height: h,
 	}
+}
+
+func NewBlockReward(r int64) BlockReward {
+	return BlockReward{
+		Reward: r,
+	}
+}
+
+func (br BlockReward) String() string {
+	return strconv.FormatInt(int64(br.Reward), 10)
 }
 
 func queryBlockRewards(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
@@ -92,10 +122,10 @@ func queryBlockRewards(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([
 
 	reward := keeper.GetReward(ctx, params.Height)
 	if reward < 0 {
-		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", strconv.FormatInt(params.Height, 10)))
+		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("height %s does not exist", strconv.FormatInt(params.Height, 10)))
 	}
 
-	res, err := codec.MarshalJSONIndent(keeper.cdc, reward)
+	res, err := codec.MarshalJSONIndent(keeper.cdc, sdk.NewInt(reward))
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to marshal JSON", err.Error()))
 	}
