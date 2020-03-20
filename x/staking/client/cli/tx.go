@@ -233,7 +233,7 @@ $ hscli tx staking unbond htdf1020jcyjpqwph4q5ye2ymt8l35um4zdrktz5rnz \
 	}
 }
 
-// GetCmdUnbond implements the unbond validator command.
+// GetCmdUpgradeDelStatus implements the upgrade validator command.
 func GetCmdUpgradeDelStatus(storeName string, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "uds [delegator-addr]",
