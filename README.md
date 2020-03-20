@@ -15,10 +15,7 @@
   * [x] **transaction**: 
     * [x]  cold-wallet functions(create, sign, broadcast)
     * [x]  fee & reward system
-  * [x] **rest**: auth/query rest removal - tx/sign, encode, broadcast
   * [ ] **block**: non-empty block
-  * [x] **docker**: standalone
-  * [x] **docker-compose**: multi-node
   * [ ] **emergency system**
     * [ ] monitoring system
     * [ ] alert system
