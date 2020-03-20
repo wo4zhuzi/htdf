@@ -11,25 +11,26 @@
    
    **Note**: Requires Go 12.9+
 ## Features
-  * [x] **account**: database to filesystem
-  * [x] **transaction**: cold-wallet functions(create, sign, broadcast)
-  * [x] **transaction**: system_issuer increase balance 
-  * [x] **transaction**: fee, reward system
+  * [x] **account**: ethereum-style
+  * [x] **transaction**: 
+    * [x]  cold-wallet functions(create, sign, broadcast)
+    * [x]  fee & reward system
   * [x] **rest**: auth/query rest removal - tx/sign, encode, broadcast
   * [ ] **block**: non-empty block
-  * [ ] **daemon & cli**: bitcoin style to ethereum style(integrated single)
   * [x] **docker**: standalone
   * [x] **docker-compose**: multi-node
   * [ ] **emergency system**
     * [ ] monitoring system
     * [ ] alert system
     * [x] urgent response system
-      * [x] hard fork: export-based
+      * [ ] hard fork: export-based function disabled
     * [ ] validator abnormality detection
   * [x] **security**
     * [x] sentry node architecture
     * [x] dynamic system issuer
-  * [x] **delegators, validators test**
+  * [x] **validators & delegators**
+  * [x] **guardian**
+  * [x] **upgrade**
 ## Executables
 ```
 hsd
