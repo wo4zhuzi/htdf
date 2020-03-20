@@ -3,6 +3,7 @@
 [![Travis](https://travis-ci.org/orientwalt/htdf.svg?branch=master)](https://travis-ci.org/orientwalt/htdf)
 [![version](https://img.shields.io/github/tag/orientwalt/htdf.svg)](https://github.com/orientwalt/htdf/releases/latest)
 [![](https://tokei.rs/b1/github/orientwalt/htdf?category=lines)](https://github.com/orientwalt/htdf)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # HTDFService
 ### What is HTDFService?
@@ -30,5 +31,3 @@
   * [x] **delegators, validators test**
 ### [Test](https://github.com/orientwalt/htdf/blob/master/tests/plan.md)
 ### [Quick Start](https://github.com/orientwalt/htdf/blob/master/docs/build%20%26%20run.md)
-### License
-   This project is Private.
