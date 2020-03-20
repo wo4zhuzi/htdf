@@ -31,3 +31,6 @@
   * [x] **delegators, validators test**
 ### [Test](https://github.com/orientwalt/htdf/blob/master/tests/plan.md)
 ### [Quick Start](https://github.com/orientwalt/htdf/blob/master/docs/build%20%26%20run.md)
+```
+make new
+```
