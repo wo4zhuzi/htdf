@@ -5,11 +5,12 @@
 [![](https://tokei.rs/b1/github/orientwalt/htdf?category=lines)](https://github.com/orientwalt/htdf)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# HTDFService
-### What is HTDFService?
-   HTDFService is a cosmos-sdk application that provides fundamental crytocurrency functions including account management, transaction processing, and smart contract. It still uses BPOS of tendermint as its consensus algorithm. This project is now UNDER ACTIVE DEVELOPMENT.
+# HTDF
+### Introduction
+   HTDF is a cosmos-sdk application that provides fundamental crytocurrency functions including account management, transaction processing, and smart contract. It still uses BPOS of tendermint as its consensus algorithm. This project is now UNDER ACTIVE DEVELOPMENT.
    
-### Development Plan
+   **Note**: Requires Go 12.9+
+### Features
   * [x] **account**: database to filesystem
   * [x] **transaction**: cold-wallet functions(create, sign, broadcast)
   * [x] **transaction**: system_issuer increase balance 
@@ -29,8 +30,13 @@
     * [x] sentry node architecture
     * [x] dynamic system issuer
   * [x] **delegators, validators test**
-
+### Executables
+```
+hsd
+hscli
+```
 ### [Quick Start](https://github.com/orientwalt/htdf/blob/master/docs/build%20%26%20run.md)
+Only one command is enough to set up a standalone blockchain on your local machine.
 ```
 make new
 ```
