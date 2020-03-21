@@ -6,7 +6,7 @@
 
 # HTDF
 ## Introduction
-   HTDF is a high-performance public blockchain developed by YiJaYi Info Tech. Co,LTD. It is based on [ethereum](https://github.com/ethereum/go-ethereum) & [cosmos-sdk](https://github.com/cosmos/cosmos-sdk) on [tendermint](https://github.com/tendermint/tendermint)  . We merged tendermint's consensus, cosmos-sdk' application logic, and ethereum's account system & smart contract architecture into a brand new architecture - htdf blockchain.  This project is now UNDER ACTIVE DEVELOPMENT.
+   HTDF is a high-performance public blockchain developed by YiJaYi Info Tech. Co,LTD. It is based on [ethereum](https://github.com/ethereum/go-ethereum) & [cosmos-sdk](https://github.com/cosmos/cosmos-sdk) on [tendermint](https://github.com/tendermint/tendermint)  . We merged tendermint's consensus, cosmos-sdk's application logic, and ethereum's account system & smart contract architecture into a brand new architecture - htdf blockchain.  This project is now UNDER ACTIVE DEVELOPMENT.
    
    **Note**: Requires Go 12.9+
 ## Executables
@@ -19,3 +19,5 @@ Only one command is enough to set up a standalone blockchain on your local machi
 ```
 make new
 ```
+## Contributions
+We always welcome any issues/advice/suggestion from you.
