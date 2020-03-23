@@ -20,4 +20,4 @@ Only one command is enough to set up a standalone blockchain on your local machi
 make new
 ```
 ## Contributions
-We always welcome any issues/advice/suggestion from you.
+We always welcome any issue/advice/suggestion.
