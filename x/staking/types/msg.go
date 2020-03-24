@@ -213,10 +213,7 @@ func (msg MsgEditValidator) ValidateBasic() sdk.Error {
 type MsgDelegate struct {
 	DelegatorAddress sdk.AccAddress `json:"delegator_address"`
 	ValidatorAddress sdk.ValAddress `json:"validator_address"`
-	Amount           sdk.Coin       
-	Data             string
-	GasPrice         uint64 
-	GasWanted        uint64 
+	Amount           sdk.Coin
 }
 
 func NewMsgDelegate(delAddr sdk.AccAddress, valAddr sdk.ValAddress, amount sdk.Coin) MsgDelegate {
