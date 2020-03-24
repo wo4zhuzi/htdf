@@ -16,7 +16,7 @@ const (
 	QueryInflation        = "inflation"
 	QueryAnnualProvisions = "annual_provisions"
 	QueryBlockRewards     = "rewards"
-	// QueryTotalProvisions  = "total_provisions"// commented by junying, 2020-03-24
+	QueryTotalProvisions  = "total_provisions"
 )
 
 // NewQuerier returns a minting Querier handler.
@@ -32,9 +32,8 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case QueryAnnualProvisions:
 			return queryAnnualProvisions(ctx, k)
 
-		// commented by junying, 2020-03-24
-		// case QueryTotalProvisions:
-		// 	return queryTotalProvisions(ctx, k)
+		case QueryTotalProvisions:
+			return queryTotalProvisions(ctx, k)
 
 		case QueryBlockRewards:
 			return queryBlockRewards(ctx, req, k)
