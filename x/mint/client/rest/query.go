@@ -30,12 +30,13 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Co
 		queryAnnualProvisionsHandlerFn(cdc, cliCtx),
 	).Methods("GET")
 
+	// commented by junying, 2020-03-24
 	r.HandleFunc(
-		"/minting/total-provisions",
-		queryTotalProvisionsHandlerFn(cdc, cliCtx),
-	).Methods("GET")
+		// 	"/minting/total-provisions",
+		// 	queryTotalProvisionsHandlerFn(cdc, cliCtx),
+		// ).Methods("GET")
 
-	r.HandleFunc(
+		// r.HandleFunc(
 		"/minting/rewards/{height}",
 		queryBlockRewardHandlerFn(cdc, cliCtx),
 	).Methods("GET")
@@ -83,19 +84,19 @@ func queryAnnualProvisionsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext)
 	}
 }
 
-func queryTotalProvisionsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", mint.QuerierRoute, mint.QueryTotalProvisions)
+// func queryTotalProvisionsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		route := fmt.Sprintf("custom/%s/%s", mint.QuerierRoute, mint.QueryTotalProvisions)
 
-		res, err := cliCtx.QueryWithData(route, nil)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		res, err := cliCtx.QueryWithData(route, nil)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
-	}
-}
+// 		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent)
+// 	}
+// }
 
 func queryBlockRewardHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

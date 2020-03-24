@@ -16,7 +16,7 @@ const (
 	QueryInflation        = "inflation"
 	QueryAnnualProvisions = "annual_provisions"
 	QueryBlockRewards     = "rewards"
-	QueryTotalProvisions  = "total_provisions"
+	// QueryTotalProvisions  = "total_provisions"// commented by junying, 2020-03-24
 )
 
 // NewQuerier returns a minting Querier handler.
@@ -32,8 +32,9 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case QueryAnnualProvisions:
 			return queryAnnualProvisions(ctx, k)
 
-		case QueryTotalProvisions:
-			return queryTotalProvisions(ctx, k)
+		// commented by junying, 2020-03-24
+		// case QueryTotalProvisions:
+		// 	return queryTotalProvisions(ctx, k)
 
 		case QueryBlockRewards:
 			return queryBlockRewards(ctx, req, k)
@@ -125,7 +126,8 @@ func queryBlockRewards(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("height %s does not exist", strconv.FormatInt(params.Height, 10)))
 	}
 
-	res, err := codec.MarshalJSONIndent(keeper.cdc, sdk.NewInt(reward))
+	//res, err := codec.MarshalJSONIndent(keeper.cdc, sdk.NewInt(reward))
+	res, err := codec.MarshalJSONIndent(keeper.cdc, reward)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to marshal JSON", err.Error()))
 	}

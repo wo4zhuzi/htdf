@@ -92,29 +92,29 @@ func GetCmdQueryAnnualProvisions(cdc *codec.Codec) *cobra.Command {
 
 // GetCmdQueryTotalProvisions implements a command to return the current minting
 // total provisions value.
-func GetCmdQueryTotalProvisions(cdc *codec.Codec) *cobra.Command {
-	return &cobra.Command{
-		Use:   "total-provisions",
-		Short: "Query the current minting total provisions value",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
+// func GetCmdQueryTotalProvisions(cdc *codec.Codec) *cobra.Command {
+// 	return &cobra.Command{
+// 		Use:   "total-provisions",
+// 		Short: "Query the current minting total provisions value",
+// 		Args:  cobra.NoArgs,
+// 		RunE: func(cmd *cobra.Command, args []string) error {
+// 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			route := fmt.Sprintf("custom/%s/%s", mint.QuerierRoute, mint.QueryTotalProvisions)
-			res, err := cliCtx.QueryWithData(route, nil)
-			if err != nil {
-				return err
-			}
+// 			route := fmt.Sprintf("custom/%s/%s", mint.QuerierRoute, mint.QueryTotalProvisions)
+// 			res, err := cliCtx.QueryWithData(route, nil)
+// 			if err != nil {
+// 				return err
+// 			}
 
-			var provisions sdk.Int
-			if err := cdc.UnmarshalJSON(res, &provisions); err != nil {
-				return err
-			}
+// 			var provisions sdk.Int
+// 			if err := cdc.UnmarshalJSON(res, &provisions); err != nil {
+// 				return err
+// 			}
 
-			return cliCtx.PrintOutput(provisions)
-		},
-	}
-}
+// 			return cliCtx.PrintOutput(provisions)
+// 		},
+// 	}
+// }
 
 // GetCmdQueryBlockRewards implements a command to return a block reward
 // at given height.
@@ -142,12 +142,14 @@ func GetCmdQueryBlockRewards(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			var reward sdk.Int
+			//var reward sdk.Int
+			var reward int64
 			if err := cliCtx.Codec.UnmarshalJSON(res, &reward); err != nil {
 				return err
 			}
 
-			return cliCtx.PrintOutput(reward)
+			//return cliCtx.PrintOutput(reward)
+			return cliCtx.PrintOutput(sdk.NewDec(reward))
 		},
 	}
 }
