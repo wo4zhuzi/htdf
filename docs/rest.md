@@ -445,17 +445,11 @@
 ```
 curl -X GET "http://localhost:1317/minting/rewards/2" -H "accept: application/json"
 >
-{
-  "type": "types/Int",
-  "value": "14467592"
-}
+"value": "14467592"
 ```
 ### total provisions
 ```
 curl -X GET "http://localhost:1317/minting/total-provisions" -H "accept: application/json"
 >
-{
-  "type": "types/Int",
-  "value": "6000000207544571"
-}
+"6000000207544571"
 
