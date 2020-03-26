@@ -445,7 +445,7 @@
 ```
 curl -X GET "http://localhost:1317/minting/rewards/2" -H "accept: application/json"
 >
-"value": "14467592"
+"14467592"
 ```
 ### total provisions
 ```
