@@ -58,7 +58,7 @@ func QueryContractRequestHandlerFn(
 			return
 		}
 		//
-		route := fmt.Sprintf("custom/%s/%s", "htdfservice", htdfservice.QueryContract)
+		route := fmt.Sprintf("custom/%s/%s", htdfservice.QuerierRoute, htdfservice.QueryContract)
 		res, err := cliCtx.QueryWithData(route, bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
