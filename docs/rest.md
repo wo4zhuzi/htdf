@@ -452,4 +452,9 @@ curl -X GET "http://localhost:1317/minting/rewards/2" -H "accept: application/js
 curl -X GET "http://localhost:1317/minting/total-provisions" -H "accept: application/json"
 >
 "6000000207544571"
-
+```
+### contract call
+```
+curl -X GET "http://localhost:1317/hs/contract/htdf1l03rqalmg58wgw9ya39wwc3466lyy20xnpeaee/27e235e300000000000000000000000027681ceb7de9bae3c5f7f10f81ff5106e2ca48a7" -H "accept: application/json"
+>
+``` 

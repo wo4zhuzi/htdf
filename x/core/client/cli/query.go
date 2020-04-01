@@ -11,16 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// junying-todo-20190327
-// GetCmdBroadCast is the CLI command for broadcasting a signed transaction
-/*
-	inspired by
-	hscli tx broadcast signed.json
-*/
+// junying-todo, 2020-04-01
+// GetCmdCall is the CLI command for call contract.
 func GetCmdCall(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "contract [contract-address] [callcode]",
-		Short: "broadcast signed transaction",
+		Short: "query contract data",
 		Long:  "hscli query contract htdf...  7839124400000000...",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -36,7 +32,7 @@ func GetCmdCall(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			route := fmt.Sprintf("custom/%s/%s", "htdfservice", htdfservice.QueryContract)
+			route := fmt.Sprintf("custom/%s/%s", htdfservice.QuerierRoute, htdfservice.QueryContract)
 			res, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
