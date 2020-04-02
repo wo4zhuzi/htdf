@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/orientwalt/htdf/CodecGenral"
 	"io"
 	"os"
 	"strings"
@@ -79,7 +80,8 @@ type HtdfServiceApp struct {
 // NewHtdfServiceApp is a constructor function for htdfServiceApp
 func NewHtdfServiceApp(logger log.Logger, config *cfg.InstrumentationConfig, db dbm.DB, traceStore io.Writer, loadLatest bool, invCheckPeriod uint, baseAppOptions ...func(*BaseApp)) *HtdfServiceApp {
 
-	cdc := MakeLatestCodec()
+	//cdc := MakeLatestCodec()
+	cdc := CodecGenral.InstCodecOld
 
 	bApp := NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)

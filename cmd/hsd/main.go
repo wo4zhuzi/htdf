@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/orientwalt/htdf/CodecGenral"
 	"io"
 
 	"github.com/orientwalt/htdf/codec"
@@ -38,7 +39,8 @@ var (
 
 func main() {
 	cobra.EnableCommandSorting = false
-	cdc := bam.MakeLatestCodec()
+	//cdc := bam.MakeLatestCodec()
+	cdc := CodecGenral.InstCodecOld
 	ctx := server.NewDefaultContext()
 
 	// set address prefix

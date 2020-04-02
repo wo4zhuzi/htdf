@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/orientwalt/htdf/CodecGenral"
 	"os"
 	"path"
 
@@ -63,7 +64,8 @@ func main() {
 		svrConfig.ApiSecurityLevel = svrConfig.ValueSecurityLevel_Low
 	}
 
-	cdc := app.MakeLatestCodec()
+	//cdc := app.MakeLatestCodec()
+	cdc := CodecGenral.InstCodecOld
 
 	// set address prefix
 	config := sdk.GetConfig()
@@ -123,7 +125,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	staking.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	slashing.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 	gov.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
-	mint.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	mint.RegisterRoutes(rs.CliCtx, rs.Mux, CodecGenral.InstCodecNew)
 }
 
 func versionCmd(cdc *amino.Codec, mc []sdk.ModuleClients) *cobra.Command {
