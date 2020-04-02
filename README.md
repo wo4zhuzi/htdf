@@ -19,6 +19,8 @@ hscli
 Only one command is enough to set up a standalone blockchain on your local machine.
 ```
 make new
+make start
+tail -f ~/.hsd/app.log
 ```
 ## Contributions
 We always welcome any issue/advice/suggestion.
