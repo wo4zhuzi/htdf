@@ -25,10 +25,6 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec, 
 		QueryBalancesRequestHandlerFn(storeName, cdc, context.GetAccountDecoder(cdc), cliCtx),
 	).Methods("GET")
 
-	r.HandleFunc(
-		"/auth/contract/{address}/{data}",
-		QueryContractRequestHandlerFn(storeName, cdc, context.GetAccountDecoder(cdc), cliCtx),
-	).Methods("GET")
 }
 
 // query accountREST Handler
@@ -105,43 +101,5 @@ func QueryBalancesRequestHandlerFn(
 		}
 
 		rest.PostProcessResponse(w, cdc, account.GetCoins(), cliCtx.Indent)
-	}
-}
-
-// query contractREST Handler
-func QueryContractRequestHandlerFn(
-	storeName string, cdc *codec.Codec,
-	decoder auth.AccountDecoder, cliCtx context.CLIContext,
-) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		bech32addr := vars["address"]
-
-		addr, err := sdk.AccAddressFromBech32(bech32addr)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		res, err := cliCtx.QueryStore(auth.AddressStoreKey(addr), storeName)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		// the query will return empty account if there is no data
-		if len(res) == 0 {
-			rest.PostProcessResponse(w, cdc, auth.BaseAccount{}, cliCtx.Indent)
-			return
-		}
-
-		// decode the value
-		account, err := decoder(res)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		rest.PostProcessResponse(w, cdc, account, cliCtx.Indent)
 	}
 }
