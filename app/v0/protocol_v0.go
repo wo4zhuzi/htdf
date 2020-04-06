@@ -180,7 +180,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 			panic("The subspace " + auth.DefaultParamspace + " cannot be found!")
 		}
 		// logrus.Traceln("33333333333@@@@@@@@@@@@@!!!!!!!!!")
-		if uint64(len(txBytes)) > txSizeLimit {
+		if uint64(len(txBytes)) > 1200000 { //txSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), txSizeLimit))
 		}
 	}
@@ -194,7 +194,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 			panic("The subspace " + service.DefaultParamSpace + " cannot be found!")
 		}
 
-		if uint64(len(txBytes)) > serviceTxSizeLimit {
+		if uint64(len(txBytes)) > 1200000 { //serviceTxSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), serviceTxSizeLimit))
 		}
 
