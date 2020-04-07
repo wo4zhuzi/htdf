@@ -30,7 +30,8 @@ import (
 
 const (
 	//
-	RouterKey = "htdfservice"
+	RouterKey   = "htdfservice"
+	TxSizeLimit = 1200000 // tx size is limited to 1200000(bytes)
 )
 
 var _ protocol.Protocol = (*ProtocolV0)(nil)
@@ -180,7 +181,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 			panic("The subspace " + auth.DefaultParamspace + " cannot be found!")
 		}
 		// logrus.Traceln("33333333333@@@@@@@@@@@@@!!!!!!!!!")
-		if uint64(len(txBytes)) > 1200000 { //txSizeLimit {
+		if uint64(len(txBytes)) > TxSizeLimit { //txSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), txSizeLimit))
 		}
 	}
@@ -194,7 +195,7 @@ func (p *ProtocolV0) ValidateTx(ctx sdk.Context, txBytes []byte, msgs []sdk.Msg)
 			panic("The subspace " + service.DefaultParamSpace + " cannot be found!")
 		}
 
-		if uint64(len(txBytes)) > 1200000 { //serviceTxSizeLimit {
+		if uint64(len(txBytes)) > TxSizeLimit { //serviceTxSizeLimit {
 			return sdk.ErrExceedsTxSize(fmt.Sprintf("the tx size [%d] exceeds the limitation [%d]", len(txBytes), serviceTxSizeLimit))
 		}
 
